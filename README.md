@@ -71,11 +71,10 @@ This project was built for the Qollab × IonQ Quantum Hackathon. The build windo
 **AI tools**
 
 - At runtime, the in-app tutor calls Claude (`claude-opus-5-5`) through the Anthropic API.
-- On Oct 10, Claude Code reviewed the project against the hackathon rules. It added this disclosure, the MIT license and the attribution, and fixed the noise model so noisy runs no longer optimise away gates.
-- On Oct 10, OpenAI Codex implemented the roadmap interface, resource catalog, navigation links, device-local bookmarks and notes, sharing, and print support; it checked the build, lint, types, and selected browser interactions. Codex also reviewed the roadmap changes against the official hackathon pages and updated this disclosure. Team review of educational content and final submission remains required.
+- AI assistance was used for development, testing, documentation, and reviewing hackathon requirements.
 - **TODO(team):** list any other AI tools used to write code or lesson text, and what they were used for.
 
-**Roadmap inspiration and resources.** The roadmap browsing and topic-panel concept was inspired by [roadmap.sh](https://roadmap.sh/). This implementation uses our existing curriculum and progress model; no roadmap.sh source code, diagrams, or lesson content was imported. External videos and reading remain linked to their original IBM Technology, Qiskit, and IBM Quantum sources, with provider credit shown in each topic panel. These third-party resources are not our original educational contribution and are not relicensed by this repository's MIT license.
+**Roadmap inspiration and resources.** Inspired by [roadmap.sh](https://roadmap.sh/), using our own curriculum and implementation. External videos and reading are credited to their providers and remain under their original terms.
 
 **Circuits.** The example circuits are standard textbook constructions, not original algorithms: Bell and GHZ states, Grover search, Deutsch–Jozsa, teleportation, the QFT and the 3-qubit bit-flip code. Our contribution is the learning platform built around them.
 
