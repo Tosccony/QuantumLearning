@@ -4,7 +4,7 @@ import Link from "next/link";
 import { modulesOf, TRACKS, type TrackId } from "@/lib/curriculum";
 import { PLANETS, xpLevel, XP_PER_LEVEL } from "@/lib/levels";
 import { useProgress, type State } from "@/lib/progress";
-import { certificate, moduleStatus, trackProgress, type SkillStatus } from "@/lib/skills";
+import { certificate, moduleStatus, planetStatus, trackProgress, type SkillStatus } from "@/lib/skills";
 
 type Node = { id: string; track: TrackId; row: number; label: string; href: string; status: SkillStatus; requires: string[] };
 
@@ -14,7 +14,7 @@ const BRIDGES: [string, string][] = [["e7", "s1"], ["s4", "r1"], ["s6", "d4"], [
 function nodes(s: State): Node[] {
   const out: Node[] = PLANETS.map((p, i) => ({
     id: `e${p.id}`, track: "explorer", row: i, label: p.concept, href: `/planet/${p.id}`,
-    status: s.levels[p.id]?.completed ? "done" : i === 0 || s.levels[p.id - 1]?.completed ? "available" : "locked",
+    status: planetStatus(s, p.id),
     requires: i ? [`e${p.id - 1}`] : [],
   }));
   for (const t of ["student", "developer", "researcher", "concepts"] as const)

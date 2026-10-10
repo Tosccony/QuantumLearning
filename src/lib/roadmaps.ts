@@ -1,10 +1,10 @@
 import { moduleById, modulesOf, type TrackId } from "./curriculum";
 import { PLANETS } from "./levels";
-import { moduleStatus, type SkillStatus } from "./skills";
+import { moduleStatus, planetStatus, type SkillStatus } from "./skills";
 import type { State } from "./progress";
 
 export type Resource = { title: string; url: string; kind: "Video" | "Reading"; provider: string; level: string };
-export type RoadmapTopic = { id: string; title: string; summary: string; lesson: string; lab?: string; requires: string[]; minutes?: number; resources: Resource[]; challenge: string };
+export type RoadmapTopic = { id: string; source: { kind: "planet"; id: number } | { kind: "module"; id: string }; title: string; summary: string; lesson: string; lab?: string; requires: string[]; minutes?: number; resources: Resource[]; challenge: string };
 const intro: Resource = { title: "What is quantum computing?", url: "https://www.youtube.com/watch?v=lt4OsgmUTGI", kind: "Video", provider: "IBM Technology", level: "Introductory overview" };
 const grover: Resource = { title: "Grover’s algorithm — lesson 08", url: "https://www.youtube.com/watch?v=hnpjC8WQVrQ", kind: "Video", provider: "Qiskit", level: "University" };
 const basics: Resource = { title: "Basics of quantum information", url: "https://quantum.cloud.ibm.com/learning/en/courses/basics-of-quantum-information", kind: "Reading", provider: "IBM Quantum", level: "Foundations · linear algebra recommended" };
@@ -18,18 +18,21 @@ const variational: Resource = { title: "Variational algorithm design", url: "htt
 const reading: Record<string, Resource> = { s5: teleport, s6: algorithms, d1: docs, d2: docs, d3: docs, d4: algorithms, d5: algorithms, d6: variational, r1: mixed, r2: mixed, r3: correction, r4: algorithms, r5: variational, r6: algorithms };
 
 // Shared courses are labeled as broader resources rather than topic-specific videos.
+function buildTopics(track: TrackId): RoadmapTopic[] {
+  if (track === "explorer") return PLANETS.map((p, i) => ({ id: `e${p.id}`, source: { kind: "planet" as const, id: p.id }, title: p.concept, summary: p.blurb, lesson: `/planet/${p.id}`, requires: i ? [`e${p.id - 1}`] : [], resources: [intro, basics], challenge: `Play ${p.name}, then explain ${p.concept.toLowerCase()} in your own words.` }));
+  return modulesOf(track).map(m => ({ id: m.id, source: { kind: "module" as const, id: m.id }, title: m.skill, summary: m.summary, lesson: `/learn/${m.id}`, lab: `/lab?module=${m.id}`, requires: m.requires, minutes: m.minutes, resources: [m.id === "d4" ? grover : intro, reading[m.id] ?? basics], challenge: m.tryIt[0] }));
+}
+
+// Topics derive only from constant curriculum data, so they're built once. Callers must not mutate them.
+const topicCache = new Map<TrackId, RoadmapTopic[]>();
 export function roadmapTopics(track: TrackId): RoadmapTopic[] {
-  if (track === "explorer") return PLANETS.map((p, i) => ({ id: `e${p.id}`, title: p.concept, summary: p.blurb, lesson: `/planet/${p.id}`, requires: i ? [`e${p.id - 1}`] : [], resources: [intro, basics], challenge: `Play ${p.name}, then explain ${p.concept.toLowerCase()} in your own words.` }));
-  return modulesOf(track).map(m => ({ id: m.id, title: m.skill, summary: m.summary, lesson: `/learn/${m.id}`, lab: `/lab?module=${m.id}`, requires: m.requires, minutes: m.minutes, resources: [m.id === "d4" ? grover : intro, reading[m.id] ?? basics], challenge: m.tryIt[0] }));
+  let topics = topicCache.get(track);
+  if (!topics) topicCache.set(track, topics = buildTopics(track));
+  return topics;
 }
 
 export function topicStatus(state: State, topic: RoadmapTopic): SkillStatus {
-  if (topic.id.startsWith("e")) {
-    const id = Number(topic.id.slice(1));
-    return state.levels[id]?.completed ? "done" : topic.requires.every(r => state.levels[Number(r.slice(1))]?.completed) ? "available" : "locked";
-  }
-  const lesson = moduleById(topic.id)!;
-  return moduleStatus(state, lesson);
+  return topic.source.kind === "planet" ? planetStatus(state, topic.source.id) : moduleStatus(state, moduleById(topic.source.id)!);
 }
 
 /** The first lesson the learner can start on the way to `id`: `id` itself if it's available, otherwise the first startable lesson among its unfinished prerequisites (depth-first, in `requires` order). Null if `id` is already done or nothing on its path is startable. */

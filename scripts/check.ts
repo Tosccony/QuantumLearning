@@ -1,9 +1,10 @@
 // Runnable checks for the logic the Qollab player depends on. Run: npm run check:js
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { MODULES } from "@/lib/curriculum";
+import { MODULES, moduleById, TRACKS } from "@/lib/curriculum";
 import { firstStartable, roadmapTopics, sanitizePersonal, topicStatus } from "@/lib/roadmaps";
 import type { State } from "@/lib/progress";
+import { planetStatus, trackProgress } from "@/lib/skills";
 import { bellScore, noiseVisible, onesRate, pairCorrelation, registerCounts, shorFactors, shotNoiseTvd, tvd } from "@/lib/explain";
 import { QuantumServiceError } from "@/lib/quantum";
 import { pythonErrorMessage, qollabTransport } from "@/qollab/bridge";
@@ -81,6 +82,28 @@ assert.equal(firstStartable(emptyProgress, "s3"), "s1");
 const doneThrough = (ids: string[]) => ({ ...emptyProgress, modules: Object.fromEntries(ids.map(id => [id, { completedAt: "2026-10-10", correct: true }])) }) as State;
 assert.equal(firstStartable(doneThrough(["s1", "s2", "s3"]), "s3"), null);
 assert.equal(firstStartable(doneThrough(["s1", "s2", "s3"]), "s4"), "s4");
+
+// Explorer unlock rules live in planetStatus; roadmap topics point at their source instead of parsing ids.
+const planet1Done = { ...emptyProgress, levels: { 1: { completed: true } } } as unknown as State;
+assert.equal(planetStatus(emptyProgress, 1), "available");
+assert.equal(planetStatus(emptyProgress, 2), "locked");
+assert.equal(planetStatus(planet1Done, 1), "done");
+assert.equal(planetStatus(planet1Done, 2), "available");
+for (const st of [emptyProgress, planet1Done])
+  for (const topic of roadmapTopics("explorer")) {
+    assert.equal(topic.source.kind, "planet");
+    if (topic.source.kind === "planet") assert.equal(topicStatus(st, topic), planetStatus(st, topic.source.id));
+  }
+assert.equal(roadmapTopics("student"), roadmapTopics("student")); // built once
+for (const t of TRACKS)
+  for (const topic of roadmapTopics(t.id)) {
+    assert.equal(topic.source.kind, t.id === "explorer" ? "planet" : "module");
+    if (topic.source.kind === "module") assert.ok(moduleById(topic.source.id), `${topic.id}: module source resolves`);
+  }
+// Roadmap done counts agree with the shared trackProgress.
+const sample = { ...doneThrough(["s1", "s2", "d1"]), levels: { 1: { completed: true } } } as unknown as State;
+for (const t of TRACKS)
+  assert.equal(roadmapTopics(t.id).filter(x => topicStatus(sample, x) === "done").length, trackProgress(sample, t.id).done, `${t.id}: done count`);
 
 // Malformed stored notes are dropped, never thrown.
 assert.deepEqual(sanitizePersonal({ s1: { reviewed: 5, note: 3, bookmarked: true } }), { s1: { bookmarked: true } });
