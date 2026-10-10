@@ -61,7 +61,7 @@ export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean
         <header>
           <h2 className="text-2xl font-bold">🧪 Lab: build your own circuit</h2>
           <p className="text-muted">
-            Pick a gate from the palette and place it on the wires, then run on the simulator you chose in Select QPU. To compare machines, press Stop, then Run, and pick another simulator. Qollab starts fresh on every Run, so start again from the same lesson's circuit or rebuild yours.
+            Pick a gate from the palette and place it on the wires, then run on the simulator you chose in Select QPU. To compare machines, press Stop, then Run, and pick another simulator. Qollab starts fresh on every Run, so start again from the same lesson&apos;s circuit or rebuild yours.
           </p>
         </header>
         <section className="panel flex flex-col gap-3 p-4" aria-label="Circuit builder">
