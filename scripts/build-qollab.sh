@@ -17,7 +17,7 @@ npx esbuild src/qollab/main.tsx --bundle --format=esm --jsx=automatic --minify \
   --external:quantum.engine --define:process.env.NODE_ENV='"production"' \
   --outfile="$OUT/main.js" --log-level=error
 npx tailwindcss -i src/qollab/qollab.css -o "$OUT/main.css" --minify
-cp src/qollab/index.html README.md LICENSE "$OUT/"
+cp src/qollab/index.html src/qollab/requirements.txt README.md LICENSE "$OUT/"
 cp backend/engine.py "$OUT/quantum/engine.py"
 : > "$OUT/quantum/__init__.py"
 
