@@ -20,7 +20,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${fredoka.variable} ${inter.variable} ${mono.variable} antialiased`}>
         <div className="stars" aria-hidden />
         <ProgressProvider>
-          <div className="relative z-10">{children}</div>
+          <div className="relative z-10">
+            {children}
+            <footer className="px-4 py-6 text-center text-xs text-muted">This effort is supported by Qollab &amp; IonQ</footer>
+          </div>
         </ProgressProvider>
       </body>
     </html>
