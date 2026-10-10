@@ -33,7 +33,8 @@ SPECIAL = {"barrier", "initialize", "mcx", "mcz"}
 GENERIC_BASIS = ["rz", "sx", "x", "cx", "measure"]
 
 # IonQ backends take one job per Run, and Qollab creates a fresh backend object for each Run.
-_ionq_used: set[int] = set()
+# Holds strong references so a dead backend's id() can't be reused by a fresh one after GC.
+_ionq_used: list[object] = []
 
 
 def build(c: dict) -> QuantumCircuit:
@@ -125,7 +126,7 @@ def run(backend, req: dict, label: str | None = None) -> dict:
     t0 = time.perf_counter()
     name = label or str(getattr(backend, "name", "unknown backend"))
     ionq = "ionq" in name.lower()
-    if ionq and id(backend) in _ionq_used:
+    if ionq and any(b is backend for b in _ionq_used):
         raise ValueError("IonQ allows one job per Run. Press Stop, then Run again, or pick a local simulator.")
     shots = int(req.get("shots", 1024))
     if not 1 <= shots <= MAX_SHOTS:
@@ -146,7 +147,7 @@ def run(backend, req: dict, label: str | None = None) -> dict:
         opts["seed_simulator"] = req["seed"]
     result = backend.run(_compile(measured, backend), **opts).result()
     if ionq:
-        _ionq_used.add(id(backend))
+        _ionq_used.append(backend)
     counts = dict(sorted(result.get_counts().items()))
 
     device = transpile(qc, basis_gates=["rz", "sx", "x", "cx"], optimization_level=1, seed_transpiler=7)

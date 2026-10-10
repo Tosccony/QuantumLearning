@@ -1,5 +1,6 @@
 """Self-checks for engine.py. Run: backend/.venv/bin/python backend/test_engine.py"""
 
+import gc
 import json
 
 from qiskit_aer import AerSimulator
@@ -75,6 +76,12 @@ def main():
     assert engine.run(ionq, BELL)["backend"] == "ionq_simulator"
     expect_error(lambda: engine.run(ionq, BELL), "one job per Run")
     engine.run(FakeIonQ(), BELL)  # the next Run gets a fresh backend object
+
+    used = FakeIonQ()
+    engine.run(used, BELL)
+    del used
+    gc.collect()
+    engine.run(FakeIonQ(), BELL)  # a dropped, used backend must not block a fresh one
 
     engine.run(NoTarget(), {"qubits": 3, "ops": [g("initialize", [0], params=[1, 1]), g("x", [1]), g("ccx", [2], [0, 1])]})
 
