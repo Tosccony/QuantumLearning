@@ -162,7 +162,7 @@ function CodeVsBare({ circuit }: { circuit: Circuit }) {
         <h3 className="mr-auto font-semibold">🛡️ Does the code help on this machine?</h3>
         <button className="pbtn-primary" onClick={run} disabled={busy}>{busy ? "Running…" : "▶ Run bare vs protected"}</button>
       </div>
-      <p className="text-sm text-muted">One circuit holds a bare qubit and a qubit protected by the 3-qubit code, both storing 0. Any 1 we read is an error.</p>
+      <p className="text-sm text-muted">One circuit holds a bare qubit that just waits and a qubit protected by the 3-qubit code, both storing 0. Any 1 we read is an error. The protected qubit pays for its protection with about 15 extra gates.</p>
       {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
       {r && (
         <p role="status" className="text-sm">
@@ -171,7 +171,7 @@ function CodeVsBare({ circuit }: { circuit: Circuit }) {
             ? "No errors at all: this is a perfect machine. Pick an IBM or IonQ simulator on your next Run."
             : coded < bare
               ? "The code helped: it caught flips that hit the bare qubit unprotected."
-              : "The code lost: its extra gates added more errors than it fixed. Error correction pays off only once gates are good enough, below the fault-tolerance threshold."}
+              : "The code lost: its own gates added more errors than it fixed. Error correction pays off only once gates are good enough, below the fault-tolerance threshold. Real hardware is a little kinder to the code than this test, because a real idle qubit also decays while it waits."}
         </p>
       )}
     </section>
