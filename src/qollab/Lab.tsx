@@ -91,7 +91,7 @@ export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean
           {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
           {result && (
             <>
-              <IdealVsMachine result={result} hint="On your next Run, pick an IBM or IonQ machine in Select QPU to see real-world noise." />
+              <IdealVsMachine result={result} hint="If this was the built-in simulator, pick an IBM or IonQ machine in Select QPU on your next Run to see real-world noise." />
               <ResultsPanel result={result} circuit={circuit} />
             </>
           )}

@@ -40,6 +40,14 @@ export function shotNoiseTvd(r: Pick<RunResult, "probabilities" | "shots">): num
   return Object.values(r.probabilities).reduce((a, p) => a + Math.sqrt((2 * p * (1 - p)) / (Math.PI * r.shots)), 0) / 2;
 }
 
+/** Outcomes this run produced that a perfect machine never would (noise lands here first). */
+export const leakedOutcomes = (r: Pick<RunResult, "counts" | "probabilities">) => Object.keys(r.counts).filter((k) => !(k in r.probabilities));
+
+/** Noise beyond shot-to-shot wobble: an outcome a perfect machine never gives, or a TVD well above what finite shots explain. */
+export function noiseVisible(r: Pick<RunResult, "counts" | "probabilities" | "shots">): boolean {
+  return leakedOutcomes(r).length > 0 || tvd(r) > 3 * shotNoiseTvd(r) + 0.01;
+}
+
 /** Fraction of shots where qubit q read 1. Qiskit bitstrings are little-endian: q0 is the last character. */
 export function onesRate(counts: Record<string, number>, q: number): number {
   let ones = 0;
@@ -119,32 +127,39 @@ export function offlineExplain(c: Circuit, r: RunResult | null, level: Level): s
 
   const used = Array.from(new Set(c.ops.map((o) => o.gate)));
   const probs = Object.entries(r.probabilities).sort((a, b) => b[1] - a[1]);
-  const certain = probs.length === 1;
   const hasH = used.some((g) => ["h", "ry", "rx", "sx", "initialize"].includes(g));
   const hasPhase = used.some((g) => ["z", "s", "t", "sdg", "tdg", "rz", "p", "cz", "cp", "crz"].includes(g));
   const two = used.filter((g) => (GATES[g]?.controls ?? 0) !== 0 || g === "swap");
   const shots = Object.values(r.counts).reduce((a, b) => a + b, 0);
   const totalShotDev = tvd(r); // includes outcomes the ideal machine never produces, which is where noise lands
+  const noisy = noiseVisible(r);
+  const idealCertain = probs.length === 1;
+  const allSame = Object.keys(r.counts).length === 1;
   const out: string[] = [];
 
   if (level === "beginner") {
     out.push(`Your circuit uses ${used.map((g) => `\`${GATES[g]?.label ?? g}\``).join(", ")} on ${c.qubits} qubit${c.qubits > 1 ? "s" : ""}.`);
-    if (certain) out.push(`Every single shot gave **${probs[0][0]}**. The circuit sends the qubits to one definite answer${hasH ? ". The superposition in the middle was undone by interference, a bit like waves cancelling out" : ""}.`);
-    else out.push(`Results are spread over ${probs.length} answers. The most likely is **${probs[0][0]}** (${pct(probs[0][1])}). Each run is like a fresh coin toss with these odds.`);
+    if (idealCertain && allSame) out.push(`Every single shot gave **${probs[0][0]}**. The circuit sends the qubits to one definite answer${hasH ? ". The superposition in the middle was undone by interference, a bit like waves cancelling out" : ""}.`);
+    else if (idealCertain) out.push(`A perfect machine would give **${probs[0][0]}** on every shot${hasH ? ", because interference cancels every other answer" : ""}. This run gave it on ${pct((r.counts[probs[0][0]] ?? 0) / shots)} of shots, and the rest comes from noise in the machine.`);
+    else out.push(`Results are spread over ${probs.length} answers. The most likely is **${probs[0][0]}** (${pct(probs[0][1])}). Each run is like a fresh coin toss with these odds.${noisy ? " Some of the spread comes from noise in the machine, not just quantum randomness." : ""}`);
     if (r.entangled) out.push("The qubits are **entangled**: their answers are linked, so looking at one tells you about the other. That's why the Bloch arrows shrank toward the centre.");
-    out.push(certain ? "**Try:** remove one gate and predict what changes before you run it." : "**Try:** run it again. The counts wobble but stay close to the yellow lines, which are the exact odds.");
+    out.push(idealCertain ? "**Try:** remove one gate and predict what changes before you run it." : "**Try:** run it again. The counts wobble but stay close to the yellow lines, which are the exact odds.");
   } else if (level === "intermediate") {
     out.push(`Statevector support: ${probs.slice(0, 6).map(([k, p]) => `|${k}⟩ (${p.toFixed(3)})`).join(", ")}${probs.length > 6 ? ", …" : ""}.`);
-    if (hasH && certain) out.push("You created superposition and then ended in a basis state. That is **interference**: amplitudes into the other outcomes cancelled.");
+    if (hasH && idealCertain) out.push("You created superposition and then ended in a basis state. That is **interference**: amplitudes into the other outcomes cancelled.");
     if (hasPhase) out.push("Phase gates (`Z`, `S`, `T`, `Rz`, `CZ`, `CP`) don't change Z-basis probabilities directly. Their effect shows up only after a later basis change such as `H`.");
     out.push(`Bloch vectors: ${r.bloch.map((b, q) => `q${q} (${b.map((n) => n.toFixed(2)).join(", ")}), |r| = ${Math.hypot(...b).toFixed(2)}`).join("; ")}.`);
     if (r.entangled) out.push(`Some reduced states are mixed (purity ${r.purity.map((p) => p.toFixed(2)).join(", ")}). That signals entanglement created by ${two.map((g) => `\`${g}\``).join(", ") || "multi-qubit gates"}.`);
-    out.push(`Sampling: total-variation distance between counts and exact probabilities is ${totalShotDev.toFixed(3)} at ${shots} shots. Expect it to shrink like 1/√shots.`);
+    out.push(
+      noisy
+        ? `Sampling: total-variation distance to the exact probabilities is ${totalShotDev.toFixed(3)} at ${shots} shots, more than shot noise explains, so the machine's noise is showing.`
+        : `Sampling: total-variation distance between counts and exact probabilities is ${totalShotDev.toFixed(3)} at ${shots} shots. Expect it to shrink like 1/√shots.`,
+    );
   } else {
     out.push(`Logical depth ${r.depth}, transpiled to {${r.transpiled.basis.join(", ")}}: depth ${r.transpiled.depth} with ${r.transpiled.gate_counts.cx ?? 0} CX. On hardware, two-qubit error rates of ~10⁻³–10⁻² per CX make that count the main fidelity driver.`);
     out.push(`Reduced-state purities: ${r.purity.map((p, q) => `q${q}: ${p.toFixed(3)}`).join(", ")}. ${r.entangled ? "Purity < 1 for a globally pure state means nonzero entanglement entropy across that cut." : "All marginals are pure, so the state is a product state (no entanglement)."}`);
-    out.push(`Empirical TVD to the ideal distribution: ${totalShotDev.toFixed(3)} (${shots} shots${r.backend.includes("noisy") ? ", noisy model, so this includes systematic error, not just shot noise" : ""}).`);
-    if (r.backend.includes("noisy")) out.push("To separate shot noise from model error, compare against the ideal run at higher shot counts. For mitigation, try readout-matrix inversion or zero-noise extrapolation over 2–3 noise levels.");
+    out.push(`Empirical TVD to the ideal distribution: ${totalShotDev.toFixed(3)} (${shots} shots${noisy ? ", noisy model, so this includes systematic error, not just shot noise" : ""}).`);
+    if (noisy) out.push("To separate shot noise from model error, compare against the ideal run at higher shot counts. For mitigation, try readout-matrix inversion or zero-noise extrapolation over 2–3 noise levels.");
     out.push("**Next:** step through the circuit and watch where purity first drops. That is the gate that creates the correlations.");
   }
   return out.join("\n\n");

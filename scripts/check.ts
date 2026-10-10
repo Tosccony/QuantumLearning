@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { MODULES } from "@/lib/curriculum";
-import { bellScore, onesRate, pairCorrelation, registerCounts, shorFactors, shotNoiseTvd, tvd } from "@/lib/explain";
+import { bellScore, noiseVisible, onesRate, pairCorrelation, registerCounts, shorFactors, shotNoiseTvd, tvd } from "@/lib/explain";
 import { QuantumServiceError } from "@/lib/quantum";
 import { pythonErrorMessage, qollabTransport } from "@/qollab/bridge";
 
@@ -35,6 +35,9 @@ assert.ok(Math.abs(tvd({ counts: { "00": 900, "01": 100 }, probabilities: { "00"
 // 5 qubits, uniform, 1024 shots: shot noise alone gives ~0.07 TVD, so a 0.05 cutoff would cry "noise".
 const uniform = Object.fromEntries(Array.from({ length: 32 }, (_, i) => [i.toString(2).padStart(5, "0"), 1 / 32]));
 assert.ok(shotNoiseTvd({ probabilities: uniform, shots: 1024 }) > 0.05);
+assert.equal(noiseVisible({ counts: { "00": 500, "11": 490, "01": 34 }, probabilities: { "00": 0.5, "11": 0.5 }, shots: 1024 }), true); // a leaked outcome is decisive
+assert.equal(noiseVisible({ counts: { "00": 512, "11": 512 }, probabilities: { "00": 0.5, "11": 0.5 }, shots: 1024 }), false);
+assert.equal(noiseVisible({ counts: Object.fromEntries(Object.keys(uniform).map((k) => [k, 32])), probabilities: uniform, shots: 1024 }), false);
 assert.equal(onesRate({ "10": 30, "01": 70 }, 0), 0.7); // q0 is the last character
 assert.equal(onesRate({ "10": 30, "01": 70 }, 1), 0.3);
 
