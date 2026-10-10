@@ -14,6 +14,7 @@
 - **Order.** The engine extraction (Task 1) comes before the Qollab bridge test (Task 2), so that the test exercises the real engine. Every fallback path needs the engine anyway, so no work is wasted.
 - **Sampled circuit.** The engine samples the circuit with `initialize` decomposed and resets and barriers removed (`_unitary`), on every backend. This is what makes it portable to Qollab, and it's equivalent because every run starts from |0…0⟩. In the web app, one side effect is that a noisy run now applies noise to the gates `initialize` decomposes into, which is more realistic.
 - **Progress.** The Qollab player tracks no progress (no XP or checkmarks), because nothing persists between Runs on Qollab. Progress stays a web-app feature.
+- **Amendment (user request, Oct 10).** Added Task 8 (the BB84 and Bell test lessons), Task 9 (Shor's algorithm) and Task 10 (the project-page story). The old wrap-up is now Task 11. Execution order is 1–4, 6, 7, 8, 9, 10, then 5 (publish once, with everything), then 11.
 
 ## Global Constraints
 
@@ -1550,7 +1551,554 @@ git commit -m "Add Ideal-vs-machine callout and bit-flip code vs bare comparison
 
 ---
 
-### Task 8: Wrap-up
+### Task 8: BB84 and Bell test lessons
+
+**Files:**
+- Modify: `src/lib/curriculum.ts`: the `Readout` type and `Module.readout?`, plus modules `s7` and `s8`, inserted right after module `s6` (before `d1`)
+- Modify: `src/lib/explain.ts`: `pairCorrelation` and `bellScore`, after `onesRate`
+- Create: `src/components/lab/LessonReadout.tsx`
+- Modify: `src/app/(platform)/learn/[module]/page.tsx` and `src/qollab/Player.tsx`: render `LessonReadout`
+- Create: `backend/check_lessons.py`
+- Modify: `scripts/check.ts`: write `dist/lessons.json`, update the predicted-ids list, and add the helper checks
+- Modify: `package.json`: add the `check:lessons` script
+
+**Interfaces:**
+- Consumes: `Module`, `Predict` and `MODULES` from Task 6. `IdealVsMachine` render lines from Task 7, used as anchors. `g` and `PI` in `curriculum.ts`.
+- Produces:
+  - `export type Readout = { kind: "bell" }` (Task 9 widens it)
+  - `Module.readout?: Readout`
+  - `pairCorrelation(counts: Record<string, number>, a: number, b: number): number`
+  - `bellScore(counts: Record<string, number>): { E: number[]; S: number }`
+  - default export `LessonReadout({ readout, result }: { readout: Readout; result: RunResult })`
+  - `dist/lessons.json` (`{ [moduleId]: Circuit }`)
+  - `backend/check_lessons.py`
+
+The physics was verified on the engine before writing this task:
+- BB84 gives exactly 4 outcomes, `001x1y0`. With Eve listening on q2, that round is wrong 48% of the time.
+- CHSH gives E ≈ [0.70, 0.71, 0.71, −0.71], so S ≈ 2.83.
+
+- [ ] **Step 1: Write the failing checks**
+
+In `scripts/check.ts`:
+- Add `import { mkdirSync, writeFileSync } from "node:fs";` to the imports at the top.
+- Add `pairCorrelation` and `bellScore` to the existing `@/lib/explain` import.
+- Change the predicted-ids assertion to `["s2", "s4", "s5", "s7", "s8", "d4", "r3"]`.
+- Add these lines before the final `console.log`:
+
+```ts
+assert.ok(Math.abs(pairCorrelation({ "00": 85, "01": 15 }, 0, 1) - 0.7) < 1e-12);
+assert.equal(bellScore({ "00000000": 100 }).S, 2); // everyone agrees: exactly the classical limit
+assert.equal(bellScore({ "10000000": 100 }).S, 4); // pair D always disagrees: the formula's maximum
+
+// Every lesson circuit, for backend/check_lessons.py to run through the real engine.
+mkdirSync("dist", { recursive: true });
+writeFileSync("dist/lessons.json", JSON.stringify(Object.fromEntries(MODULES.map((m) => [m.id, m.circuit]))));
+```
+
+Create `backend/check_lessons.py`:
+```python
+"""Runs every lesson circuit through engine.py and checks the physics of lessons that make a claim.
+Run: npm run check:lessons (check:js writes dist/lessons.json from curriculum.ts first)."""
+
+import json
+import sys
+from pathlib import Path
+
+from qiskit_aer import AerSimulator
+
+import engine
+
+
+def ones(counts, q):
+    """Fraction of shots where qubit q read 1 (Qiskit bitstrings: q0 is the last character)."""
+    return sum(v for k, v in counts.items() if k[-1 - q] == "1") / sum(counts.values())
+
+
+def corr(counts, a, b):
+    """E = P(same) - P(different) for qubits a and b."""
+    return sum(v if k[-1 - a] == k[-1 - b] else -v for k, v in counts.items()) / sum(counts.values())
+
+
+def main(path):
+    lessons = json.loads(Path(path).read_text())
+    counts = {lid: engine.run(AerSimulator(), {**c, "shots": 4000, "seed": 7})["counts"] for lid, c in lessons.items()}
+
+    # BB84: kept rounds q0, q2, q4, q5 carry the key 0, 1, 1, 0; mismatched q1, q3 are coin flips; Eve's q6 stays 0.
+    c = counts["s7"]
+    assert [ones(c, q) for q in (0, 2, 4, 5, 6)] == [0, 1, 1, 0, 0], c
+    assert all(0.4 < ones(c, q) < 0.6 for q in (1, 3)), c
+
+    # Bell test: E ≈ +0.71, +0.71, +0.71, -0.71, so S ≈ 2.83 (classical limit 2).
+    c = counts["s8"]
+    E = [corr(c, 2 * p, 2 * p + 1) for p in range(4)]
+    S = E[0] + E[1] + E[2] - E[3]
+    assert 2.7 < S < 2.95, (E, S)
+
+    print(f"lessons: {len(counts)} circuits ran; physics checks passed")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])
+```
+
+In `package.json` `"scripts"`, add `"check:lessons": "npm run check:js && backend/.venv/bin/python backend/check_lessons.py dist/lessons.json",`.
+
+- [ ] **Step 2: Run the checks to verify they fail**
+
+Run: `npm run check:lessons`
+Expected: FAIL. esbuild reports `No matching export in "src/lib/explain.ts" for import "pairCorrelation"`.
+
+- [ ] **Step 3: Add the helpers**
+
+In `src/lib/explain.ts`, after `onesRate`, add:
+```ts
+/** Agreement score E = P(same) − P(different) for qubits a and b: +1 always agree, −1 always disagree. */
+export function pairCorrelation(counts: Record<string, number>, a: number, b: number): number {
+  let shots = 0;
+  let score = 0;
+  for (const [k, v] of Object.entries(counts)) {
+    shots += v;
+    score += k[k.length - 1 - a] === k[k.length - 1 - b] ? v : -v;
+  }
+  return shots ? score / shots : 0;
+}
+
+/** CHSH score for the Bell-test lesson: pairs (q0,q1) (q2,q3) (q4,q5) (q6,q7), S = E₀ + E₁ + E₂ − E₃. */
+export function bellScore(counts: Record<string, number>): { E: number[]; S: number } {
+  const E = [0, 1, 2, 3].map((p) => pairCorrelation(counts, 2 * p, 2 * p + 1));
+  return { E, S: E[0] + E[1] + E[2] - E[3] };
+}
+```
+
+- [ ] **Step 4: Add the type and the two lessons**
+
+In `src/lib/curriculum.ts`, after the `Predict` type, add:
+```ts
+/** Lesson-specific arithmetic shown under the results (see LessonReadout). */
+export type Readout = { kind: "bell" };
+```
+In `Module`, after `compare?: Circuit;`, add `readout?: Readout;`.
+
+Insert these two modules right after module `s6`'s closing `},` and before the first developer module (`d1`):
+```ts
+  {
+    id: "s7", track: "student", title: "Quantum key distribution: BB84", minutes: 12, skill: "Quantum cryptography", requires: ["s3"],
+    summary: "Alice and Bob build a shared secret key from single qubits. Measuring in the wrong basis disturbs a state, so an eavesdropper leaves errors they can detect.",
+    sections: [
+      { heading: "Why quantum helps with secrets", body: "To encrypt messages, two people first need a shared secret key: a string of random bits nobody else knows. Sent over an ordinary channel, those bits can be copied without leaving a trace. Qubits are different. An unknown quantum state can't be copied (the **no-cloning theorem**), and measuring it in the wrong basis changes it. BB84, proposed by Charles Bennett and Gilles Brassard in 1984, turns that fragility into a burglar alarm." },
+      { heading: "The protocol", body: "1. For each qubit, Alice picks a random bit and a random basis: **Z** (|0⟩, |1⟩) or **X** (|+⟩, |−⟩).\n2. Bob picks his own random basis for each qubit and measures in it.\n3. Over a public channel they compare **bases, never bits**, and keep only the rounds where the bases matched. This step is called sifting.\n4. When the bases match, Bob's bit always equals Alice's. When they don't, Bob gets a coin flip, so those rounds are thrown away." },
+      { heading: "This circuit", body: "Each qubit is one round, with the random choices written into the circuit. Alice uses `X` to send a 1 and `H` to switch to the X basis. Bob measuring in the X basis is an `H` just before measurement.\n\n- q0: Alice sends 0 in Z, Bob measures Z. Kept.\n- q1: Alice sends 1 in Z, Bob measures X. Thrown away.\n- q2: Alice sends 1 in X, Bob measures X. Kept.\n- q3: Alice sends 0 in X, Bob measures Z. Thrown away.\n- q4: Alice sends 1 in Z, Bob measures Z. Kept.\n- q5: Alice sends 0 in X, Bob measures X. Kept.\n\nq6 is Eve's notebook. She isn't listening yet, so it always reads 0. The shared key is q0, q2, q4, q5 = **0, 1, 1, 0**." },
+      { heading: "Catching Eve", body: "Eve can't copy the qubits, so to learn anything she has to measure them, and she doesn't know Alice's bases. Whenever she guesses the wrong basis, she knocks the qubit into the other basis, and Bob's result turns into a coin flip even though his basis matched Alice's. Over many rounds that's a 25% error rate in the sifted key. Alice and Bob publicly compare a random sample of key bits; if too many disagree, they know someone listened, throw the key away and start again. In the circuit, a `CX` from a key qubit into q6 plays Eve: it records the qubit's Z value, which disturbs it exactly like a Z-basis measurement." },
+    ],
+    circuit: {
+      qubits: 7,
+      ops: [
+        g("x", [1]), g("x", [2]), g("h", [2]), g("h", [3]), g("x", [4]), g("h", [5]), // Alice
+        g("h", [1]), g("h", [2]), g("h", [5]), // Bob
+      ],
+    },
+    observe: "Read each bitstring right to left (q0 first). q0, q2, q4 and q5 never change: they hold the key 0, 1, 1, 0. Only q1 and q3 flip, because those rounds used different bases and get thrown away. q6, Eve's notebook, stays 0.",
+    tryIt: [
+      "Let Eve listen to round q2: add a `CX` with q2 as control and q6 as target, after Alice's `H` and before Bob's `H`. How often is q2 wrong now?",
+      "Move Eve to round q4 instead, a Z-basis round. Does the key change? Why do Alice and Bob need to check many bits, not just one?",
+    ],
+    check: { q: "Why can't Eve just copy each qubit and measure her copy later?", options: ["Unknown quantum states can't be copied (no-cloning)", "Qubits travel faster than light", "Alice encrypts each qubit first", "Bob always measures before Eve can"], answer: 0, why: "The no-cloning theorem rules out a perfect copy of an unknown state. Eve has to measure the original, and measuring in the wrong basis disturbs it, which Alice and Bob can detect." },
+    predict: {
+      q: "Rounds q1 and q3 used different bases for Alice and Bob. What will Bob read on those qubits?",
+      options: ["Always Alice's bit", "Always the opposite of Alice's bit", "A random 0 or 1, 50/50", "Always 0"],
+      answer: 2,
+      feedback: [
+        "Only matching bases guarantee that. A Z-basis state measured in the X basis, or the reverse, gives a coin flip.",
+        "There's no systematic flip. With mismatched bases the result is completely random, so it carries no information about Alice's bit.",
+        "Right. A Z-basis state measured in the X basis, or the reverse, is a perfect coin flip. That's why these rounds are thrown away during sifting.",
+        "Nothing forces 0. q1 starts as |1⟩ and q3 as |+⟩, and measured in the other basis each gives 0 or 1 with equal odds.",
+      ],
+    },
+  },
+  {
+    id: "s8", track: "student", title: "Is entanglement real? The Bell test", minutes: 14, skill: "Bell inequalities", requires: ["s4"],
+    summary: "If entangled pairs secretly carried pre-agreed answers, a score called S could never exceed 2. Real quantum pairs score about 2.83.",
+    sections: [
+      { heading: "Hidden instructions?", body: "Entangled qubits always agree when they're measured the same way. Einstein suspected a boring explanation: perhaps each pair leaves the source carrying a hidden instruction sheet, like twins who agreed on their answers in advance. In 1964 John Bell showed that this idea makes a testable prediction, and that quantum mechanics disagrees with it." },
+      { heading: "The CHSH game", body: "Alice measures her qubit along one of two directions (a₀ or a₁), and Bob along one of two (b₀ or b₁). For each combination they compute an agreement score:\n\n```\nE = P(same result) − P(different result)\nS = E(a₀,b₀) + E(a₀,b₁) + E(a₁,b₀) − E(a₁,b₁)\n```\n\nWith hidden instruction sheets, S can never be larger than 2, whatever the sheets say. Quantum mechanics allows up to 2√2 ≈ 2.83, which is called Tsirelson's bound." },
+      { heading: "This circuit", body: "Four Bell pairs, one for each combination of settings: A (q0, q1), B (q2, q3), C (q4, q5) and D (q6, q7). Measuring along an angle θ is an `Ry(−θ)` just before measurement. Alice uses a₀ = 0 and a₁ = π/2; Bob uses b₀ = π/4 and b₁ = −π/4. For these pairs E = cos(θ_Alice − θ_Bob), so pairs A, B and C score +0.71 and pair D scores −0.71, giving S ≈ 2.83. The Bell score panel under the results does the arithmetic." },
+      { heading: "Why it matters", body: "Experiments since the 1970s have measured S above 2, closing loophole after loophole, and the 2022 Nobel Prize in Physics went to Alain Aspect, John Clauser and Anton Zeilinger for this work. Entanglement-based key distribution (Ekert's E91 protocol) uses the same test: if S drops to 2 or below, someone has disturbed the pairs." },
+    ],
+    circuit: {
+      qubits: 8,
+      ops: [
+        g("h", [0]), g("cx", [1], [0]), g("h", [2]), g("cx", [3], [2]),
+        g("h", [4]), g("cx", [5], [4]), g("h", [6]), g("cx", [7], [6]),
+        g("ry", [1], [], [-PI / 4]), // A: Alice 0, Bob π/4
+        g("ry", [3], [], [PI / 4]), // B: Alice 0, Bob −π/4
+        g("ry", [4], [], [-PI / 2]), g("ry", [5], [], [-PI / 4]), // C: Alice π/2, Bob π/4
+        g("ry", [6], [], [-PI / 2]), g("ry", [7], [], [PI / 4]), // D: Alice π/2, Bob −π/4
+      ],
+    },
+    observe: "Pairs A, B and C agree about 85% of the time (E ≈ +0.71); pair D disagrees about 85% of the time (E ≈ −0.71). The Bell score adds them up to about 2.83, comfortably above the classical limit of 2.",
+    tryIt: [
+      "Set every `Ry` angle to 0, so Alice and Bob always measure the same way. Predict S before you run.",
+      "Turn Bob's angles up to ±π/2: give q1 and q5 `Ry(−π/2)`, and q3 and q7 `Ry(π/2)`. Does S grow or shrink? Why is π/4 the sweet spot?",
+    ],
+    check: { q: "What does a measured S of about 2.83 rule out?", options: ["Pairs carrying pre-agreed answers (local hidden variables)", "Quantum mechanics", "Any correlation between the qubits", "Randomness in each single result"], answer: 0, why: "Any hidden-instruction model scores at most 2, so measuring 2.83 means no such instruction sheet can explain the results. Each single result is still random, so the correlation can't be used to send a message." },
+    predict: {
+      q: "Hidden instruction sheets can score at most S = 2. What will these entangled pairs score?",
+      options: ["Exactly 2, the same as instruction sheets", "About 2.83, above the classical limit", "4, the largest value the formula allows", "About 0, because every single result is random"],
+      answer: 1,
+      feedback: [
+        "Instruction sheets top out at 2, but entanglement isn't an instruction sheet. These pairs go beyond it.",
+        "Right. Each pair is individually random, yet the correlations reach 2√2 ≈ 2.83, which no pre-agreed answers can match.",
+        "The formula allows 4, but quantum mechanics stops at 2√2 ≈ 2.83 (Tsirelson's bound). Reaching 4 would need correlations stranger than quantum ones.",
+        "Each single result is random, but the pairs are strongly correlated. S measures the correlations, not the individual results.",
+      ],
+    },
+    readout: { kind: "bell" },
+  },
+```
+
+- [ ] **Step 5: Write the readout component**
+
+`src/components/lab/LessonReadout.tsx`:
+```tsx
+import type { Readout } from "@/lib/curriculum";
+import { bellScore } from "@/lib/explain";
+import type { RunResult } from "@/lib/quantum";
+
+const PAIRS = ["A (q0, q1)", "B (q2, q3)", "C (q4, q5)", "D (q6, q7)"];
+
+/** Lesson-specific arithmetic on the measured counts, so the punchline is a number, not homework. */
+export default function LessonReadout({ readout, result }: { readout: Readout; result: RunResult }) {
+  if (readout.kind === "bell") {
+    const { E, S } = bellScore(result.counts);
+    return (
+      <section className="rounded-xl bg-white/5 p-3 text-sm" aria-label="Bell score">
+        <p className="font-semibold">🔔 Bell score</p>
+        <ul className="mt-1 grid gap-1 sm:grid-cols-2">
+          {E.map((e, p) => <li key={p}>Pair {PAIRS[p]}: E = {e.toFixed(2)}</li>)}
+        </ul>
+        <p role="status" className="mt-2">
+          S = E(A) + E(B) + E(C) − E(D) = <b>{S.toFixed(2)}</b>.{" "}
+          {S > 2.1
+            ? "That's above 2: no hidden instruction sheet can produce these correlations."
+            : "That's not clearly above 2 (results wobble by about ±0.1 from run to run), so hidden instruction sheets could still explain it. Check the angles, or noise may have washed out the entanglement."}
+          {" "}Classical limit 2, quantum limit 2√2 ≈ 2.83.
+        </p>
+      </section>
+    );
+  }
+  return null;
+}
+```
+
+- [ ] **Step 6: Render it in both lesson views**
+
+In `src/app/(platform)/learn/[module]/page.tsx`:
+- Add the import `import LessonReadout from "@/components/lab/LessonReadout";`.
+- Directly after the `<IdealVsMachine … />` line, add:
+  ```tsx
+              {m.readout && <LessonReadout readout={m.readout} result={result} />}
+  ```
+
+In `src/qollab/Player.tsx`:
+- Add the same import.
+- Directly after the `<IdealVsMachine … />` line inside `Lesson`, add the same line.
+
+- [ ] **Step 7: Run the checks to verify they pass**
+
+Run: `npm run check:lessons`
+Expected: `js: all checks passed`, then `lessons: 20 circuits ran; physics checks passed`.
+
+Then run: `npx tsc --noEmit && npm run lint && npm run build && npm run qollab:build`
+Expected: all pass.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add src/lib/curriculum.ts src/lib/explain.ts src/components/lab/LessonReadout.tsx "src/app/(platform)/learn/[module]/page.tsx" src/qollab/Player.tsx backend/check_lessons.py scripts/check.ts package.json
+git commit -m "Add BB84 and Bell test lessons with a Bell score readout"
+```
+
+---
+
+### Task 9: Shor's algorithm lesson
+
+**Files:**
+- Modify: `src/lib/curriculum.ts`: widen `Readout`, and append module `r7` after `r6`
+- Modify: `src/lib/explain.ts`: `registerCounts` and `shorFactors`, after `bellScore`
+- Modify: `src/components/lab/LessonReadout.tsx`: the `shor` branch
+- Modify: `src/lib/quantum.ts`: the `cswap` entry in `GATES` (not in `PALETTE`)
+- Modify: `src/components/lab/CircuitEditor.tsx`: draw `cswap` like `swap`
+- Modify: `backend/check_lessons.py`: the Shor physics check
+- Modify: `scripts/check.ts`: the helper checks and predicted ids
+
+**Interfaces:**
+- Consumes: `Readout`, `LessonReadout` and `check_lessons.py` from Task 8.
+- Produces:
+  - `Readout = { kind: "bell" } | { kind: "shor"; a: number; N: number; counting: number[] }`
+  - `registerCounts(counts: Record<string, number>, qubits: number[]): Record<number, number>`
+  - `shorFactors(y: number, bits: number, a: number, N: number): { r: number | null; factors: [number, number] | null; note: string }`
+
+Verified on the engine before writing this task: the counting register reads only 0, 4, 8 and 12, about 25% each. The work register takes the values {1, 4, 7, 13}. The ×7 and ×4 mod 15 blocks are correct for every y from 1 to 14.
+
+- [ ] **Step 1: Write the failing checks**
+
+In `scripts/check.ts`:
+- Add `registerCounts` and `shorFactors` to the `@/lib/explain` import.
+- Change the predicted-ids assertion to `["s2", "s4", "s5", "s7", "s8", "d4", "r3", "r7"]`.
+- Add these lines before the `// Every lesson circuit` block:
+
+```ts
+assert.deepEqual(registerCounts({ "00010100": 3, "11110100": 2 }, [0, 1, 2, 3]), { 4: 5 });
+assert.deepEqual(shorFactors(4, 4, 7, 15).factors, [3, 5]);
+assert.deepEqual(shorFactors(12, 4, 7, 15).factors, [3, 5]);
+assert.equal(shorFactors(8, 4, 7, 15).r, 2); // phase 1/2 suggests r = 2, but 7² mod 15 = 4, so it fails the check
+assert.equal(shorFactors(8, 4, 7, 15).factors, null);
+assert.equal(shorFactors(0, 4, 7, 15).r, null);
+```
+
+In `backend/check_lessons.py`, add before the final `print`:
+```python
+    # Shor, N = 15, a = 7: the counting register (q0..q3) reads only y = 0, 4, 8, 12, each about a quarter of the time.
+    c = counts["r7"]
+    reg = {}
+    for k, v in c.items():
+        y = sum(1 << q for q in range(4) if k[-1 - q] == "1")
+        reg[y] = reg.get(y, 0) + v
+    assert set(reg) == {0, 4, 8, 12}, reg
+    assert all(0.2 < v / 4000 < 0.3 for v in reg.values()), reg
+```
+
+- [ ] **Step 2: Run the checks to verify they fail**
+
+Run: `npm run check:lessons`
+Expected: FAIL. esbuild reports `No matching export in "src/lib/explain.ts" for import "registerCounts"`.
+
+- [ ] **Step 3: Add the helpers**
+
+In `src/lib/explain.ts`, after `bellScore`, add:
+```ts
+/** How often each integer appeared in a register of `qubits` (qubits[0] is the register's lowest bit). */
+export function registerCounts(counts: Record<string, number>, qubits: number[]): Record<number, number> {
+  const out: Record<number, number> = {};
+  for (const [k, v] of Object.entries(counts)) {
+    const y = qubits.reduce((acc, q, i) => acc + (k[k.length - 1 - q] === "1" ? 1 << i : 0), 0);
+    out[y] = (out[y] ?? 0) + v;
+  }
+  return out;
+}
+
+const gcd = (x: number, y: number): number => (y ? gcd(y, x % y) : Math.abs(x));
+const modPow = (a: number, e: number, n: number) => {
+  let x = 1;
+  for (let i = 0; i < e; i++) x = (x * a) % n;
+  return x;
+};
+
+/** Shor's classical step for one measured value y of a `bits`-qubit counting register: phase → period r → factors. */
+export function shorFactors(y: number, bits: number, a: number, N: number): { r: number | null; factors: [number, number] | null; note: string } {
+  if (y === 0) return { r: null, factors: null, note: "Phase 0 says nothing about the period. Run again." };
+  const phase = y / 2 ** bits;
+  let r = 1;
+  let best = Infinity;
+  for (let d = 1; d < N; d++) {
+    const err = Math.abs(phase - Math.round(phase * d) / d);
+    if (err < best - 1e-12) {
+      best = err;
+      r = d;
+    }
+  }
+  const ar = modPow(a, r, N);
+  if (ar !== 1) return { r, factors: null, note: `${a}^${r} mod ${N} = ${ar}, not 1, so ${r} isn't the period. Run again.` };
+  if (r % 2) return { r, factors: null, note: `r = ${r} is odd, so the gcd trick doesn't apply. Try another a.` };
+  const f = gcd(modPow(a, r / 2, N) - 1, N);
+  if (f === 1 || f === N) return { r, factors: null, note: `${a}^${r / 2} ≡ −1 mod ${N}, which gives only trivial factors. Try another a.` };
+  return { r, factors: [f, N / f], note: `${N} = ${f} × ${N / f}` };
+}
+```
+
+- [ ] **Step 4: Add the lesson**
+
+In `src/lib/curriculum.ts`, change the `Readout` type to:
+```ts
+export type Readout = { kind: "bell" } | { kind: "shor"; a: number; N: number; counting: number[] };
+```
+Append this module after module `r6` (the last researcher module):
+```ts
+  {
+    id: "r7", track: "researcher", title: "Shor's algorithm: factoring 15", minutes: 18, skill: "Shor's algorithm", requires: ["r4"],
+    summary: "Factoring reduces to finding the period of aˣ mod N. Phase estimation finds that period, and a little classical number theory turns it into factors: 15 = 3 × 5.",
+    sections: [
+      { heading: "From factoring to a period", body: "To factor N, pick a number a that shares no factor with N and look at the sequence aˣ mod N. For N = 15 and a = 7:\n\n```\n7⁰ = 1, 7¹ = 7, 7² = 49 ≡ 4, 7³ ≡ 13, 7⁴ ≡ 1, …\n```\n\nIt repeats with **period r = 4**. When r is even, gcd(a^(r/2) − 1, N) and gcd(a^(r/2) + 1, N) are usually factors of N: gcd(48, 15) = 3 and gcd(50, 15) = 5. Finding r is the hard part for big N, and it's the only part the quantum computer does." },
+      { heading: "Phase estimation finds the period", body: "Let U multiply a 4-qubit register by 7 mod 15. With the work register starting at |1⟩, phase estimation with U, U², U⁴ and U⁸ writes y/16 ≈ s/r into the counting register, for a random s. Here r = 4, so the counting register reads y = 0, 4, 8 or 12 (phases 0, ¼, ½, ¾), each about a quarter of the time. This is the QFT and phase estimation from earlier lessons, applied to modular multiplication." },
+      { heading: "This circuit, and its shortcut", body: "Counting qubits are q0–q3; the work register is q4–q7, with q4 as its lowest bit, starting at |1⟩. Multiplying by 7 mod 15 takes three controlled `SWAP`s and four controlled `X`s. Multiplying by 4 (that's U²) takes two controlled `SWAP`s. Because 7⁴ ≡ 1, U⁴ and U⁸ do nothing, so they're left out.\n\nThat's a shortcut: we used the answer to build the circuit. Factoring a large number needs general modular-multiplication circuits that don't know r in advance, which is why breaking a 2048-bit RSA key needs a large, fault-tolerant quantum computer. The inverse QFT at the end turns the phase into a readable number." },
+      { heading: "From measurement to factors", body: "Each run gives one y. Turn y/16 into the nearest fraction s/r with r < 15, check that 7ʳ ≡ 1 mod 15, and if r is even compute the gcds. y = 4 or 12 gives r = 4 and the factors 3 and 5. y = 8 suggests r = 2, which fails the check, and y = 0 says nothing. Either way you run again: Shor's algorithm succeeds with good probability on each run, not every time. The panel under the results does this arithmetic for the values you measured." },
+    ],
+    circuit: {
+      qubits: 8,
+      ops: [
+        g("x", [4]), g("h", [0]), g("h", [1]), g("h", [2]), g("h", [3]),
+        // U = ×7 mod 15, controlled by q0
+        g("cswap", [4, 5], [0]), g("cswap", [5, 6], [0]), g("cswap", [6, 7], [0]),
+        g("cx", [4], [0]), g("cx", [5], [0]), g("cx", [6], [0]), g("cx", [7], [0]),
+        // U² = ×4 mod 15, controlled by q1. U⁴ = U⁸ = ×1, so q2 and q3 control nothing.
+        g("cswap", [5, 7], [1]), g("cswap", [4, 6], [1]),
+        // inverse QFT on q0–q3
+        g("swap", [0, 3]), g("swap", [1, 2]),
+        g("h", [0]),
+        g("cp", [1], [0], [-PI / 2]), g("h", [1]),
+        g("cp", [2], [0], [-PI / 4]), g("cp", [2], [1], [-PI / 2]), g("h", [2]),
+        g("cp", [3], [0], [-PI / 8]), g("cp", [3], [1], [-PI / 4]), g("cp", [3], [2], [-PI / 2]), g("h", [3]),
+      ],
+    },
+    observe: "Look at the right-most four bits of each outcome (the counting register, q3…q0): only 0000, 0100, 1000 and 1100 appear, each about a quarter of the time. That's y = 0, 4, 8 and 12. The panel below turns y = 4 and y = 12 into 15 = 3 × 5.",
+    tryIt: [
+      "Open the Qiskit tab and look at the transpiled CX count. That's what this tiny 15 = 3 × 5 needs. What does it suggest about a 2048-bit number?",
+      "Run it with noise (the Lab's noise sliders, or an IBM or IonQ machine on Qollab). Do 0, 4, 8 and 12 still stand out, and does the panel still find 3 × 5?",
+    ],
+    check: { q: "Which part of Shor's algorithm needs the quantum computer?", options: ["Finding the period r of aˣ mod N", "Computing the gcds that give the factors", "Choosing the number a", "Checking that the factors multiply to N"], answer: 0, why: "Everything except period finding is fast on an ordinary computer. Phase estimation finds the period far faster than any known classical method, and that's the whole speed-up." },
+    predict: {
+      q: "The period of 7ˣ mod 15 is 4. What will the 4-bit counting register read?",
+      options: ["Always 4 (0100)", "0, 4, 8 or 12, each about a quarter of the time", "Every value from 0 to 15 equally often", "The factors 3 and 5"],
+      answer: 1,
+      feedback: [
+        "The register holds y/16 ≈ s/r for a random s, not r itself. With r = 4, s can be 0, 1, 2 or 3, giving y = 0, 4, 8 or 12.",
+        "Right. y/16 lands on s/4 for s = 0, 1, 2 or 3. Two of those (y = 4 and 12) reveal r = 4 directly, and the classical step then finds 3 × 5.",
+        "Interference cancels every phase that isn't a multiple of 1/4. That's the inverse QFT's job, and only four values survive.",
+        "The quantum part only finds the period. The factors come afterwards, from an ordinary gcd calculation.",
+      ],
+    },
+    readout: { kind: "shor", a: 7, N: 15, counting: [0, 1, 2, 3] },
+  },
+```
+
+- [ ] **Step 5: Draw cswap and name it**
+
+In `src/lib/quantum.ts`, add after the `swap` entry of `GATES`:
+```ts
+  cswap: { label: "CSWAP", name: "Controlled swap (Fredkin)", controls: 1, targets: 2, params: 0, color: "#b388ff", group: "Multi", about: "Swaps two qubits when the control is |1⟩. Used for modular multiplication in Shor's algorithm." },
+```
+Leave `PALETTE` unchanged.
+
+In `src/components/lab/CircuitEditor.tsx`, change `) : o.gate === "swap" ? (` to `) : o.gate === "swap" || o.gate === "cswap" ? (`. The control dot and the connecting line are already drawn for every gate's `controls`.
+
+- [ ] **Step 6: Add the Shor readout**
+
+In `src/components/lab/LessonReadout.tsx`:
+- Change the explain import to `import { bellScore, registerCounts, shorFactors } from "@/lib/explain";`.
+- Replace the final `return null;` with:
+
+```tsx
+  const reg = registerCounts(result.counts, readout.counting);
+  const bits = readout.counting.length;
+  const top = Object.entries(reg).sort((x, y) => y[1] - x[1]).slice(0, 4);
+  return (
+    <section className="rounded-xl bg-white/5 p-3 text-sm" aria-label="Shor's classical step">
+      <p className="font-semibold">🧮 From measurements to factors (a = {readout.a}, N = {readout.N})</p>
+      <ul role="status" className="mt-1 flex flex-col gap-1">
+        {top.map(([ys, n]) => {
+          const f = shorFactors(Number(ys), bits, readout.a, readout.N);
+          return (
+            <li key={ys}>
+              y = {ys} ({Math.round((100 * n) / result.shots)}% of shots) → phase {ys}/{2 ** bits}
+              {f.r ? `, r = ${f.r}` : ""}: <b>{f.note}</b>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+```
+
+- [ ] **Step 7: Run the checks to verify they pass**
+
+Run: `npm run check:lessons`
+Expected: `js: all checks passed`, then `lessons: 21 circuits ran; physics checks passed`.
+
+Then run: `npx tsc --noEmit && npm run lint && npm run build && npm run qollab:build`
+Expected: all pass.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add src/lib/curriculum.ts src/lib/explain.ts src/components/lab/LessonReadout.tsx src/lib/quantum.ts src/components/lab/CircuitEditor.tsx backend/check_lessons.py scripts/check.ts
+git commit -m "Add Shor's algorithm lesson with a factor-finding readout"
+```
+
+---
+
+### Task 10: Project page story (README)
+
+The README becomes the Qollab project page, which is the first thing judges read. Judging covers novelty and creativity, technical execution, impact potential, and documentation quality. The page also has to state "what problem it explores".
+
+**Files:**
+- Modify: `README.md`
+
+**Interfaces:**
+- Consumes: the lesson set from Tasks 6–9: 21 lessons, 8 with predictions, plus the Bell and Shor readouts.
+- Produces: the project-page text that Task 5 uploads.
+
+- [ ] **Step 1: Rewrite the top of the README**
+
+Replace everything from the first line `# Quantum Quest` up to, but not including, the line `## Features` with:
+
+```markdown
+# Quantum Quest
+
+**Learn quantum computing by experiment.** Predict what a circuit will do, run it on real Qiskit simulators (including models of IBM and IonQ machines), and explain the gap between what you expected and what happened. From an 8-year-old's first coin flip to Shor's algorithm.
+
+*This effort is supported by Qollab & IonQ.*
+
+## The problem
+
+Quantum computing is usually taught in one of two ways: linear algebra on a whiteboard, or apps that animate qubits without running anything real. Either way, learners end up repeating slogans ("a qubit is 0 and 1 at the same time", "a quantum computer tries every answer at once") without being able to predict what a circuit will actually do. And almost nobody gets to see how real, noisy hardware changes the answer, even though noise is the main thing holding the field back today.
+
+## How Quantum Quest teaches
+
+- **Predict → Run → Explain.** Lessons ask for a prediction before you run. The wrong options are the common misconceptions, and each one gets a targeted explanation, so a wrong guess becomes a lesson.
+- **Every number is real.** Every circuit runs on Qiskit: Aer in the web app, and on Qollab the built-in simulator, IBM device noise models, or IonQ's Aria and Forte simulators.
+- **Ideal vs this machine.** Each result is compared with the exact ideal answer, so noise becomes something you can see and measure, not a footnote.
+- **One path for everyone.** Four tracks teach the same honest physics at different depths, from no maths at all to density matrices.
+- **Hard topics, hands on.** Error correction (and whether it actually helps on today's machines), BB84 quantum key distribution, the Bell test, teleportation, Grover's search and Shor's algorithm all run as circuits you can edit, with panels that do the arithmetic: the Bell score, and the factors Shor's algorithm finds.
+
+| Track | For | Lessons |
+|---|---|---|
+| 🪐 Explorer | Ages 8–12, no maths | 7 planets of games with Qubit the Robot: coin flips, treasure clouds, entangled twins, a gate machine and a door race, all running real circuits |
+| 🎓 Student | High school and first-year university | Qubits and measurement, superposition and interference, phase, Bell states, teleportation, Deutsch–Jozsa, BB84 key distribution, the Bell test |
+| 💻 Developer | Programmers new to quantum | Qiskit and bit ordering, transpilation, shots and noise, Grover's search, the QFT, variational circuits |
+| 🔬 Researcher | Graduate level | Density matrices, noise and mitigation, the bit-flip code, phase estimation, VQE and QAOA, benchmarking, Shor's algorithm |
+
+The 21 Student, Developer and Researcher lessons run on Qollab. The Explorer games, community sharing and the Claude tutor need the full web app.
+
+```
+
+- [ ] **Step 2: Update the counts and credits**
+
+- In `## Features`, change `**Course modules**: 18 lessons. Each has a runnable circuit, "what to look for" notes, experiments to try and a check question.` to `**Course modules**: 21 lessons. Each has a runnable circuit, "what to look for" notes, experiments to try and a check question, and eight start with a prediction.`
+- In `## Run it on Qollab`, change `All 18 Student, Developer and Researcher lessons` to `All 21 Student, Developer and Researcher lessons`.
+- In `## Disclosure`, replace the paragraph that starts `**Circuits.**` with:
+
+```markdown
+**Circuits.** The example circuits are standard, published constructions, not original algorithms: Bell and GHZ states, Grover search, Deutsch–Jozsa, teleportation, the QFT, phase estimation, the 3-qubit bit-flip code, BB84 (Bennett and Brassard, 1984), the CHSH Bell test (Clauser, Horne, Shimony and Holt, 1969) and Shor's algorithm (Shor, 1994). They follow the standard textbook treatments in Nielsen and Chuang's *Quantum Computation and Quantum Information*. The compiled ×7 and ×4 mod 15 circuits in the Shor lesson follow the construction in the Qiskit textbook. The lesson text, predictions and explanations are our own. Our contribution is the learning platform built around these circuits.
+```
+
+- [ ] **Step 3: Verify**
+
+Run: `grep -n "18 lessons\|All 18" README.md`
+Expected: no output.
+
+Run: `npm run qollab:build`
+Expected: the build succeeds, still with the `TODO(team)` warning until Task 5. Then `wc -c dist/qollab/README.md` must be under 65000, Qollab's write-up limit.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add README.md
+git commit -m "Tell the project story on the README / Qollab project page"
+```
+
+---
+
+### Task 11: Wrap-up
 
 **Files:**
 - Delete: `scripts/qollab-smoke/` and the `qollab:smoke` script in `package.json`
