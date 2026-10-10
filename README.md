@@ -2,6 +2,8 @@
 
 A quantum computing learning platform: think Brilliant-style lessons, Coursera-style tracks and certificates, and GitHub-style project sharing. Every experiment is a real Qiskit circuit.
 
+*This effort is supported by Qollab & IonQ.*
+
 **Learn → Build → Run → Understand → Share**
 
 | Track | Audience | Content |
@@ -54,3 +56,36 @@ Next.js (TypeScript, Tailwind, Framer Motion, Three.js)
 - Accounts (Supabase). Progress and certificates are per-device for now, and certificate IDs aren't server-verifiable.
 - Running on real IBM Quantum hardware. Everything runs on the Qiskit Aer simulator, optionally with noise.
 - The Explorer teacher dashboard is still single-learner, and there's no adaptive difficulty yet.
+
+## Disclosure
+
+This project was built for the Qollab × IonQ Quantum Hackathon. The build window ran from Oct 9, 19:00 ET to Oct 11, 19:00 ET, and only work done in that window is judged.
+
+**Before the build window**
+
+> **TODO(team): replace this line before submitting.** Either list what existed before Oct 9, 19:00 ET (code, designs, lesson text) and where it came from, or write "Nothing: all code and content were written during the build window."
+
+**Starter template.** The app was scaffolded with `create-next-app`. The config files (`next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `postcss.config.mjs`) started from that template, and the SVGs in `public/` are its unused defaults.
+
+**AI tools**
+
+- At runtime, the in-app tutor calls Claude (`claude-opus-5-5`) through the Anthropic API.
+- On Oct 10, Claude Code reviewed the project against the hackathon rules. It added this disclosure, the MIT license and the attribution, and fixed the noise model so noisy runs no longer optimise away gates.
+- **TODO(team):** list any other AI tools used to write code or lesson text, and what they were used for.
+
+**Circuits.** The example circuits are standard textbook constructions, not original algorithms: Bell and GHZ states, Grover search, Deutsch–Jozsa, teleportation, the QFT and the 3-qubit bit-flip code. Our contribution is the learning platform built around them.
+
+**Third-party libraries.** All of these are used as unmodified dependencies.
+
+| Library | License | Used for |
+|---|---|---|
+| [Qiskit](https://github.com/Qiskit/qiskit) | Apache-2.0 | Building circuits, statevectors and partial traces, transpiling |
+| [Qiskit Aer](https://github.com/Qiskit/qiskit-aer) | Apache-2.0 | Shot-based simulation and the noise model |
+| FastAPI, Uvicorn, NumPy | MIT, BSD-3-Clause, BSD-3-Clause | The Qiskit service |
+| Next.js, React, Tailwind CSS | MIT | The web app |
+| Three.js, Framer Motion | MIT | 3D Bloch spheres and animation |
+| Anthropic TypeScript SDK | MIT | The tutor's API calls |
+
+## License
+
+[MIT](LICENSE). This effort is supported by Qollab & IonQ.
