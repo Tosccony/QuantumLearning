@@ -146,7 +146,7 @@ function Lab() {
                 <option value="" disabled>Load example…</option>
                 <option value="blank">Empty circuit</option>
                 <option value="bell">Bell pair</option>
-                {(["student", "developer", "researcher"] as const).map((t) => (
+                {(["student", "developer", "researcher", "concepts"] as const).map((t) => (
                   <optgroup key={t} label={`${t[0].toUpperCase()}${t.slice(1)} track`}>
                     {MODULES.filter((m) => m.track === t).map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
                   </optgroup>
