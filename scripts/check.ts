@@ -2,6 +2,8 @@
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { MODULES } from "@/lib/curriculum";
+import { roadmapTopics, topicStatus } from "@/lib/roadmaps";
+import type { State } from "@/lib/progress";
 import { bellScore, noiseVisible, onesRate, pairCorrelation, registerCounts, shorFactors, shotNoiseTvd, tvd } from "@/lib/explain";
 import { QuantumServiceError } from "@/lib/quantum";
 import { pythonErrorMessage, qollabTransport } from "@/qollab/bridge";
@@ -59,5 +61,18 @@ assert.match(shorFactors(8, 4, 14, 15).note, /≡ −1/); // a = 14 ≡ −1: r 
 // Every lesson circuit, for backend/check_lessons.py to run through the real engine.
 mkdirSync("dist", { recursive: true });
 writeFileSync("dist/lessons.json", JSON.stringify(Object.fromEntries(MODULES.map((m) => [m.id, m.circuit]))));
+
+// Concepts IDs retain their original prefixes, and prerequisites cross tracks.
+// Neither must prevent the roadmap from rendering or unlocking correctly.
+const concepts = roadmapTopics("concepts");
+assert.deepEqual(concepts.map(t => t.id), ["s7", "s8", "r7"]);
+const emptyProgress = { modules: {}, levels: {} } as State;
+for (const topic of concepts) {
+  assert.equal(topicStatus(emptyProgress, topic), "locked");
+  const prerequisiteProgress = { ...emptyProgress, modules: Object.fromEntries(topic.requires.map(id => [id, { completedAt: "2026-10-10", correct: true }])) };
+  assert.equal(topicStatus(prerequisiteProgress, topic), "available");
+  const completedProgress = { ...prerequisiteProgress, modules: { ...prerequisiteProgress.modules, [topic.id]: { completedAt: "2026-10-10", correct: true } } };
+  assert.equal(topicStatus(completedProgress, topic), "done");
+}
 
 console.log("js: all checks passed");
