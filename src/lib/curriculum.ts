@@ -21,6 +21,9 @@ export const TRACKS: Track[] = [
 
 export type Check = { q: string; options: string[]; answer: number; why: string };
 
+/** A prediction made before running. Each wrong option is a common misconception, answered in `feedback`. */
+export type Predict = { q: string; options: string[]; answer: number; feedback: string[] };
+
 export type Module = {
   id: string;
   track: Exclude<TrackId, "explorer">;
@@ -34,6 +37,7 @@ export type Module = {
   observe: string; // what to look for after running
   tryIt: string[];
   check: Check;
+  predict?: Predict;
 };
 
 const PI = Math.PI;
@@ -65,6 +69,17 @@ export const MODULES: Module[] = [
     observe: "100% |0⟩. If H just randomised the qubit, you would see 50/50. Interference is what brings it back.",
     tryIt: ["Delete the second H. What changes?", "Insert a Z between the two H gates. Predict the result first."],
     check: { q: "What does H·H|1⟩ equal?", options: ["|0⟩", "|1⟩", "|+⟩", "A random bit"], answer: 1, why: "H is its own inverse (H² = I), so any state comes back unchanged." },
+    predict: {
+      q: "This circuit applies H twice to |0⟩. Before you run it: what will the shots show?",
+      options: ["About 50% 0 and 50% 1", "0 every time", "1 every time", "A different random mix on every run"],
+      answer: 1,
+      feedback: [
+        "That's the coin-flip picture of H. One H does give 50/50, but the second H makes the two paths into |1⟩ cancel (+½ and −½). Amplitudes can cancel; probabilities can't, which is why the coin picture breaks.",
+        "Right. The paths into |1⟩ carry +½ and −½ and cancel, while the paths into |0⟩ add up. That's interference.",
+        "H undoes itself (H·H = I), so the qubit returns to where it started: |0⟩, not |1⟩.",
+        "Shots are random only when the final state is a superposition. Interference leaves exactly |0⟩ here, so there's nothing random left to measure.",
+      ],
+    },
   },
   {
     id: "s3", track: "student", title: "Phase: Z, S and T gates", minutes: 9, skill: "Phase", requires: ["s2"],
@@ -91,6 +106,17 @@ export const MODULES: Module[] = [
     observe: "Only 00 and 11 appear. Both Bloch vectors collapse to the centre, and the entanglement badge lights up.",
     tryIt: ["Add an X on q1 before the CNOT. Which Bell state do you get?", "Add a third qubit with another CNOT from q1 to make a GHZ state."],
     check: { q: "What is the purity of either qubit in a Bell state?", options: ["1", "½", "0", "√2/2"], answer: 1, why: "Each reduced state is maximally mixed, I/2, and Tr[(I/2)²] = ½." },
+    predict: {
+      q: "H on q0, then a CNOT from q0 to q1. Which outcomes will you see?",
+      options: ["All four (00, 01, 10, 11), about 25% each", "Only 00 and 11, about half each", "Only 00", "Only 01 and 10"],
+      answer: 1,
+      feedback: [
+        "That's what two independent coin flips give. The CNOT copies q0's value into q1 in every branch, so 01 and 10 never appear.",
+        "Right. Each qubit on its own is random, but the pair always agrees. That correlation is entanglement.",
+        "q0 is in superposition after H, so half the time it's 1, and the CNOT then flips q1 too, giving 11.",
+        "That would be anti-correlation, which you get by adding an X on q1 first. Here the CNOT makes q1 match q0.",
+      ],
+    },
   },
   {
     id: "s5", track: "student", title: "Quantum teleportation", minutes: 12, skill: "Teleportation", requires: ["s4"],
@@ -104,6 +130,17 @@ export const MODULES: Module[] = [
     observe: "q2's Bloch vector ≈ (0.89, 0, 0.45), the same as the Ry(1.1) state you prepared on q0.",
     tryIt: ["Change the Ry angle on q0 and confirm q2 follows.", "Remove the CZ correction. Which component of q2's Bloch vector goes wrong?"],
     check: { q: "Why doesn't teleportation allow faster-than-light messages?", options: ["Bob needs Alice's two classical bits to fix his qubit", "The Bell pair decays", "Measurement is slow", "It only works for |0⟩"], answer: 0, why: "Without the classical bits, Bob's qubit is maximally mixed and carries no information." },
+    predict: {
+      q: "q0 starts as Ry(1.1)|0⟩. After the teleportation protocol, what does q2's Bloch vector look like?",
+      options: ["The same as q0's starting state, about (0.89, 0, 0.45)", "Still |0⟩, since no gate with the angle touched q2", "q0 and q2 both hold copies of the state", "Random: it changes every run"],
+      answer: 0,
+      feedback: [
+        "Right. The state moved from q0 to q2, and q0 no longer holds it, so nothing was copied.",
+        "The angle never touches q2 directly. Entanglement plus the two corrections carry the state across, which is the whole point of teleportation.",
+        "Quantum states can't be copied (the no-cloning theorem). After teleportation q0 is left in |+⟩ and only q2 holds the state.",
+        "Bloch vectors are calculated exactly from the statevector, not sampled, so they're the same every run. Only the histogram counts wobble.",
+      ],
+    },
   },
   {
     id: "s6", track: "student", title: "Your first algorithm: Deutsch–Jozsa", minutes: 10, skill: "Oracles", requires: ["s5"],
@@ -171,6 +208,17 @@ export const MODULES: Module[] = [
     observe: "100% |11⟩ after a single query to the oracle.",
     tryIt: ["Mark |01⟩ instead: wrap the oracle CZ with X on q1.", "Open the 16-door race on Explorer Planet 6. It runs the 4-qubit version of this circuit."],
     check: { q: "Approximately how many Grover iterations for N = 1,000,000?", options: ["~785", "~1,000,000", "~20", "~500,000"], answer: 0, why: "(π/4)·√10⁶ ≈ 785. A classical search needs ~500,000 checks on average." },
+    predict: {
+      q: "Grover's search marks |11⟩ among 4 possibilities and asks the oracle once. What will you measure?",
+      options: ["|11⟩ about 25% of the time, the same as guessing", "|11⟩ every time", "|11⟩ about half the time", "All four answers at once, because a quantum computer tries them all in parallel"],
+      answer: 1,
+      feedback: [
+        "The oracle flips |11⟩'s sign, and the diffuser turns that sign into extra amplitude through interference, so the odds aren't the same as guessing.",
+        "Right. For 4 items, one Grover iteration rotates the state exactly onto the marked item. Larger searches need about √N iterations and usually stop just short of 100%.",
+        "For N = 4 the amplification isn't partial: one iteration lands exactly on the answer.",
+        "This is the most common myth. Every shot gives one outcome. The speed-up comes from interference boosting the right answer, not from reading out all the answers.",
+      ],
+    },
   },
   {
     id: "d5", track: "developer", title: "The Quantum Fourier Transform", minutes: 12, skill: "QFT", requires: ["d4"],
@@ -249,6 +297,17 @@ export const MODULES: Module[] = [
     observe: "q0's Bloch vector returns to ≈ (0.717, 0, 0.697) even though an X error hit the codeword. Ancillas q3, q4 always read 11, the syndrome for 'q1 flipped'.",
     tryIt: ["Move the injected X to q0 or q2. Which syndrome appears?", "Inject two X errors. Does the code still recover?"],
     check: { q: "Why can the syndrome be measured without destroying the encoded superposition?", options: ["It measures parities that are identical for |000⟩ and |111⟩", "Ancillas are classical", "Measurement is delayed", "Errors are always X"], answer: 0, why: "Z₀Z₁ and Z₁Z₂ have the same eigenvalue on both codewords, so the measurement gives no information about α, β." },
+    predict: {
+      q: "An X error hits q1 in the middle of the code. After correction and decoding, what happens to q0's Bloch vector?",
+      options: ["It's restored to about (0.717, 0, 0.697), the original state", "It's flipped, because the error was never measured", "It collapses to |0⟩ or |1⟩, because we checked for errors", "It's partly damaged, about halfway between"],
+      answer: 0,
+      feedback: [
+        "Right. The syndrome pinpoints q1, the Toffoli flips it back, and decoding returns the original state, all without learning α or β.",
+        "The ancillas detect the error by checking parities, and the controlled corrections act on that information. The data never needs to be measured directly.",
+        "The syndrome checks only parities (Z₀Z₁ and Z₁Z₂), which are the same for |000⟩ and |111⟩. That reveals the error without disturbing the superposition.",
+        "This code fully corrects a single X error. Damage starts only with two or more errors, or with errors it can't see, such as Z flips.",
+      ],
+    },
   },
   {
     id: "r4", track: "researcher", title: "Quantum phase estimation", minutes: 15, skill: "Phase estimation", requires: ["r3"],

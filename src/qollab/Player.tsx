@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import Markdown from "@/components/Markdown";
 import CircuitEditor, { layout, toCircuit, type EOp } from "@/components/lab/CircuitEditor";
+import Predict from "@/components/lab/Predict";
 import ResultsPanel from "@/components/lab/ResultsPanel";
 import Tutor from "@/components/lab/Tutor";
 import { MODULES, TRACKS, modulesOf, type Module } from "@/lib/curriculum";
@@ -53,6 +54,7 @@ function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [picked, setPicked] = useState<number | null>(null);
+  const [guess, setGuess] = useState<number | null>(null);
 
   async function run() {
     setRunning(true);
@@ -60,6 +62,7 @@ function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
     try {
       setResult(await runCircuit(circuit, { shots: 1024 }));
     } catch (e) {
+      setResult(null);
       setError((e as Error).message);
     } finally {
       setRunning(false);
@@ -79,14 +82,16 @@ function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
             <Markdown text={s.body} />
           </section>
         ))}
+        {m.predict && <Predict p={m.predict} picked={guess} onPick={setGuess} revealed={!!result} />}
+
         <section className="panel flex flex-col gap-3 p-4" aria-label="Lesson circuit">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="mr-auto font-semibold">🧩 The circuit (you can edit it)</h3>
-            <button className="pbtn-ghost" onClick={() => { setOps(layout(m.circuit)); setResult(null); setError(null); }}>Reset</button>
-            <button className="pbtn-primary" onClick={run} disabled={running}>{running ? "Running…" : "▶ Run"}</button>
+            <button className="pbtn-ghost" disabled={running} onClick={() => { setOps(layout(m.circuit)); setResult(null); setError(null); }}>Reset</button>
+            <button className="pbtn-primary" onClick={run} disabled={running || (!!m.predict && guess === null)}>{running ? "Running…" : m.predict && guess === null ? "Predict first ↑" : "▶ Run"}</button>
           </div>
           {isIonQ && <p className="text-xs text-muted">IonQ simulators take one job per Run. To run again, press Stop and Run, or pick a local simulator.</p>}
-          <CircuitEditor qubits={m.circuit.qubits} ops={ops} onChange={setOps} />
+          <CircuitEditor qubits={m.circuit.qubits} ops={ops} onChange={(next) => { setOps(next); setResult(null); }} />
           {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
           {result && (
             <>
