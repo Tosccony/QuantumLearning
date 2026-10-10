@@ -54,8 +54,17 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
+/** How a run request reaches Qiskit: the FastAPI service by default, Qollab's Python bridge on qollab.xyz. */
+export type Transport = (body: object) => Promise<RunResult>;
+
+let transport: Transport = (body) => call<RunResult>("/run", { method: "POST", body: JSON.stringify(body) });
+
+export function setTransport(t: Transport) {
+  transport = t;
+}
+
 export function runCircuit(c: Circuit, opts: RunOptions = {}) {
-  return call<RunResult>("/run", { method: "POST", body: JSON.stringify({ ...c, ...opts }) });
+  return transport({ ...c, ...opts });
 }
 
 // ---------------------------------------------------------------- gate catalog
@@ -92,6 +101,7 @@ export const GATES: Partial<Record<GateName, GateInfo>> = {
   cp: { label: "CP", name: "Controlled phase", controls: 1, targets: 1, params: 1, color: "#3ddc97", group: "Multi", about: "Adds phase θ to |11⟩ — the building block of the QFT." },
   crz: { label: "CRz", name: "Controlled Rz", controls: 1, targets: 1, params: 1, color: "#3ddc97", group: "Multi", about: "Rz(θ) on the target when the control is |1⟩." },
   swap: { label: "SWAP", name: "Swap", controls: 0, targets: 2, params: 0, color: "#b388ff", group: "Multi", about: "Exchanges two qubits' states." },
+  cswap: { label: "CSWAP", name: "Controlled swap (Fredkin)", controls: 1, targets: 2, params: 0, color: "#b388ff", group: "Multi", about: "Swaps two qubits when the control is |1⟩. Used for modular multiplication in Shor's algorithm." },
   ccx: { label: "CCX", name: "Toffoli", controls: 2, targets: 1, params: 0, color: "#3ddc97", group: "Multi", about: "Flips the target when both controls are |1⟩. Universal for classical logic." },
   mcz: { label: "MCZ", name: "Multi-controlled Z", controls: -1, targets: 1, params: 0, color: "#3ddc97", group: "Multi", about: "Phase-flips the all-ones state. Used in Grover oracles." },
 };

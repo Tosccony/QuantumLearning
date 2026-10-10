@@ -1,4 +1,4 @@
-import { modulesOf, type TrackId } from "./curriculum";
+import { moduleById, modulesOf, type TrackId } from "./curriculum";
 import { PLANETS } from "./levels";
 import { moduleStatus, type SkillStatus } from "./skills";
 import type { State } from "./progress";
@@ -28,6 +28,6 @@ export function topicStatus(state: State, topic: RoadmapTopic): SkillStatus {
     const id = Number(topic.id.slice(1));
     return state.levels[id]?.completed ? "done" : topic.requires.every(r => state.levels[Number(r.slice(1))]?.completed) ? "available" : "locked";
   }
-  const lesson = modulesOf(topic.id.startsWith("s") ? "student" : topic.id.startsWith("d") ? "developer" : "researcher").find(m => m.id === topic.id)!;
+  const lesson = moduleById(topic.id)!;
   return moduleStatus(state, lesson);
 }

@@ -17,19 +17,19 @@ function nodes(s: State): Node[] {
     status: s.levels[p.id]?.completed ? "done" : i === 0 || s.levels[p.id - 1]?.completed ? "available" : "locked",
     requires: i ? [`e${p.id - 1}`] : [],
   }));
-  for (const t of ["student", "developer", "researcher"] as const)
+  for (const t of ["student", "developer", "researcher", "concepts"] as const)
     modulesOf(t).forEach((m, i) => out.push({ id: m.id, track: t, row: i, label: m.skill, href: `/learn/${m.id}`, status: moduleStatus(s, m), requires: m.requires }));
   return out;
 }
 
-const COLS: TrackId[] = ["explorer", "student", "developer", "researcher"];
+const COLS: TrackId[] = ["explorer", "student", "developer", "researcher", "concepts"];
 const ROW = 74;
 
 export default function ProgressPage() {
   const { state, ready } = useProgress();
   if (!ready) return null;
   const ns = nodes(state);
-  const pos = (n: Node) => ({ x: (COLS.indexOf(n.track) + 0.5) * 25, y: 40 + n.row * ROW });
+  const pos = (n: Node) => ({ x: (COLS.indexOf(n.track) + 0.5) * (100 / COLS.length), y: 40 + n.row * ROW });
   const byId = Object.fromEntries(ns.map((n) => [n.id, n]));
   const height = 40 + 7 * ROW;
   const doneCount = ns.filter((n) => n.status === "done").length;
@@ -56,8 +56,8 @@ export default function ProgressPage() {
         <h2 className="mb-1 text-xl font-semibold">Skill tree</h2>
         <p className="mb-4 text-sm text-muted">Solid lines are prerequisites within a track. Dashed lines show where one track feeds another.</p>
         <div className="overflow-x-auto">
-          <div className="relative min-w-[720px]" style={{ height }}>
-            <div className="absolute inset-x-0 top-0 grid grid-cols-4 text-center text-sm font-semibold">
+          <div className="relative min-w-[860px]" style={{ height }}>
+            <div className="absolute inset-x-0 top-0 grid grid-cols-5 text-center text-sm font-semibold">
               {COLS.map((c) => { const t = TRACKS.find((x) => x.id === c)!; return <div key={c} style={{ color: t.color }}>{t.icon} {t.name}</div>; })}
             </div>
             <svg className="absolute inset-0 h-full w-full" viewBox={`0 0 100 ${height}`} preserveAspectRatio="none" aria-hidden>
@@ -86,7 +86,7 @@ export default function ProgressPage() {
                 <Link
                   key={n.id}
                   href={n.href}
-                  className={`absolute flex w-[21%] -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-xl px-2.5 py-2 text-xs ring-1 transition hover:scale-[1.03] ${n.status === "done" ? "bg-good/20 ring-good" : n.status === "available" ? "bg-panel ring-white/40" : "bg-panel/50 text-muted ring-white/10"}`}
+                  className={`absolute flex w-[17%] -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-xl px-2.5 py-2 text-xs ring-1 transition hover:scale-[1.03] ${n.status === "done" ? "bg-good/20 ring-good" : n.status === "available" ? "bg-panel ring-white/40" : "bg-panel/50 text-muted ring-white/10"}`}
                   style={{ left: `${p.x}%`, top: p.y }}
                   aria-label={`${n.label}: ${n.status}`}
                 >
@@ -103,7 +103,7 @@ export default function ProgressPage() {
 
       <section aria-label="Certificates">
         <h2 className="mb-3 text-xl font-semibold">Certificates</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {TRACKS.map((t) => {
             const c = certificate(state, t.id);
             const p = trackProgress(state, t.id);

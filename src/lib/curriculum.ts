@@ -1,6 +1,6 @@
 import { g, groverCircuit, type Circuit } from "./quantum";
 
-export type TrackId = "explorer" | "student" | "developer" | "researcher";
+export type TrackId = "explorer" | "student" | "developer" | "researcher" | "concepts";
 
 export type Track = {
   id: TrackId;
@@ -17,9 +17,16 @@ export const TRACKS: Track[] = [
   { id: "student", name: "Student", icon: "🎓", color: "#7bdff2", audience: "High school & first-year university", tagline: "States, gates, entanglement and your first algorithms, with just enough maths.", certificate: "Quantum Foundations" },
   { id: "developer", name: "Developer", icon: "💻", color: "#3ddc97", audience: "Programmers new to quantum", tagline: "Qiskit, transpilation, shots and noise, and building Grover, QFT and variational circuits.", certificate: "Quantum Software Developer" },
   { id: "researcher", name: "Researcher", icon: "🔬", color: "#b388ff", audience: "Graduate level", tagline: "Density matrices, noise and mitigation, error correction, phase estimation and advantage.", certificate: "Quantum Research Practitioner" },
+  { id: "concepts", name: "Concepts", icon: "🔓", color: "#ff9f1c", audience: "After the Student basics", tagline: "Hands-on deep dives: secret keys with BB84, the Bell test, and Shor's algorithm.", certificate: "Quantum Concepts" },
 ];
 
 export type Check = { q: string; options: string[]; answer: number; why: string };
+
+/** A prediction made before running. Each wrong option is a common misconception, answered in `feedback`. */
+export type Predict = { q: string; options: string[]; answer: number; feedback: string[] };
+
+/** Lesson-specific arithmetic shown under the results (see LessonReadout). */
+export type Readout = { kind: "bell" } | { kind: "shor"; a: number; N: number; counting: number[] };
 
 export type Module = {
   id: string;
@@ -34,6 +41,9 @@ export type Module = {
   observe: string; // what to look for after running
   tryIt: string[];
   check: Check;
+  predict?: Predict;
+  compare?: Circuit;
+  readout?: Readout;
 };
 
 const PI = Math.PI;
@@ -65,6 +75,17 @@ export const MODULES: Module[] = [
     observe: "100% |0⟩. If H just randomised the qubit, you would see 50/50. Interference is what brings it back.",
     tryIt: ["Delete the second H. What changes?", "Insert a Z between the two H gates. Predict the result first."],
     check: { q: "What does H·H|1⟩ equal?", options: ["|0⟩", "|1⟩", "|+⟩", "A random bit"], answer: 1, why: "H is its own inverse (H² = I), so any state comes back unchanged." },
+    predict: {
+      q: "This circuit applies H twice to |0⟩. Before you run it: what will the shots show?",
+      options: ["About 50% 0 and 50% 1", "0 every time", "1 every time", "A different random mix on every run"],
+      answer: 1,
+      feedback: [
+        "That's the coin-flip picture of H. One H does give 50/50, but the second H makes the two paths into |1⟩ cancel (+½ and −½). Amplitudes can cancel; probabilities can't, which is why the coin picture breaks.",
+        "Right. The paths into |1⟩ carry +½ and −½ and cancel, while the paths into |0⟩ add up. That's interference.",
+        "H undoes itself (H·H = I), so the qubit returns to where it started: |0⟩, not |1⟩.",
+        "Shots are random only when the final state is a superposition. Interference leaves exactly |0⟩ here, so there's nothing random left to measure.",
+      ],
+    },
   },
   {
     id: "s3", track: "student", title: "Phase: Z, S and T gates", minutes: 9, skill: "Phase", requires: ["s2"],
@@ -91,6 +112,17 @@ export const MODULES: Module[] = [
     observe: "Only 00 and 11 appear. Both Bloch vectors collapse to the centre, and the entanglement badge lights up.",
     tryIt: ["Add an X on q1 before the CNOT. Which Bell state do you get?", "Add a third qubit with another CNOT from q1 to make a GHZ state."],
     check: { q: "What is the purity of either qubit in a Bell state?", options: ["1", "½", "0", "√2/2"], answer: 1, why: "Each reduced state is maximally mixed, I/2, and Tr[(I/2)²] = ½." },
+    predict: {
+      q: "H on q0, then a CNOT from q0 to q1. Which outcomes will you see?",
+      options: ["All four (00, 01, 10, 11), about 25% each", "Only 00 and 11, about half each", "Only 00", "Only 01 and 10"],
+      answer: 1,
+      feedback: [
+        "That's what two independent coin flips give. The CNOT copies q0's value into q1 in every branch, so 01 and 10 never appear.",
+        "Right. Each qubit on its own is random, but the pair always agrees. That correlation is entanglement.",
+        "q0 is in superposition after H, so half the time it's 1, and the CNOT then flips q1 too, giving 11.",
+        "That would be anti-correlation, which you get by adding an X on q1 first. Here the CNOT makes q1 match q0.",
+      ],
+    },
   },
   {
     id: "s5", track: "student", title: "Quantum teleportation", minutes: 12, skill: "Teleportation", requires: ["s4"],
@@ -104,6 +136,17 @@ export const MODULES: Module[] = [
     observe: "q2's Bloch vector ≈ (0.89, 0, 0.45), the same as the Ry(1.1) state you prepared on q0.",
     tryIt: ["Change the Ry angle on q0 and confirm q2 follows.", "Remove the CZ correction. Which component of q2's Bloch vector goes wrong?"],
     check: { q: "Why doesn't teleportation allow faster-than-light messages?", options: ["Bob needs Alice's two classical bits to fix his qubit", "The Bell pair decays", "Measurement is slow", "It only works for |0⟩"], answer: 0, why: "Without the classical bits, Bob's qubit is maximally mixed and carries no information." },
+    predict: {
+      q: "q0 starts as Ry(1.1)|0⟩. After the teleportation protocol, what does q2's Bloch vector look like?",
+      options: ["The same as q0's starting state, about (0.89, 0, 0.45)", "Still |0⟩, since no gate with the angle touched q2", "q0 and q2 both hold copies of the state", "Random: it changes every run"],
+      answer: 0,
+      feedback: [
+        "Right. The state moved from q0 to q2, and q0 no longer holds it, so nothing was copied.",
+        "The angle never touches q2 directly. Entanglement plus the two corrections carry the state across, which is the whole point of teleportation.",
+        "Quantum states can't be copied (the no-cloning theorem). After teleportation q0 is left in |+⟩ and only q2 holds the state.",
+        "Bloch vectors are calculated exactly from the statevector, not sampled, so they're the same every run. Only the histogram counts wobble.",
+      ],
+    },
   },
   {
     id: "s6", track: "student", title: "Your first algorithm: Deutsch–Jozsa", minutes: 10, skill: "Oracles", requires: ["s5"],
@@ -117,6 +160,80 @@ export const MODULES: Module[] = [
     observe: "The inputs (the right-most two bits of each bitstring) are always 11. The ancilla bit stays random, which is expected.",
     tryIt: ["Delete both oracle CNOTs to get a constant function. What do q0, q1 read now?", "Keep only one CNOT. Is f still balanced?"],
     check: { q: "If Deutsch–Jozsa measures all zeros on the input register, the function is…", options: ["Constant", "Balanced", "Undetermined", "Both"], answer: 0, why: "Only a constant function makes every amplitude interfere constructively back to |0…0⟩." },
+  },
+
+  {
+    id: "s7", track: "concepts", title: "Quantum key distribution: BB84", minutes: 12, skill: "Quantum cryptography", requires: ["s3"],
+    summary: "Alice and Bob build a shared secret key from single qubits. Measuring in the wrong basis disturbs a state, so an eavesdropper leaves errors they can detect.",
+    sections: [
+      { heading: "Why quantum helps with secrets", body: "To encrypt messages, two people first need a shared secret key: a string of random bits nobody else knows. Sent over an ordinary channel, those bits can be copied without leaving a trace. Qubits are different. An unknown quantum state can't be copied (the **no-cloning theorem**), and measuring it in the wrong basis changes it. BB84, proposed by Charles Bennett and Gilles Brassard in 1984, turns that fragility into a burglar alarm." },
+      { heading: "The protocol", body: "1. For each qubit, Alice picks a random bit and a random basis: **Z** (|0⟩, |1⟩) or **X** (|+⟩, |−⟩).\n2. Bob picks his own random basis for each qubit and measures in it.\n3. Over a public channel they compare **bases, never bits**, and keep only the rounds where the bases matched. This step is called sifting.\n4. When the bases match, Bob's bit always equals Alice's. When they don't, Bob gets a coin flip, so those rounds are thrown away." },
+      { heading: "This circuit", body: "Each qubit is one round, with the random choices written into the circuit. Alice uses `X` to send a 1 and `H` to switch to the X basis. Bob measuring in the X basis is an `H` just before measurement.\n\n- q0: Alice sends 0 in Z, Bob measures Z. Kept.\n- q1: Alice sends 1 in Z, Bob measures X. Thrown away.\n- q2: Alice sends 1 in X, Bob measures X. Kept.\n- q3: Alice sends 0 in X, Bob measures Z. Thrown away.\n- q4: Alice sends 1 in Z, Bob measures Z. Kept.\n- q5: Alice sends 0 in X, Bob measures X. Kept.\n\nq6 is Eve's notebook. She isn't listening yet, so it always reads 0. The shared key is q0, q2, q4, q5 = **0, 1, 1, 0**." },
+      { heading: "Catching Eve", body: "Eve can't copy the qubits, so to learn anything she has to measure them, and she doesn't know Alice's bases. Whenever she guesses the wrong basis, she knocks the qubit into the other basis, and Bob's result turns into a coin flip even though his basis matched Alice's. Over many rounds that's a 25% error rate in the sifted key. Alice and Bob publicly compare a random sample of key bits; if too many disagree, they know someone listened, throw the key away and start again. In the circuit, a `CX` from a key qubit into q6 plays Eve: it records the qubit's Z value, which disturbs it exactly like a Z-basis measurement." },
+    ],
+    circuit: {
+      qubits: 7,
+      ops: [
+        g("x", [1]), g("x", [2]), g("h", [2]), g("h", [3]), g("x", [4]), g("h", [5]), // Alice
+        g("h", [1]), g("h", [2]), g("h", [5]), // Bob
+      ],
+    },
+    observe: "Read each bitstring right to left (q0 first). q0, q2, q4 and q5 never change: they hold the key 0, 1, 1, 0. Only q1 and q3 flip, because those rounds used different bases and get thrown away. q6, Eve's notebook, stays 0.",
+    tryIt: [
+      "Let Eve listen to round q2: add a CX with q2 as control and q6 as target, after Alice's H and before Bob's H. How often is q2 wrong now?",
+      "Move Eve to round q4 instead, a Z-basis round. Does the key change? Why do Alice and Bob need to check many bits, not just one?",
+    ],
+    check: { q: "Why can't Eve just copy each qubit and measure her copy later?", options: ["Unknown quantum states can't be copied (no-cloning)", "Qubits travel faster than light", "Alice encrypts each qubit first", "Bob always measures before Eve can"], answer: 0, why: "The no-cloning theorem rules out a perfect copy of an unknown state. Eve has to measure the original, and measuring in the wrong basis disturbs it, which Alice and Bob can detect." },
+    predict: {
+      q: "Rounds q1 and q3 used different bases for Alice and Bob. What will Bob read on those qubits?",
+      options: ["Always Alice's bit", "Always the opposite of Alice's bit", "A random 0 or 1, 50/50", "Always 0"],
+      answer: 2,
+      feedback: [
+        "Only matching bases guarantee that. A Z-basis state measured in the X basis, or the reverse, gives a coin flip.",
+        "There's no systematic flip. With mismatched bases the result is completely random, so it carries no information about Alice's bit.",
+        "Right. A Z-basis state measured in the X basis, or the reverse, is a perfect coin flip. That's why these rounds are thrown away during sifting.",
+        "Nothing forces 0. q1 starts as |1⟩ and q3 as |+⟩, and measured in the other basis each gives 0 or 1 with equal odds.",
+      ],
+    },
+  },
+  {
+    id: "s8", track: "concepts", title: "Is entanglement real? The Bell test", minutes: 14, skill: "Bell inequalities", requires: ["s4"],
+    summary: "If entangled pairs secretly carried pre-agreed answers, a score called S could never exceed 2. Real quantum pairs score about 2.83.",
+    sections: [
+      { heading: "Hidden instructions?", body: "Entangled qubits always agree when they're measured the same way. Einstein suspected a boring explanation: perhaps each pair leaves the source carrying a hidden instruction sheet, like twins who agreed on their answers in advance. In 1964 John Bell showed that this idea makes a testable prediction, and that quantum mechanics disagrees with it." },
+      { heading: "The CHSH game", body: "Alice measures her qubit along one of two directions (a₀ or a₁), and Bob along one of two (b₀ or b₁). For each combination they compute an agreement score:\n\n```\nE = P(same result) − P(different result)\nS = E(a₀,b₀) + E(a₀,b₁) + E(a₁,b₀) − E(a₁,b₁)\n```\n\nWith hidden instruction sheets, S can never be larger than 2, whatever the sheets say. Quantum mechanics allows up to 2√2 ≈ 2.83, which is called Tsirelson's bound." },
+      { heading: "This circuit", body: "Four Bell pairs, one for each combination of settings: A (q0, q1), B (q2, q3), C (q4, q5) and D (q6, q7). Measuring along an angle θ is an `Ry(−θ)` just before measurement. Alice uses a₀ = 0 and a₁ = π/2; Bob uses b₀ = π/4 and b₁ = −π/4. For these pairs E = cos(θ_Alice − θ_Bob), so pairs A, B and C score +0.71 and pair D scores −0.71, giving S ≈ 2.83. The Bell score panel under the results does the arithmetic. In a real Bell test each pair's settings are chosen at random after the pair leaves the source, so no instruction sheet can know them in advance. Here each pair gets a fixed combination so that one run collects all four scores." },
+      { heading: "Why it matters", body: "Experiments since the 1970s have measured S above 2, closing loophole after loophole, and the 2022 Nobel Prize in Physics went to Alain Aspect, John Clauser and Anton Zeilinger for this work. Entanglement-based key distribution (Ekert's E91 protocol) uses the same test: if S drops to 2 or below, someone has disturbed the pairs." },
+    ],
+    circuit: {
+      qubits: 8,
+      ops: [
+        g("h", [0]), g("cx", [1], [0]), g("h", [2]), g("cx", [3], [2]),
+        g("h", [4]), g("cx", [5], [4]), g("h", [6]), g("cx", [7], [6]),
+        g("ry", [1], [], [-PI / 4]), // A: Alice 0, Bob π/4
+        g("ry", [3], [], [PI / 4]), // B: Alice 0, Bob −π/4
+        g("ry", [4], [], [-PI / 2]), g("ry", [5], [], [-PI / 4]), // C: Alice π/2, Bob π/4
+        g("ry", [6], [], [-PI / 2]), g("ry", [7], [], [PI / 4]), // D: Alice π/2, Bob −π/4
+      ],
+    },
+    observe: "Pairs A, B and C agree about 85% of the time (E ≈ +0.71); pair D disagrees about 85% of the time (E ≈ −0.71). The Bell score adds them up to about 2.83, comfortably above the classical limit of 2.",
+    tryIt: [
+      "Set every Ry angle to 0, so Alice and Bob always measure the same way. Predict S before you run.",
+      "Turn Bob's angles up to ±π/2: give q1 and q5 Ry(−π/2), and q3 and q7 Ry(π/2). Does S grow or shrink? Why is π/4 the sweet spot?",
+    ],
+    check: { q: "What does a measured S of about 2.83 rule out?", options: ["Pairs carrying pre-agreed answers (local hidden variables)", "Quantum mechanics", "Any correlation between the qubits", "Randomness in each single result"], answer: 0, why: "Any hidden-instruction model scores at most 2, so measuring 2.83 means no such instruction sheet can explain the results. Each single result is still random, so the correlation can't be used to send a message." },
+    predict: {
+      q: "Hidden instruction sheets can score at most S = 2. What will these entangled pairs score?",
+      options: ["Exactly 2, the same as instruction sheets", "About 2.83, above the classical limit", "4, the largest value the formula allows", "About 0, because every single result is random"],
+      answer: 1,
+      feedback: [
+        "Instruction sheets top out at 2, but entanglement isn't an instruction sheet. These pairs go beyond it.",
+        "Right. Each pair is individually random, yet the correlations reach 2√2 ≈ 2.83, which no pre-agreed answers can match.",
+        "The formula allows 4, but quantum mechanics stops at 2√2 ≈ 2.83 (Tsirelson's bound). Reaching 4 would need correlations stranger than quantum ones.",
+        "Each single result is random, but the pairs are strongly correlated. S measures the correlations, not the individual results.",
+      ],
+    },
+    readout: { kind: "bell" },
   },
 
   // ------------------------------------------------------------------ Developer
@@ -171,6 +288,17 @@ export const MODULES: Module[] = [
     observe: "100% |11⟩ after a single query to the oracle.",
     tryIt: ["Mark |01⟩ instead: wrap the oracle CZ with X on q1.", "Open the 16-door race on Explorer Planet 6. It runs the 4-qubit version of this circuit."],
     check: { q: "Approximately how many Grover iterations for N = 1,000,000?", options: ["~785", "~1,000,000", "~20", "~500,000"], answer: 0, why: "(π/4)·√10⁶ ≈ 785. A classical search needs ~500,000 checks on average." },
+    predict: {
+      q: "Grover's search marks |11⟩ among 4 possibilities and asks the oracle once. What will you measure?",
+      options: ["|11⟩ about 25% of the time, the same as guessing", "|11⟩ every time", "|11⟩ about half the time", "All four answers at once, because a quantum computer tries them all in parallel"],
+      answer: 1,
+      feedback: [
+        "The oracle flips |11⟩'s sign, and the diffuser turns that sign into extra amplitude through interference, so the odds aren't the same as guessing.",
+        "Right. For 4 items, one Grover iteration rotates the state exactly onto the marked item. Larger searches need about √N iterations and usually stop just short of 100%.",
+        "For N = 4 the amplification isn't partial: one iteration lands exactly on the answer.",
+        "This is the most common myth. Every shot gives one outcome. The speed-up comes from interference boosting the right answer, not from reading out all the answers.",
+      ],
+    },
   },
   {
     id: "d5", track: "developer", title: "The Quantum Fourier Transform", minutes: 12, skill: "QFT", requires: ["d4"],
@@ -249,6 +377,30 @@ export const MODULES: Module[] = [
     observe: "q0's Bloch vector returns to ≈ (0.717, 0, 0.697) even though an X error hit the codeword. Ancillas q3, q4 always read 11, the syndrome for 'q1 flipped'.",
     tryIt: ["Move the injected X to q0 or q2. Which syndrome appears?", "Inject two X errors. Does the code still recover?"],
     check: { q: "Why can the syndrome be measured without destroying the encoded superposition?", options: ["It measures parities that are identical for |000⟩ and |111⟩", "Ancillas are classical", "Measurement is delayed", "Errors are always X"], answer: 0, why: "Z₀Z₁ and Z₁Z₂ have the same eigenvalue on both codewords, so the measurement gives no information about α, β." },
+    predict: {
+      q: "An X error hits q1 in the middle of the code. After correction and decoding, what happens to q0's Bloch vector?",
+      options: ["It's restored to about (0.717, 0, 0.697), the original state", "It's flipped, because the error was never measured", "It collapses to |0⟩ or |1⟩, because we checked for errors", "It's partly damaged, about halfway between"],
+      answer: 0,
+      feedback: [
+        "Right. The syndrome pinpoints q1, the Toffoli flips it back, and decoding returns the original state, all without learning α or β.",
+        "The ancillas detect the error by checking parities, and the controlled corrections act on that information. The data never needs to be measured directly.",
+        "The syndrome checks only parities (Z₀Z₁ and Z₁Z₂), which are the same for |000⟩ and |111⟩. That reveals the error without disturbing the superposition.",
+        "This code fully corrects a single X error. Damage starts only with two or more errors, or with errors it can't see, such as Z flips.",
+      ],
+    },
+    // q0: a bare qubit. q1–q3: the same bit protected by the 3-qubit code (ancillas q4, q5).
+    // One circuit, so it fits IonQ's one-job-per-Run rule. Bare error = P(q0 = 1), protected = P(q1 = 1).
+    compare: {
+      qubits: 6,
+      ops: [
+        g("cx", [2], [1]), g("cx", [3], [1]),
+        g("cx", [4], [1]), g("cx", [4], [2]), g("cx", [5], [2]), g("cx", [5], [3]),
+        g("ccx", [2], [4, 5]),
+        g("x", [5]), g("ccx", [1], [4, 5]), g("x", [5]),
+        g("x", [4]), g("ccx", [3], [4, 5]), g("x", [4]),
+        g("cx", [3], [1]), g("cx", [2], [1]),
+      ],
+    },
   },
   {
     id: "r4", track: "researcher", title: "Quantum phase estimation", minutes: 15, skill: "Phase estimation", requires: ["r3"],
@@ -296,6 +448,51 @@ export const MODULES: Module[] = [
     observe: "Ideal: 0000/1111 only. With noise, compute the fidelity and compare it with 3 qubits.",
     tryIt: ["Fit fidelity against qubit count (2 → 6) at fixed noise.", "Rewrite the GHZ preparation as a log-depth tree. Does fidelity improve?"],
     check: { q: "Quantum volume primarily measures…", options: ["The largest square random circuit run reliably", "Qubit count", "T₁ time", "Gate speed"], answer: 0, why: "QV combines width, depth, connectivity and error into a single 'largest reliable square circuit'." },
+  },
+  {
+    id: "r7", track: "concepts", title: "Shor's algorithm: factoring 15", minutes: 18, skill: "Shor's algorithm", requires: ["r4"],
+    summary: "Factoring reduces to finding the period of aˣ mod N. Phase estimation finds that period, and a little classical number theory turns it into factors: 15 = 3 × 5.",
+    sections: [
+      { heading: "From factoring to a period", body: "To factor N, pick a number a that shares no factor with N and look at the sequence aˣ mod N. For N = 15 and a = 7:\n\n```\n7⁰ = 1, 7¹ = 7, 7² = 49 ≡ 4, 7³ ≡ 13, 7⁴ ≡ 1, …\n```\n\nIt repeats with **period r = 4**. When r is even, gcd(a^(r/2) − 1, N) and gcd(a^(r/2) + 1, N) are usually factors of N: gcd(48, 15) = 3 and gcd(50, 15) = 5. Finding r is the hard part for big N, and it's the only part the quantum computer does." },
+      { heading: "Phase estimation finds the period", body: "Let U multiply a 4-qubit register by 7 mod 15. With the work register starting at |1⟩, phase estimation with U, U², U⁴ and U⁸ writes y/16 ≈ s/r into the counting register, for a random s. Here r = 4, so the counting register reads y = 0, 4, 8 or 12 (phases 0, ¼, ½, ¾), each about a quarter of the time. This is the QFT and phase estimation from earlier lessons, applied to modular multiplication." },
+      { heading: "This circuit, and its shortcut", body: "Counting qubits are q0–q3; the work register is q4–q7, with q4 as its lowest bit, starting at |1⟩. Multiplying by 7 mod 15 takes three controlled `SWAP`s and four controlled `X`s. Multiplying by 4 (that's U²) takes two controlled `SWAP`s. Because 7⁴ ≡ 1, U⁴ and U⁸ do nothing, so they're left out.\n\nThat's a shortcut: we used the answer to build the circuit. Factoring a large number needs general modular-multiplication circuits that don't know r in advance, which is why breaking a 2048-bit RSA key needs a large, fault-tolerant quantum computer. The inverse QFT at the end turns the phase into a readable number." },
+      { heading: "From measurement to factors", body: "Each run gives one y. Turn y/16 into the nearest fraction s/r with r < 15, check that 7ʳ ≡ 1 mod 15, and if r is even compute the gcds. y = 4 or 12 gives r = 4 and the factors 3 and 5. y = 8 suggests r = 2, which fails the check, and y = 0 says nothing. Either way you run again: Shor's algorithm succeeds with good probability on each run, not every time. The panel under the results does this arithmetic for the values you measured." },
+    ],
+    circuit: {
+      qubits: 8,
+      ops: [
+        g("x", [4]), g("h", [0]), g("h", [1]), g("h", [2]), g("h", [3]),
+        // U = ×7 mod 15, controlled by q0
+        g("cswap", [4, 5], [0]), g("cswap", [5, 6], [0]), g("cswap", [6, 7], [0]),
+        g("cx", [4], [0]), g("cx", [5], [0]), g("cx", [6], [0]), g("cx", [7], [0]),
+        // U² = ×4 mod 15, controlled by q1. U⁴ = U⁸ = ×1, so q2 and q3 control nothing.
+        g("cswap", [5, 7], [1]), g("cswap", [4, 6], [1]),
+        // inverse QFT on q0–q3
+        g("swap", [0, 3]), g("swap", [1, 2]),
+        g("h", [0]),
+        g("cp", [1], [0], [-PI / 2]), g("h", [1]),
+        g("cp", [2], [0], [-PI / 4]), g("cp", [2], [1], [-PI / 2]), g("h", [2]),
+        g("cp", [3], [0], [-PI / 8]), g("cp", [3], [1], [-PI / 4]), g("cp", [3], [2], [-PI / 2]), g("h", [3]),
+      ],
+    },
+    observe: "Look at the right-most four bits of each outcome (the counting register, q3…q0): only 0000, 0100, 1000 and 1100 appear, each about a quarter of the time. That's y = 0, 4, 8 and 12. The panel below turns y = 4 and y = 12 into 15 = 3 × 5.",
+    tryIt: [
+      "Open the Qiskit tab and look at the transpiled CX count. That's what this tiny 15 = 3 × 5 needs. What does it suggest about a 2048-bit number?",
+      "Run it with noise (the Lab's noise sliders, or an IBM or IonQ machine on Qollab). Do 0, 4, 8 and 12 still stand out, and does the panel still find 3 × 5?",
+    ],
+    check: { q: "Which part of Shor's algorithm needs the quantum computer?", options: ["Finding the period r of aˣ mod N", "Computing the gcds that give the factors", "Choosing the number a", "Checking that the factors multiply to N"], answer: 0, why: "Everything except period finding is fast on an ordinary computer. Phase estimation finds the period far faster than any known classical method, and that's the whole speed-up." },
+    predict: {
+      q: "The period of 7ˣ mod 15 is 4. What will the 4-bit counting register read?",
+      options: ["Always 4 (0100)", "0, 4, 8 or 12, each about a quarter of the time", "Every value from 0 to 15 equally often", "The factors 3 and 5"],
+      answer: 1,
+      feedback: [
+        "The register holds y/16 ≈ s/r for a random s, not r itself. With r = 4, s can be 0, 1, 2 or 3, giving y = 0, 4, 8 or 12.",
+        "Right. y/16 lands on s/4 for s = 0, 1, 2 or 3. Two of those (y = 4 and 12) reveal r = 4 directly, and the classical step then finds 3 × 5.",
+        "Interference cancels every phase that isn't a multiple of 1/4. That's the inverse QFT's job, and only four values survive.",
+        "The quantum part only finds the period. The factors come afterwards, from an ordinary gcd calculation.",
+      ],
+    },
+    readout: { kind: "shor", a: 7, N: 15, counting: [0, 1, 2, 3] },
   },
 ];
 

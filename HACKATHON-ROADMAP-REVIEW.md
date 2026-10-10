@@ -67,3 +67,12 @@ weights. Their equal weighting is not an official rule.
 Do not claim real-hardware execution, cross-device sync, custom roadmap editing,
 team dashboards, measured learning gains or full roadmap.sh parity: these are not
 implemented or substantiated by this feature release.
+
+## Main-branch synchronization
+
+Merged main at 14e3ffb into the roadmap branch. The curriculum now includes
+five tracks, 21 adult lessons and seven Explorer topics. Main's Qollab player,
+predictions, machine comparison and Concepts lessons are included. The README
+pre-window disclosure is now filled in upstream; its provenance remains the
+team's responsibility. Published Qollab runs and a public demo video still need
+to be verified independently.

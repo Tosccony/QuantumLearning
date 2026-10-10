@@ -1,9 +1,7 @@
 """Quantum Quest Qiskit service.
 
-Every experiment in the app is built here as a real `QuantumCircuit`, then:
-  * sampled with Qiskit Aer (optionally with a depolarising + readout noise model),
-  * analysed exactly with `qiskit.quantum_info` (statevector, per-qubit Bloch vectors, purity),
-  * transpiled to a hardware-style basis so learners see what a device would run.
+The circuit work lives in engine.py, which the Qollab project shares. This service adds request
+validation, an optional Qiskit Aer noise model (depolarising + readout) and the community store.
 
 Community projects are stored in SQLite, and each one is re-executed here on publish so the
 results shown in the gallery always come from a real run, never from client-side data.
@@ -20,17 +18,14 @@ from contextlib import asynccontextmanager, closing
 from pathlib import Path
 from typing import Literal
 
-import numpy as np
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from qiskit import QuantumCircuit, qasm2, transpile
-from qiskit.quantum_info import DensityMatrix, Statevector, partial_trace
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel, ReadoutError, depolarizing_error
 
-MAX_QUBITS = 8
-MAX_OPS = 200
-MAX_SHOTS = 20000
+import engine
+from engine import MAX_OPS, MAX_QUBITS, MAX_SHOTS
+
 DB = Path(__file__).with_name("community.db")
 
 
@@ -44,15 +39,6 @@ GateName = Literal[
     "cx", "cy", "cz", "ch", "cp", "crz", "swap", "ccx", "cswap", "mcx", "mcz",
     "initialize", "barrier",
 ]
-
-# gate -> (controls, targets, params) arity
-ARITY: dict[str, tuple[int, int, int]] = {
-    "h": (0, 1, 0), "x": (0, 1, 0), "y": (0, 1, 0), "z": (0, 1, 0), "s": (0, 1, 0),
-    "sdg": (0, 1, 0), "t": (0, 1, 0), "tdg": (0, 1, 0), "sx": (0, 1, 0),
-    "rx": (0, 1, 1), "ry": (0, 1, 1), "rz": (0, 1, 1), "p": (0, 1, 1),
-    "cx": (1, 1, 0), "cy": (1, 1, 0), "cz": (1, 1, 0), "ch": (1, 1, 0),
-    "cp": (1, 1, 1), "crz": (1, 1, 1), "swap": (0, 2, 0), "ccx": (2, 1, 0), "cswap": (1, 2, 0),
-}
 
 
 class Op(BaseModel):
@@ -81,39 +67,6 @@ class RunRequest(Circuit):
     seed: int | None = None
 
 
-def build(c: Circuit) -> QuantumCircuit:
-    qc = QuantumCircuit(c.qubits)
-    for i, op in enumerate(c.ops):
-        qs = op.controls + op.targets
-        if any(q < 0 or q >= c.qubits for q in qs) or len(set(qs)) != len(qs):
-            raise HTTPException(400, f"op {i} ({op.gate}): invalid or repeated qubit indices")
-        if op.gate == "barrier":
-            qc.barrier()
-            continue
-        if op.gate == "initialize":
-            n = 2 ** len(op.targets)
-            amps = np.array(op.params, dtype=float)
-            if len(amps) != n or np.linalg.norm(amps) == 0:
-                raise HTTPException(400, f"op {i}: initialize needs {n} non-zero amplitudes")
-            qc.initialize(amps / np.linalg.norm(amps), op.targets)
-            continue
-        if op.gate in ("mcx", "mcz"):
-            if len(op.targets) != 1 or not op.controls or op.params:
-                raise HTTPException(400, f"op {i} ({op.gate}): expects 1+ controls and 1 target")
-            t = op.targets[0]
-            if op.gate == "mcz":
-                qc.h(t)
-            qc.mcx(op.controls, t)
-            if op.gate == "mcz":
-                qc.h(t)
-            continue
-        nc, nt, np_ = ARITY[op.gate]
-        if (len(op.controls), len(op.targets), len(op.params)) != (nc, nt, np_):
-            raise HTTPException(400, f"op {i} ({op.gate}): expects {nc} control(s), {nt} target(s), {np_} param(s)")
-        getattr(qc, op.gate)(*op.params, *op.controls, *op.targets)
-    return qc
-
-
 def noise_model(n: Noise) -> NoiseModel:
     m = NoiseModel()
     if n.p1:
@@ -126,78 +79,12 @@ def noise_model(n: Noise) -> NoiseModel:
     return m
 
 
-def bloch_vectors(state: Statevector, n: int) -> tuple[list[list[float]], list[float]]:
-    """Per-qubit Bloch vector and purity from the reduced density matrix (purity < 1 => entangled)."""
-    vecs, purities = [], []
-    rho = DensityMatrix(state)
-    for q in range(n):
-        red = partial_trace(rho, [k for k in range(n) if k != q]) if n > 1 else rho
-        m = red.data
-        x = 2 * m[0, 1].real
-        y = 2 * m[1, 0].imag
-        z = (m[0, 0] - m[1, 1]).real
-        vecs.append([round(float(v), 6) for v in (x, y, z)])
-        purities.append(round(float(np.real(np.trace(m @ m))), 6))
-    return vecs, purities
-
-
-def unitary_part(qc: QuantumCircuit) -> QuantumCircuit:
-    """`initialize` contains a reset, which Statevector can't evolve; from |0…0> it's a pure state prep."""
-    return qc.decompose(gates_to_decompose=["initialize"]).decompose(gates_to_decompose=["state_preparation"]) if any(
-        i.operation.name == "initialize" for i in qc.data
-    ) else qc
-
-
-def statevector_of(qc: QuantumCircuit) -> Statevector:
-    clean = QuantumCircuit(qc.num_qubits)
-    for inst in unitary_part(qc).data:
-        if inst.operation.name not in ("reset", "barrier"):
-            clean.append(inst)
-    return Statevector.from_instruction(clean)
-
-
 def execute(req: RunRequest) -> dict:
-    t0 = time.perf_counter()
-    qc = build(req)
-    n = req.qubits
-
-    state = statevector_of(qc)
-    probs = state.probabilities_dict()
-    bloch, purity = bloch_vectors(state, n)
-
-    measured = qc.copy()
-    measured.measure_all()
     sim = AerSimulator(noise_model=noise_model(req.noise)) if req.noise else AerSimulator()
-    # No optimisation: cancelling gate pairs would also cancel the noise each gate is meant to add.
-    tqc = transpile(measured, sim, optimization_level=0)
-    result = sim.run(tqc, shots=req.shots, memory=req.memory, seed_simulator=req.seed).result()
-    counts = dict(sorted(result.get_counts().items()))
-
-    device = transpile(qc, basis_gates=["rz", "sx", "x", "cx"], optimization_level=1, seed_transpiler=7)
-
-    out = {
-        "counts": counts,
-        "shots": req.shots,
-        "probabilities": {k: round(v, 6) for k, v in sorted(probs.items()) if v > 1e-9},
-        "statevector": [[round(float(a.real), 6), round(float(a.imag), 6)] for a in state.data],
-        "bloch": bloch,
-        "purity": purity,
-        "entangled": any(p < 0.999 for p in purity),
-        "diagram": str(qc.draw("text", fold=-1)),
-        "qasm": qasm2.dumps(unitary_part(qc)) if n else "",
-        "depth": qc.depth(),
-        "gate_counts": dict(qc.count_ops()),
-        "transpiled": {"depth": device.depth(), "gate_counts": dict(device.count_ops()), "basis": ["rz", "sx", "x", "cx"]},
-        "backend": "aer_simulator" + (" (noisy)" if req.noise else ""),
-        "qiskit_version": __import__("qiskit").__version__,
-        "elapsed_ms": round((time.perf_counter() - t0) * 1000, 1),
-    }
-    if req.memory:
-        out["memory"] = result.get_memory()
-    if req.trace:
-        # One entry per op the learner placed (not per decomposed instruction), so the UI slider lines up.
-        out["trace"] = [bloch_vectors(statevector_of(build(Circuit(qubits=n, ops=req.ops[: k + 1]))), n)[0] for k in range(len(req.ops))]
-    return out
+    try:
+        return engine.run(sim, req.model_dump(), label="aer_simulator" + (" (noisy)" if req.noise else ""))
+    except ValueError as e:
+        raise HTTPException(400, str(e)) from e
 
 
 @app.get("/health")

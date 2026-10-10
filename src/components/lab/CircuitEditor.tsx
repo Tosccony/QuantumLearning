@@ -178,7 +178,7 @@ export default function CircuitEditor({ qubits, ops, onChange, readOnly, stepInd
       )}
 
       <div className="overflow-x-auto rounded-xl bg-[#070a24] ring-1 ring-white/10">
-        <svg width={W} height={H} role="img" aria-label={`Circuit with ${qubits} qubits and ${ops.length} gates`} className="block select-none">
+        <svg width={W} height={H} role={readOnly ? "img" : "group"} aria-label={readOnly ? `Circuit with ${qubits} qubits and ${ops.length} gates` : `Circuit editor: ${qubits} qubits, ${ops.length} gates`} className="qq-editor block select-none">
           {Array.from({ length: qubits }, (_, q) => (
             <g key={q}>
               <text x={10} y={y(q) + 5} className="fill-muted font-mono text-[13px]">q{q}</text>
@@ -200,6 +200,17 @@ export default function CircuitEditor({ qubits, ops, onChange, readOnly, stepInd
                   onMouseEnter={() => setHover({ q, col: c })}
                   onMouseLeave={() => setHover(null)}
                   onClick={() => clickCell(q, c)}
+                  {...(tool
+                    ? {
+                        tabIndex: 0,
+                        role: "button",
+                        "aria-label": `Place on q${q}, step ${c + 1}`,
+                        onKeyDown: (e: React.KeyboardEvent) => {
+                          if (e.key === "Enter" && tool === "mcz" && pending) return; // Enter commits a multi-controlled Z instead
+                          if (e.key === "Enter" || e.key === " ") { if (e.key === " ") e.preventDefault(); clickCell(q, c); }
+                        },
+                      }
+                    : {})}
                   onDragOver={(e) => { e.preventDefault(); setHover({ q, col: c }); }}
                   onDrop={(e) => { e.preventDefault(); const gname = e.dataTransfer.getData("gate") as GateName; if (gname) { setTool(gname); if ((GATES[gname]!.controls || 0) + GATES[gname]!.targets === 1) { setTool(gname); setTimeout(() => clickCellWith(gname, q, c)); } else setPending({ col: c, picked: [q] }); } }}
                   style={{ cursor: tool ? "copy" : "pointer" }}
@@ -223,6 +234,19 @@ export default function CircuitEditor({ qubits, ops, onChange, readOnly, stepInd
                 key={o.id}
                 opacity={faded ? 0.25 : 1}
                 onClick={(e) => { if (!readOnly && !tool) { e.stopPropagation(); setSelected(o.id); } }}
+                {...(readOnly
+                  ? {}
+                  : {
+                      tabIndex: 0,
+                      role: "button",
+                      "aria-label": `${gi?.name ?? o.gate} on ${[...cs.map((q) => `control q${q}`), ...o.targets.map((q) => `q${q}`)].join(", ")}`,
+                      onKeyDown: (e: React.KeyboardEvent) => {
+                        if (tool || (e.key !== "Enter" && e.key !== " ")) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSelected(o.id);
+                      },
+                    })}
                 style={{ cursor: readOnly ? "default" : "pointer", pointerEvents: tool ? "none" : "auto" }}
               >
                 {hi > lo && <line x1={cx} x2={cx} y1={y(lo)} y2={y(hi)} stroke={color} strokeWidth={2.5} />}
@@ -235,7 +259,7 @@ export default function CircuitEditor({ qubits, ops, onChange, readOnly, stepInd
                   </g>
                 ) : o.gate === "cz" || o.gate === "mcz" ? (
                   dot(o.targets[0], "t")
-                ) : o.gate === "swap" ? (
+                ) : o.gate === "swap" || o.gate === "cswap" ? (
                   o.targets.map((q) => (
                     <g key={q} stroke={color} strokeWidth={2.5}>
                       <line x1={cx - 8} x2={cx + 8} y1={y(q) - 8} y2={y(q) + 8} />

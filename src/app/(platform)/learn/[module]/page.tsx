@@ -6,6 +6,9 @@ import { useMemo, useState } from "react";
 import FlowSteps, { type FlowStep } from "@/components/FlowSteps";
 import Markdown from "@/components/Markdown";
 import CircuitEditor, { layout } from "@/components/lab/CircuitEditor";
+import IdealVsMachine from "@/components/lab/IdealVsMachine";
+import LessonReadout from "@/components/lab/LessonReadout";
+import Predict from "@/components/lab/Predict";
 import ResultsPanel from "@/components/lab/ResultsPanel";
 import Tutor from "@/components/lab/Tutor";
 import { moduleById, modulesOf, TRACKS } from "@/lib/curriculum";
@@ -21,6 +24,7 @@ export default function LessonPage() {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [picked, setPicked] = useState<number | null>(null);
+  const [guess, setGuess] = useState<number | null>(null);
   const [asked, setAsked] = useState(false);
   const [earned, setEarned] = useState(0);
   const ops = useMemo(() => (m ? layout(m.circuit) : []), [m]);
@@ -85,17 +89,22 @@ export default function LessonPage() {
           </section>
         ))}
 
+        {m.predict && <Predict p={m.predict} picked={guess} onPick={setGuess} revealed={!!result} />}
+
         <section className="panel flex flex-col gap-4 p-4" aria-label="Lesson circuit">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="mr-auto text-lg font-semibold">🧩 The circuit</h2>
             <Link href={`/lab?module=${m.id}`} className="pbtn-ghost">Open in Lab to modify →</Link>
-            <button className="pbtn-primary" onClick={run} disabled={running}>{running ? "Running on Qiskit…" : result ? "▶ Run again" : "▶ Run on Qiskit"}</button>
+            <button className="pbtn-primary" onClick={run} disabled={running || (!!m.predict && guess === null)}>{running ? "Running on Qiskit…" : m.predict && guess === null ? "Predict first ↑" : result ? "▶ Run again" : "▶ Run on Qiskit"}</button>
           </div>
+          <p role="status" className="sr-only">{running ? "Running…" : result ? "Results ready." : ""}</p>
           <CircuitEditor qubits={m.circuit.qubits} ops={ops} readOnly />
           {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
           {result && (
             <>
               <p className="rounded-xl bg-accent/15 p-3 text-sm"><b>What to look for:</b> {m.observe}</p>
+              <IdealVsMachine result={result} hint="Turn on noise in the Lab to see how a real device drifts." />
+              {m.readout && <LessonReadout readout={m.readout} result={result} />}
               <ResultsPanel result={result} circuit={m.circuit} />
             </>
           )}

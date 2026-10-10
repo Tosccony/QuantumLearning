@@ -1,0 +1,8 @@
+@import "../app/globals.css";
+
+/* Next's font loader defines these in the web app; on Qollab fall back to system fonts. */
+:root {
+  --font-inter: system-ui, sans-serif;
+  --font-jetbrains: ui-monospace, monospace;
+  --font-fredoka: ui-rounded, system-ui, sans-serif;
+}
