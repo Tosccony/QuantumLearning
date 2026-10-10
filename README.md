@@ -35,6 +35,18 @@ npm run dev             # web app on :3000 (proxies /api/qiskit/* to :8000)
 
 To enable the Claude tutor, set `ANTHROPIC_API_KEY` in the environment of `npm run dev` (it uses `claude-opus-5-5`). If the Qiskit service runs somewhere other than localhost, set `QISKIT_URL`.
 
+## Run it on Qollab
+
+All 18 Student, Developer and Researcher lessons also run on qollab.xyz, on Qollab's free simulators (the built-in ideal simulator, IBM device noise models, and IonQ's Aria and Forte simulators).
+
+1. Open the project on Qollab and go to the **Code** tab.
+2. Press **Run Project**, then **Run**, and pick a simulator in **Select QPU**.
+3. Pick a lesson, edit its circuit if you like, and press **▶ Run**.
+
+IonQ simulators accept one job per Run. For another job, press **Stop** and **Run** again, or pick a local simulator.
+
+To rebuild the upload: `npm run qollab:build` writes `dist/qollab.zip`. Use `RELEASE=1` for the version you publish.
+
 ## Architecture
 
 ```
