@@ -21,7 +21,7 @@ export default function NavBar() {
   const [name, setName] = useState("");
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-space/80 backdrop-blur">
+    <header className="print:hidden sticky top-0 z-40 border-b border-white/10 bg-space/80 backdrop-blur">
       <nav className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3">
         <Link href="/" className="flex items-center gap-2 font-bold">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-lg" aria-hidden>⚛</span>

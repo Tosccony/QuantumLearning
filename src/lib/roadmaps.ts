@@ -31,3 +31,37 @@ export function topicStatus(state: State, topic: RoadmapTopic): SkillStatus {
   const lesson = moduleById(topic.id)!;
   return moduleStatus(state, lesson);
 }
+
+/** The first lesson the learner can start on the way to `id`: `id` itself if it's available, otherwise the first startable lesson among its unfinished prerequisites (depth-first, in `requires` order). Null if `id` is already done or nothing on its path is startable. */
+export function firstStartable(state: State, id: string, seen = new Set<string>()): string | null {
+  const lesson = moduleById(id);
+  if (!lesson || seen.has(id) || state.modules[id]) return null;
+  seen.add(id);
+  if (moduleStatus(state, lesson) === "available") return id;
+  for (const r of lesson.requires) {
+    const found = firstStartable(state, r, seen);
+    if (found) return found;
+  }
+  return null;
+}
+
+export const ROADMAP_STORAGE_KEY = "quantum-quest-roadmaps-v1";
+export type Personal = Record<string, { bookmarked?: boolean; note?: string; started?: boolean; reviewed?: string[] }>;
+
+const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+
+/** Keeps only well-typed fields of stored notes; anything malformed is dropped. */
+export function sanitizePersonal(raw: unknown): Personal {
+  const out: Personal = {};
+  if (!isObject(raw)) return out;
+  for (const [id, v] of Object.entries(raw)) {
+    if (!isObject(v)) continue;
+    const e: Personal[string] = {};
+    if (typeof v.bookmarked === "boolean") e.bookmarked = v.bookmarked;
+    if (typeof v.started === "boolean") e.started = v.started;
+    if (typeof v.note === "string") e.note = v.note;
+    if (Array.isArray(v.reviewed)) e.reviewed = v.reviewed.filter((x): x is string => typeof x === "string");
+    out[id] = e;
+  }
+  return out;
+}

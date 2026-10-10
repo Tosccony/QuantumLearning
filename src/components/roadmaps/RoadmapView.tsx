@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { moduleById, type Track } from "@/lib/curriculum";
-import { roadmapTopics, topicStatus } from "@/lib/roadmaps";
-import { nextModule } from "@/lib/skills";
+import { firstStartable, ROADMAP_STORAGE_KEY, roadmapTopics, sanitizePersonal, topicStatus, type Personal } from "@/lib/roadmaps";
 import { useProgress } from "@/lib/progress";
 
 const labels = { done: "Completed", available: "Ready to learn", locked: "Prerequisites remaining" };
-type Personal = Record<string, { bookmarked?: boolean; note?: string; started?: boolean; reviewed?: string[] }>;
-const KEY = "quantum-quest-roadmaps-v1";
+
+function readStore(strict = false): Personal {
+  try { return sanitizePersonal(JSON.parse(localStorage.getItem(ROADMAP_STORAGE_KEY) || "{}")); } catch (e) { if (strict && !(e instanceof SyntaxError)) throw e; return {}; }
+}
 
 export default function RoadmapView({ track }: { track: Track }) {
   const topics = roadmapTopics(track.id);
@@ -23,26 +24,33 @@ export default function RoadmapView({ track }: { track: Track }) {
   const [zoom, setZoom] = useState(1);
   const [view, setView] = useState<"map" | "list">("map");
   useEffect(() => {
-    try { const value = JSON.parse(localStorage.getItem(KEY) || "{}"); if (value && typeof value === "object" && !Array.isArray(value)) setPersonal(value); } catch {}
+    setPersonal(readStore());
     const id = new URLSearchParams(window.location.search).get("topic");
     if (id && roadmapTopics(track.id).some(t => t.id === id)) setSelected(id);
     setLoaded(true);
   }, [track.id]);
-  function save(id: string, change: Partial<Personal[string]>) {
-    setPersonal(previous => ({ ...previous, [id]: { ...previous[id], ...change } }));
-  }
   useEffect(() => {
-    if (!loaded) return;
-    try { localStorage.setItem(KEY, JSON.stringify(personal)); } catch { setMessage("Device storage is unavailable. Changes will last for this visit only."); }
-  }, [personal, loaded]);
+    const onStorage = (e: StorageEvent) => { if (e.key === ROADMAP_STORAGE_KEY || e.key === null) setPersonal(readStore()); };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+  // Read-modify-write of only this topic, so two open tabs don't overwrite each other.
+  function save(id: string, change: (current: Personal[string]) => Partial<Personal[string]>) {
+    const apply = (all: Personal): Personal => ({ ...all, [id]: { ...all[id], ...change(all[id] ?? {}) } });
+    try {
+      const next = apply(readStore(true));
+      localStorage.setItem(ROADMAP_STORAGE_KEY, JSON.stringify(next));
+      setPersonal(next);
+    } catch { setMessage("Device storage is unavailable. Changes will last for this visit only."); setPersonal(apply); }
+  }
   const topic = topics.find(n => n.id === selected)!;
   const status = topicStatus(state, topic);
   const done = topics.filter(n => topicStatus(state, n) === "done").length;
   const next = topics.find(n => topicStatus(state, n) === "available");
-  // A missing prerequisite may itself be locked, so point at the next lesson that can actually be started in that prerequisite's own track.
+  // A missing prerequisite may itself be locked, so point at the first lesson that can actually be started on the way to it.
   const blocked = topics.flatMap(n => n.requires).find(id => moduleById(id) && !state.modules[id]);
-  const startable = blocked ? nextModule(state, moduleById(blocked)!.track) : undefined;
-  const continueHref = next?.lesson ?? (done === topics.length ? `/certificate/${track.id}` : startable ? `/learn/${startable.id}` : topic.lesson);
+  const startable = blocked ? firstStartable(state, blocked) : null;
+  const continueHref = next?.lesson ?? (done === topics.length ? `/certificate/${track.id}` : startable ? `/learn/${startable}` : topic.lesson);
   const continueLabel = next ? "Continue learning →" : done === topics.length ? "View certificate →" : "Start prerequisites →";
   const filtered = topics.filter(n => `${n.title} ${n.summary}`.toLowerCase().includes(query.toLowerCase().trim()) && (!onlySaved || personal[n.id]?.bookmarked));
   async function share() {
@@ -71,14 +79,14 @@ export default function RoadmapView({ track }: { track: Track }) {
         <div className="mt-8 border-t border-white/10 pt-5"><h2 className="font-semibold">Your destination</h2><p className="mt-2 text-sm text-muted">{track.certificate} · Earned by completing the platform’s {track.id === "explorer" ? "planet games" : "lessons"}.</p><Link className="mt-3 inline-block text-sm underline" href="/progress">View progress and certificates →</Link></div>
       </section>
       <section id="topic-details" className="panel p-6 lg:sticky lg:top-24" aria-label="Selected topic details">
-        <div className="flex items-start gap-3"><div className="flex-1"><p className="text-xs font-semibold uppercase tracking-widest" style={{ color: track.color }}>{track.name} · {labels[status]}</p><h2 className="mt-2 text-2xl font-bold">{topic.title}</h2></div><button aria-label="Bookmark this topic" aria-pressed={!!personal[topic.id]?.bookmarked} className="pbtn-ghost print:hidden" onClick={() => save(topic.id, { bookmarked: !personal[topic.id]?.bookmarked })}>{personal[topic.id]?.bookmarked ? "★" : "☆"}</button></div>
+        <div className="flex items-start gap-3"><div className="flex-1"><p className="text-xs font-semibold uppercase tracking-widest" style={{ color: track.color }}>{track.name} · {labels[status]}</p><h2 className="mt-2 text-2xl font-bold">{topic.title}</h2></div><button aria-label="Bookmark this topic" aria-pressed={!!personal[topic.id]?.bookmarked} className="pbtn-ghost print:hidden" onClick={() => save(topic.id, c => ({ bookmarked: !c.bookmarked }))}>{personal[topic.id]?.bookmarked ? "★" : "☆"}</button></div>
         <p className="mt-4 leading-relaxed text-muted">{topic.summary}</p>
         <div className="mt-4"><h3 className="text-sm font-semibold">Prerequisites</h3><div className="mt-2 flex flex-wrap gap-2">{topic.requires.length ? topic.requires.map(id => { const local = topics.find(n => n.id === id); const prerequisite = moduleById(id); return local ? <button key={id} onClick={() => setSelected(id)} className="chip underline">{local.title} {topicStatus(state, local) === "done" ? "✓" : ""}</button> : <Link key={id} href={`/roadmaps/${prerequisite?.track ?? "student"}?topic=${id}`} className="chip underline">{prerequisite?.skill ?? id} {state.modules[id] ? "✓" : ""}</Link>; }) : <span className="text-sm text-muted">Start here — no prior topics required.</span>}</div></div>
-        <div className="mt-5 flex flex-wrap gap-2"><Link href={topic.lesson} className="pbtn-primary" onClick={() => save(topic.id, { started: true })}>{status === "done" ? "Revisit lesson" : "Start lesson"} →</Link>{topic.lab && <Link href={topic.lab} className="pbtn-ghost">Open in Quantum Lab</Link>}</div>
+        <div className="mt-5 flex flex-wrap gap-2"><Link href={topic.lesson} className="pbtn-primary" onClick={() => save(topic.id, () => ({ started: true }))}>{status === "done" ? "Revisit lesson" : "Start lesson"} →</Link>{topic.lab && <Link href={topic.lab} className="pbtn-ghost">Open in Quantum Lab</Link>}</div>
         <h3 className="mt-7 font-semibold">Watch & read</h3><p className="mt-1 text-xs text-muted">Free learning resources. Overview videos and full courses may cover several topics; Explorer reading is for guided learning with a grown-up.</p>
-        <ul className="mt-3 space-y-3">{topic.resources.map(r => <li key={r.url} className="rounded-xl bg-space/60 p-3"><a href={r.url} target="_blank" rel="noopener noreferrer" className="block font-medium underline decoration-white/20 underline-offset-4 hover:decoration-on">{r.kind === "Video" ? "▶" : "↗"} {r.title}<span className="sr-only"> (opens in a new tab)</span></a><p className="mt-1 text-xs text-muted">{r.provider} · {r.kind} · {r.level}</p><label className="mt-2 flex items-center gap-2 text-xs print:hidden"><input type="checkbox" checked={!!personal[topic.id]?.reviewed?.includes(r.url)} onChange={e => save(topic.id, { reviewed: e.target.checked ? [...(personal[topic.id]?.reviewed ?? []), r.url] : personal[topic.id]?.reviewed?.filter(url => url !== r.url) })} />I reviewed this resource<span className="sr-only">: {r.title}</span></label></li>)}</ul>
+        <ul className="mt-3 space-y-3">{topic.resources.map(r => <li key={r.url} className="rounded-xl bg-space/60 p-3"><a href={r.url} target="_blank" rel="noopener noreferrer" className="block font-medium underline decoration-white/20 underline-offset-4 hover:decoration-on">{r.kind === "Video" ? "▶" : "↗"} {r.title}<span className="sr-only"> (opens in a new tab)</span></a><p className="mt-1 text-xs text-muted">{r.provider} · {r.kind} · {r.level}</p><label className="mt-2 flex items-center gap-2 text-xs print:hidden"><input type="checkbox" checked={!!personal[topic.id]?.reviewed?.includes(r.url)} onChange={e => save(topic.id, c => ({ reviewed: e.target.checked ? [...(c.reviewed ?? []).filter(url => url !== r.url), r.url] : c.reviewed?.filter(url => url !== r.url) }))} />I reviewed this resource<span className="sr-only">: {r.title}</span></label></li>)}</ul>
         <div className="mt-6 rounded-xl border border-white/15 p-4"><h3 className="font-semibold">Try a challenge</h3><p className="mt-2 text-sm text-muted">{topic.challenge}</p>{topic.lab && <Link href="/community" className="mt-3 inline-block text-sm underline">Explore shared circuits →</Link>}</div>
-        <label className="mt-6 block print:hidden"><span className="font-semibold">Personal notes</span><textarea value={personal[topic.id]?.note ?? ""} onChange={e => save(topic.id, { note: e.target.value.slice(0, 4000) })} rows={4} maxLength={4000} placeholder="What did you discover? What do you want to try next?" className="mt-2 w-full rounded-xl border border-white/20 bg-space p-3 text-sm" /></label>
+        <label className="mt-6 block print:hidden"><span className="font-semibold">Personal notes</span><textarea value={personal[topic.id]?.note ?? ""} onChange={e => save(topic.id, () => ({ note: e.target.value.slice(0, 4000) }))} rows={4} maxLength={4000} placeholder="What did you discover? What do you want to try next?" className="mt-2 w-full rounded-xl border border-white/20 bg-space p-3 text-sm" /></label>
         <p className="mt-4 text-xs text-muted">Reviewing resources does not complete lessons or award XP. Finish the linked lesson or game to update your roadmap and certificate progress.</p>
       </section>
     </div>

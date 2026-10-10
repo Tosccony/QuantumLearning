@@ -2,11 +2,12 @@
 
 @media print {
   body { background: white !important; color: black !important; }
-  body > header, .stars, nav { display: none !important; }
+  .stars { display: none !important; }
   .roadmap-print { --ink: #111; --muted: #333; --space: #fff; --panel: #fff; --good: #166534; }
   .roadmap-print section { position: static !important; overflow: visible !important; box-shadow: none !important; border: 1px solid #ccc; }
   .roadmap-print .roadmap-nodes { zoom: 1 !important; }
   .roadmap-print button { color: black !important; }
+  .roadmap-print .pbtn-primary { color: #000 !important; background: none !important; border: 1px solid #000 !important; }
 }
 
 /* Default palette. "on"/"off" and "a"/"b" are the two states kids compare in every game. */

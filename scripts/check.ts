@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { MODULES } from "@/lib/curriculum";
-import { roadmapTopics, topicStatus } from "@/lib/roadmaps";
+import { firstStartable, roadmapTopics, sanitizePersonal, topicStatus } from "@/lib/roadmaps";
 import type { State } from "@/lib/progress";
 import { bellScore, noiseVisible, onesRate, pairCorrelation, registerCounts, shorFactors, shotNoiseTvd, tvd } from "@/lib/explain";
 import { QuantumServiceError } from "@/lib/quantum";
@@ -74,5 +74,18 @@ for (const topic of concepts) {
   const completedProgress = { ...prerequisiteProgress, modules: { ...prerequisiteProgress.modules, [topic.id]: { completedAt: "2026-10-10", correct: true } } };
   assert.equal(topicStatus(completedProgress, topic), "done");
 }
+
+// "Start prerequisites" lands on the first lesson actually startable on the way to the blocker.
+assert.equal(firstStartable(emptyProgress, "r4"), "r1");
+assert.equal(firstStartable(emptyProgress, "s3"), "s1");
+const doneThrough = (ids: string[]) => ({ ...emptyProgress, modules: Object.fromEntries(ids.map(id => [id, { completedAt: "2026-10-10", correct: true }])) }) as State;
+assert.equal(firstStartable(doneThrough(["s1", "s2", "s3"]), "s3"), null);
+assert.equal(firstStartable(doneThrough(["s1", "s2", "s3"]), "s4"), "s4");
+
+// Malformed stored notes are dropped, never thrown.
+assert.deepEqual(sanitizePersonal({ s1: { reviewed: 5, note: 3, bookmarked: true } }), { s1: { bookmarked: true } });
+assert.deepEqual(sanitizePersonal([1]), {});
+assert.deepEqual(sanitizePersonal(null), {});
+assert.deepEqual(sanitizePersonal({ s1: { reviewed: ["a", 2] } }), { s1: { reviewed: ["a"] } });
 
 console.log("js: all checks passed");
