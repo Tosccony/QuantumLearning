@@ -33,6 +33,7 @@ SPECIAL = {"barrier", "initialize", "mcx", "mcz"}
 GENERIC_BASIS = ["rz", "sx", "x", "cx", "measure"]
 
 # IonQ backends take one job per Run, and Qollab creates a fresh backend object for each Run.
+# The backend is reserved here before submitting, so two concurrent calls in one Run can't both submit.
 # Holds strong references so a dead backend's id() can't be reused by a fresh one after GC.
 _ionq_used: list[object] = []
 
@@ -145,9 +146,9 @@ def run(backend, req: dict, label: str | None = None) -> dict:
         opts["memory"] = True
     if req.get("seed") is not None:
         opts["seed_simulator"] = req["seed"]
-    result = backend.run(_compile(measured, backend), **opts).result()
     if ionq:
         _ionq_used.append(backend)
+    result = backend.run(_compile(measured, backend), **opts).result()
     counts = dict(sorted(result.get_counts().items()))
 
     device = transpile(qc, basis_gates=["rz", "sx", "x", "cx"], optimization_level=1, seed_transpiler=7)
