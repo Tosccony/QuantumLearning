@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { MODULES } from "@/lib/curriculum";
-import { bellScore, onesRate, pairCorrelation, shotNoiseTvd, tvd } from "@/lib/explain";
+import { bellScore, onesRate, pairCorrelation, registerCounts, shorFactors, shotNoiseTvd, tvd } from "@/lib/explain";
 import { QuantumServiceError } from "@/lib/quantum";
 import { pythonErrorMessage, qollabTransport } from "@/qollab/bridge";
 
@@ -22,7 +22,7 @@ const bad = qollabTransport(
 await assert.rejects(bad({}), (e) => e instanceof QuantumServiceError && e.message === "op 0 (cx): invalid or repeated qubit indices");
 
 const predicted = MODULES.filter((m) => m.predict);
-assert.deepEqual(predicted.map((m) => m.id), ["s2", "s4", "s5", "s7", "s8", "d4", "r3"]);
+assert.deepEqual(predicted.map((m) => m.id), ["s2", "s4", "s5", "s7", "s8", "d4", "r3", "r7"]);
 for (const m of predicted) {
   const p = m.predict!;
   assert.equal(p.options.length, p.feedback.length, `${m.id}: one feedback line per option`);
@@ -41,6 +41,13 @@ assert.equal(onesRate({ "10": 30, "01": 70 }, 1), 0.3);
 assert.ok(Math.abs(pairCorrelation({ "00": 85, "01": 15 }, 0, 1) - 0.7) < 1e-12);
 assert.equal(bellScore({ "00000000": 100 }).S, 2); // everyone agrees: exactly the classical limit
 assert.equal(bellScore({ "10000000": 100 }).S, 4); // pair D always disagrees: the formula's maximum
+
+assert.deepEqual(registerCounts({ "00010100": 3, "11110100": 2 }, [0, 1, 2, 3]), { 4: 5 });
+assert.deepEqual(shorFactors(4, 4, 7, 15).factors, [3, 5]);
+assert.deepEqual(shorFactors(12, 4, 7, 15).factors, [3, 5]);
+assert.equal(shorFactors(8, 4, 7, 15).r, 2); // phase 1/2 suggests r = 2, but 7² mod 15 = 4, so it fails the check
+assert.equal(shorFactors(8, 4, 7, 15).factors, null);
+assert.equal(shorFactors(0, 4, 7, 15).r, null);
 
 // Every lesson circuit, for backend/check_lessons.py to run through the real engine.
 mkdirSync("dist", { recursive: true });

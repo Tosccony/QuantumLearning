@@ -68,6 +68,44 @@ export function bellScore(counts: Record<string, number>): { E: number[]; S: num
   return { E, S: E[0] + E[1] + E[2] - E[3] };
 }
 
+/** How often each integer appeared in a register of `qubits` (qubits[0] is the register's lowest bit). */
+export function registerCounts(counts: Record<string, number>, qubits: number[]): Record<number, number> {
+  const out: Record<number, number> = {};
+  for (const [k, v] of Object.entries(counts)) {
+    const y = qubits.reduce((acc, q, i) => acc + (k[k.length - 1 - q] === "1" ? 1 << i : 0), 0);
+    out[y] = (out[y] ?? 0) + v;
+  }
+  return out;
+}
+
+const gcd = (x: number, y: number): number => (y ? gcd(y, x % y) : Math.abs(x));
+const modPow = (a: number, e: number, n: number) => {
+  let x = 1;
+  for (let i = 0; i < e; i++) x = (x * a) % n;
+  return x;
+};
+
+/** Shor's classical step for one measured value y of a `bits`-qubit counting register: phase → period r → factors. */
+export function shorFactors(y: number, bits: number, a: number, N: number): { r: number | null; factors: [number, number] | null; note: string } {
+  if (y === 0) return { r: null, factors: null, note: "Phase 0 says nothing about the period. Run again." };
+  const phase = y / 2 ** bits;
+  let r = 1;
+  let best = Infinity;
+  for (let d = 1; d < N; d++) {
+    const err = Math.abs(phase - Math.round(phase * d) / d);
+    if (err < best - 1e-12) {
+      best = err;
+      r = d;
+    }
+  }
+  const ar = modPow(a, r, N);
+  if (ar !== 1) return { r, factors: null, note: `${a}^${r} mod ${N} = ${ar}, not 1, so ${r} isn't the period. Run again.` };
+  if (r % 2) return { r, factors: null, note: `r = ${r} is odd, so the gcd trick doesn't apply. Try another a.` };
+  const f = gcd(modPow(a, r / 2, N) - 1, N);
+  if (f === 1 || f === N) return { r, factors: null, note: `${a}^${r / 2} ≡ −1 mod ${N}, which gives only trivial factors. Try another a.` };
+  return { r, factors: [f, N / f], note: `${N} = ${f} × ${N / f}` };
+}
+
 /**
  * Deterministic explanation built from the real Qiskit results. Used when no Claude API
  * credentials are configured, so the "Understand" step always works.

@@ -235,7 +235,7 @@ export default function CircuitEditor({ qubits, ops, onChange, readOnly, stepInd
                   </g>
                 ) : o.gate === "cz" || o.gate === "mcz" ? (
                   dot(o.targets[0], "t")
-                ) : o.gate === "swap" ? (
+                ) : o.gate === "swap" || o.gate === "cswap" ? (
                   o.targets.map((q) => (
                     <g key={q} stroke={color} strokeWidth={2.5}>
                       <line x1={cx - 8} x2={cx + 8} y1={y(q) - 8} y2={y(q) + 8} />

@@ -25,7 +25,7 @@ export type Check = { q: string; options: string[]; answer: number; why: string 
 export type Predict = { q: string; options: string[]; answer: number; feedback: string[] };
 
 /** Lesson-specific arithmetic shown under the results (see LessonReadout). */
-export type Readout = { kind: "bell" };
+export type Readout = { kind: "bell" } | { kind: "shor"; a: number; N: number; counting: number[] };
 
 export type Module = {
   id: string;
@@ -447,6 +447,51 @@ export const MODULES: Module[] = [
     observe: "Ideal: 0000/1111 only. With noise, compute the fidelity and compare it with 3 qubits.",
     tryIt: ["Fit fidelity against qubit count (2 → 6) at fixed noise.", "Rewrite the GHZ preparation as a log-depth tree. Does fidelity improve?"],
     check: { q: "Quantum volume primarily measures…", options: ["The largest square random circuit run reliably", "Qubit count", "T₁ time", "Gate speed"], answer: 0, why: "QV combines width, depth, connectivity and error into a single 'largest reliable square circuit'." },
+  },
+  {
+    id: "r7", track: "researcher", title: "Shor's algorithm: factoring 15", minutes: 18, skill: "Shor's algorithm", requires: ["r4"],
+    summary: "Factoring reduces to finding the period of aˣ mod N. Phase estimation finds that period, and a little classical number theory turns it into factors: 15 = 3 × 5.",
+    sections: [
+      { heading: "From factoring to a period", body: "To factor N, pick a number a that shares no factor with N and look at the sequence aˣ mod N. For N = 15 and a = 7:\n\n```\n7⁰ = 1, 7¹ = 7, 7² = 49 ≡ 4, 7³ ≡ 13, 7⁴ ≡ 1, …\n```\n\nIt repeats with **period r = 4**. When r is even, gcd(a^(r/2) − 1, N) and gcd(a^(r/2) + 1, N) are usually factors of N: gcd(48, 15) = 3 and gcd(50, 15) = 5. Finding r is the hard part for big N, and it's the only part the quantum computer does." },
+      { heading: "Phase estimation finds the period", body: "Let U multiply a 4-qubit register by 7 mod 15. With the work register starting at |1⟩, phase estimation with U, U², U⁴ and U⁸ writes y/16 ≈ s/r into the counting register, for a random s. Here r = 4, so the counting register reads y = 0, 4, 8 or 12 (phases 0, ¼, ½, ¾), each about a quarter of the time. This is the QFT and phase estimation from earlier lessons, applied to modular multiplication." },
+      { heading: "This circuit, and its shortcut", body: "Counting qubits are q0–q3; the work register is q4–q7, with q4 as its lowest bit, starting at |1⟩. Multiplying by 7 mod 15 takes three controlled `SWAP`s and four controlled `X`s. Multiplying by 4 (that's U²) takes two controlled `SWAP`s. Because 7⁴ ≡ 1, U⁴ and U⁸ do nothing, so they're left out.\n\nThat's a shortcut: we used the answer to build the circuit. Factoring a large number needs general modular-multiplication circuits that don't know r in advance, which is why breaking a 2048-bit RSA key needs a large, fault-tolerant quantum computer. The inverse QFT at the end turns the phase into a readable number." },
+      { heading: "From measurement to factors", body: "Each run gives one y. Turn y/16 into the nearest fraction s/r with r < 15, check that 7ʳ ≡ 1 mod 15, and if r is even compute the gcds. y = 4 or 12 gives r = 4 and the factors 3 and 5. y = 8 suggests r = 2, which fails the check, and y = 0 says nothing. Either way you run again: Shor's algorithm succeeds with good probability on each run, not every time. The panel under the results does this arithmetic for the values you measured." },
+    ],
+    circuit: {
+      qubits: 8,
+      ops: [
+        g("x", [4]), g("h", [0]), g("h", [1]), g("h", [2]), g("h", [3]),
+        // U = ×7 mod 15, controlled by q0
+        g("cswap", [4, 5], [0]), g("cswap", [5, 6], [0]), g("cswap", [6, 7], [0]),
+        g("cx", [4], [0]), g("cx", [5], [0]), g("cx", [6], [0]), g("cx", [7], [0]),
+        // U² = ×4 mod 15, controlled by q1. U⁴ = U⁸ = ×1, so q2 and q3 control nothing.
+        g("cswap", [5, 7], [1]), g("cswap", [4, 6], [1]),
+        // inverse QFT on q0–q3
+        g("swap", [0, 3]), g("swap", [1, 2]),
+        g("h", [0]),
+        g("cp", [1], [0], [-PI / 2]), g("h", [1]),
+        g("cp", [2], [0], [-PI / 4]), g("cp", [2], [1], [-PI / 2]), g("h", [2]),
+        g("cp", [3], [0], [-PI / 8]), g("cp", [3], [1], [-PI / 4]), g("cp", [3], [2], [-PI / 2]), g("h", [3]),
+      ],
+    },
+    observe: "Look at the right-most four bits of each outcome (the counting register, q3…q0): only 0000, 0100, 1000 and 1100 appear, each about a quarter of the time. That's y = 0, 4, 8 and 12. The panel below turns y = 4 and y = 12 into 15 = 3 × 5.",
+    tryIt: [
+      "Open the Qiskit tab and look at the transpiled CX count. That's what this tiny 15 = 3 × 5 needs. What does it suggest about a 2048-bit number?",
+      "Run it with noise (the Lab's noise sliders, or an IBM or IonQ machine on Qollab). Do 0, 4, 8 and 12 still stand out, and does the panel still find 3 × 5?",
+    ],
+    check: { q: "Which part of Shor's algorithm needs the quantum computer?", options: ["Finding the period r of aˣ mod N", "Computing the gcds that give the factors", "Choosing the number a", "Checking that the factors multiply to N"], answer: 0, why: "Everything except period finding is fast on an ordinary computer. Phase estimation finds the period far faster than any known classical method, and that's the whole speed-up." },
+    predict: {
+      q: "The period of 7ˣ mod 15 is 4. What will the 4-bit counting register read?",
+      options: ["Always 4 (0100)", "0, 4, 8 or 12, each about a quarter of the time", "Every value from 0 to 15 equally often", "The factors 3 and 5"],
+      answer: 1,
+      feedback: [
+        "The register holds y/16 ≈ s/r for a random s, not r itself. With r = 4, s can be 0, 1, 2 or 3, giving y = 0, 4, 8 or 12.",
+        "Right. y/16 lands on s/4 for s = 0, 1, 2 or 3. Two of those (y = 4 and 12) reveal r = 4 directly, and the classical step then finds 3 × 5.",
+        "Interference cancels every phase that isn't a multiple of 1/4. That's the inverse QFT's job, and only four values survive.",
+        "The quantum part only finds the period. The factors come afterwards, from an ordinary gcd calculation.",
+      ],
+    },
+    readout: { kind: "shor", a: 7, N: 15, counting: [0, 1, 2, 3] },
   },
 ];
 

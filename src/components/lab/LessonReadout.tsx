@@ -1,5 +1,5 @@
 import type { Readout } from "@/lib/curriculum";
-import { bellScore } from "@/lib/explain";
+import { bellScore, registerCounts, shorFactors } from "@/lib/explain";
 import type { RunResult } from "@/lib/quantum";
 
 const PAIRS = ["A (q0, q1)", "B (q2, q3)", "C (q4, q5)", "D (q6, q7)"];
@@ -24,5 +24,23 @@ export default function LessonReadout({ readout, result }: { readout: Readout; r
       </section>
     );
   }
-  return null;
+  const reg = registerCounts(result.counts, readout.counting);
+  const bits = readout.counting.length;
+  const top = Object.entries(reg).sort((x, y) => y[1] - x[1]).slice(0, 4);
+  return (
+    <section className="rounded-xl bg-white/5 p-3 text-sm" aria-label="Shor's classical step">
+      <p className="font-semibold">🧮 From measurements to factors (a = {readout.a}, N = {readout.N})</p>
+      <ul role="status" className="mt-1 flex flex-col gap-1">
+        {top.map(([ys, n]) => {
+          const f = shorFactors(Number(ys), bits, readout.a, readout.N);
+          return (
+            <li key={ys}>
+              y = {ys} ({Math.round((100 * n) / result.shots)}% of shots) → phase {ys}/{2 ** bits}
+              {f.r ? `, r = ${f.r}` : ""}: <b>{f.note}</b>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
 }

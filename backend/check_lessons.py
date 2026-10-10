@@ -35,6 +35,15 @@ def main(path):
     S = E[0] + E[1] + E[2] - E[3]
     assert 2.7 < S < 2.95, (E, S)
 
+    # Shor, N = 15, a = 7: the counting register (q0..q3) reads only y = 0, 4, 8, 12, each about a quarter of the time.
+    c = counts["r7"]
+    reg = {}
+    for k, v in c.items():
+        y = sum(1 << q for q in range(4) if k[-1 - q] == "1")
+        reg[y] = reg.get(y, 0) + v
+    assert set(reg) == {0, 4, 8, 12}, reg
+    assert all(0.2 < v / 4000 < 0.3 for v in reg.values()), reg
+
     print(f"lessons: {len(counts)} circuits ran; physics checks passed")
 
 
