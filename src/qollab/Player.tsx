@@ -86,6 +86,7 @@ function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLa
       const sent = circuit;
       const r = await runCircuit(sent, { shots: 1024 });
       if (current.current === sent) setResult(r);
+      else setError("The circuit changed while it was running, so that result was dropped. Run again to see the new circuit's result.");
     } catch (e) {
       setResult(null);
       setError((e as Error).message);
@@ -97,6 +98,7 @@ function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLa
   return (
     <article className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-5">
+        <p role="status" className="sr-only">{running ? "Running…" : result ? "Results ready." : ""}</p>
         <header>
           <h2 className="text-2xl font-bold">{m.title}</h2>
           <p className="text-muted">{m.summary}</p>

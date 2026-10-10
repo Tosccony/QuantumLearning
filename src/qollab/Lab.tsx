@@ -21,6 +21,7 @@ export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [startFrom, setStartFrom] = useState("blank");
 
   // Any edit makes the last result stale, so drop it rather than show numbers for a different circuit.
   const edit = (next: EOp[]) => {
@@ -44,6 +45,7 @@ export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean
       const sent = circuit;
       const r = await runCircuit(sent, { shots: 1024 });
       if (current.current === sent) setResult(r);
+      else setError("The circuit changed while it was running, so that result was dropped. Run again to see the new circuit's result.");
     } catch (e) {
       setResult(null);
       setError((e as Error).message);
@@ -55,10 +57,11 @@ export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean
   return (
     <article className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-5">
+        <p role="status" className="sr-only">{running ? "Running…" : result ? "Results ready." : ""}</p>
         <header>
           <h2 className="text-2xl font-bold">🧪 Lab: build your own circuit</h2>
           <p className="text-muted">
-            Pick a gate from the palette and place it on the wires, then run on the simulator you chose in Select QPU. Run the same circuit on the built-in simulator and on an IBM or IonQ machine to see what real-world noise does to it.
+            Pick a gate from the palette and place it on the wires, then run on the simulator you chose in Select QPU. To compare machines, press Stop, then Run, and pick another simulator. Qollab starts fresh on every Run, so start again from the same lesson's circuit or rebuild yours.
           </p>
         </header>
         <section className="panel flex flex-col gap-3 p-4" aria-label="Circuit builder">
@@ -72,18 +75,15 @@ export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean
               Start from
               <select
                 className="rounded-lg bg-white/10 px-2 py-1"
-                value=""
+                value={startFrom}
                 disabled={running}
-                onChange={(e) => {
-                  const m = MODULES.find((x) => x.id === e.target.value);
-                  load(m ? m.circuit : { qubits, ops: [] });
-                }}
+                onChange={(e) => setStartFrom(e.target.value)}
               >
-                <option value="" disabled>Choose…</option>
                 <option value="blank">Blank circuit</option>
                 {MODULES.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
               </select>
             </label>
+            <button className="pbtn-ghost" disabled={running} onClick={() => { const m = MODULES.find((x) => x.id === startFrom); load(m ? m.circuit : { qubits, ops: [] }); }}>Load</button>
             <button className="pbtn-primary ml-auto" onClick={run} disabled={running}>{running ? "Running…" : "▶ Run"}</button>
           </div>
           {isIonQ && <p className="text-xs text-muted">IonQ simulators take one job per Run. To run again, press Stop and Run, or pick a local simulator.</p>}

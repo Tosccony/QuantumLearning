@@ -25,12 +25,14 @@ export default function Predict({ p, picked, onPick, revealed }: { p: PredictDat
           Skip, just show me
         </button>
       )}
-      {revealed && picked !== null && (
-        <p role="status" className={picked === p.answer ? "text-good" : "text-on"}>
-          {picked === SKIPPED ? `The answer: “${p.options[p.answer]}”. ` : picked === p.answer ? "You called it. " : "Surprised? "}
-          {p.feedback[picked === SKIPPED ? p.answer : picked]}
-        </p>
-      )}
+      <p role="status" className={picked === p.answer ? "text-good" : "text-on"}>
+        {revealed && picked !== null && (
+          <>
+            {picked === SKIPPED ? `The answer: “${p.options[p.answer]}”. ` : picked === p.answer ? "You called it. " : "Surprised? "}
+            {p.feedback[picked === SKIPPED ? p.answer : picked]}
+          </>
+        )}
+      </p>
     </section>
   );
 }

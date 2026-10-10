@@ -97,6 +97,7 @@ export default function LessonPage() {
             <Link href={`/lab?module=${m.id}`} className="pbtn-ghost">Open in Lab to modify →</Link>
             <button className="pbtn-primary" onClick={run} disabled={running || (!!m.predict && guess === null)}>{running ? "Running on Qiskit…" : m.predict && guess === null ? "Predict first ↑" : result ? "▶ Run again" : "▶ Run on Qiskit"}</button>
           </div>
+          <p role="status" className="sr-only">{running ? "Running…" : result ? "Results ready." : ""}</p>
           <CircuitEditor qubits={m.circuit.qubits} ops={ops} readOnly />
           {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
           {result && (
