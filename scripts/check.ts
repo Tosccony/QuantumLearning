@@ -48,6 +48,10 @@ assert.deepEqual(shorFactors(12, 4, 7, 15).factors, [3, 5]);
 assert.equal(shorFactors(8, 4, 7, 15).r, 2); // phase 1/2 suggests r = 2, but 7² mod 15 = 4, so it fails the check
 assert.equal(shorFactors(8, 4, 7, 15).factors, null);
 assert.equal(shorFactors(0, 4, 7, 15).r, null);
+assert.equal(shorFactors(2, 4, 7, 15).r, 8); // phase 1/8 → r = 8, a multiple of the true period 4
+assert.equal(shorFactors(2, 4, 7, 15).factors, null);
+assert.match(shorFactors(2, 4, 7, 15).note, /multiple of the true period/);
+assert.match(shorFactors(8, 4, 14, 15).note, /≡ −1/); // a = 14 ≡ −1: r = 2 and 14¹ ≡ −1 mod 15
 
 // Every lesson circuit, for backend/check_lessons.py to run through the real engine.
 mkdirSync("dist", { recursive: true });

@@ -101,8 +101,11 @@ export function shorFactors(y: number, bits: number, a: number, N: number): { r:
   const ar = modPow(a, r, N);
   if (ar !== 1) return { r, factors: null, note: `${a}^${r} mod ${N} = ${ar}, not 1, so ${r} isn't the period. Run again.` };
   if (r % 2) return { r, factors: null, note: `r = ${r} is odd, so the gcd trick doesn't apply. Try another a.` };
-  const f = gcd(modPow(a, r / 2, N) - 1, N);
-  if (f === 1 || f === N) return { r, factors: null, note: `${a}^${r / 2} ≡ −1 mod ${N}, which gives only trivial factors. Try another a.` };
+  const half = modPow(a, r / 2, N);
+  if (half === 1) return { r, factors: null, note: `${a}^${r / 2} mod ${N} is already 1, so r = ${r} is a multiple of the true period and gives only trivial factors. Run again.` };
+  if (half === N - 1) return { r, factors: null, note: `${a}^${r / 2} ≡ −1 mod ${N}, which gives only trivial factors. Try another a.` };
+  // a^r ≡ 1 with a^(r/2) ≢ ±1 guarantees gcd(a^(r/2) − 1, N) is a non-trivial factor.
+  const f = gcd(half - 1, N);
   return { r, factors: [f, N / f], note: `${N} = ${f} × ${N / f}` };
 }
 
