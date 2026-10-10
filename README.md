@@ -20,11 +20,12 @@ Quantum computing is usually taught in one of two ways: linear algebra on a whit
 | Track | For | Lessons |
 |---|---|---|
 | 🪐 Explorer | Ages 8–12, no maths | 7 planets of games with Qubit the Robot: coin flips, treasure clouds, entangled twins, a gate machine and a door race, all running real circuits |
-| 🎓 Student | High school and first-year university | Qubits and measurement, superposition and interference, phase, Bell states, teleportation, Deutsch–Jozsa, BB84 key distribution, the Bell test |
+| 🎓 Student | High school and first-year university | Qubits and measurement, superposition and interference, phase, Bell states, teleportation, Deutsch–Jozsa |
 | 💻 Developer | Programmers new to quantum | Qiskit and bit ordering, transpilation, shots and noise, Grover's search, the QFT, variational circuits |
-| 🔬 Researcher | Graduate level | Density matrices, noise and mitigation, the bit-flip code, phase estimation, VQE and QAOA, benchmarking, Shor's algorithm |
+| 🔬 Researcher | Graduate level | Density matrices, noise and mitigation, the bit-flip code, phase estimation, VQE and QAOA, benchmarking |
+| 🔓 Concepts | After the Student basics | BB84 quantum key distribution, the Bell test (is entanglement real?), Shor's algorithm factoring 15 |
 
-The 21 Student, Developer and Researcher lessons and the Lab run on Qollab. The Explorer games, community sharing and the Claude tutor need the full web app.
+All 21 lessons (Student, Developer, Researcher and Concepts) and the Lab run on Qollab. The Explorer games, community sharing and the Claude tutor need the full web app.
 
 ## Features
 
@@ -50,7 +51,7 @@ To enable the Claude tutor, set `ANTHROPIC_API_KEY` in the environment of `npm r
 
 ## Run it on Qollab
 
-All 21 Student, Developer and Researcher lessons also run on qollab.xyz, on Qollab's free simulators (the built-in ideal simulator, IBM device noise models, and IonQ's Aria and Forte simulators).
+All 21 lessons (Student, Developer, Researcher and Concepts) also run on qollab.xyz, on Qollab's free simulators (the built-in ideal simulator, IBM device noise models, and IonQ's Aria and Forte simulators).
 
 1. Open the project on Qollab and go to the **Code** tab.
 2. Press **Run Project**, then **Run**, and pick a simulator in **Select QPU**.

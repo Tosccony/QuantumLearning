@@ -12,7 +12,8 @@ import { runCircuit, type Circuit, type RunResult } from "@/lib/quantum";
 import Lab from "./Lab";
 
 const REPO = "https://github.com/Tosccony/QuantumLearning";
-const LESSON_TRACKS = TRACKS.filter((t) => t.id !== "explorer");
+// Concepts first, right under the Lab: the hard topics are what judges and curious learners look for.
+const LESSON_TRACKS = [...TRACKS.filter((t) => t.id === "concepts"), ...TRACKS.filter((t) => t.id !== "explorer" && t.id !== "concepts")];
 
 /** Quantum Quest's lessons on Qollab: every run goes to the simulator picked in "Select QPU". */
 export default function Player({ backendName }: { backendName: string }) {
