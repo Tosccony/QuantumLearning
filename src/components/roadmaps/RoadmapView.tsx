@@ -8,6 +8,7 @@ import { useProgress } from "@/lib/progress";
 
 const labels = { done: "Completed", available: "Ready to learn", locked: "Prerequisites remaining" };
 
+// Only writes (strict) rethrow storage errors; reads treat them as an empty store.
 function readStore(strict = false): Personal {
   try { return sanitizePersonal(JSON.parse(localStorage.getItem(ROADMAP_STORAGE_KEY) || "{}")); } catch (e) { if (strict && !(e instanceof SyntaxError)) throw e; return {}; }
 }

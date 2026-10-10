@@ -88,4 +88,8 @@ assert.deepEqual(sanitizePersonal([1]), {});
 assert.deepEqual(sanitizePersonal(null), {});
 assert.deepEqual(sanitizePersonal({ s1: { reviewed: ["a", 2] } }), { s1: { reviewed: ["a"] } });
 
+const poisoned = sanitizePersonal(JSON.parse('{"__proto__":{"bookmarked":true},"s1":{"started":true}}'));
+assert.deepEqual(poisoned, { s1: { started: true } });
+assert.equal(Object.getPrototypeOf(poisoned), Object.prototype);
+
 console.log("js: all checks passed");

@@ -55,7 +55,7 @@ export function sanitizePersonal(raw: unknown): Personal {
   const out: Personal = {};
   if (!isObject(raw)) return out;
   for (const [id, v] of Object.entries(raw)) {
-    if (!isObject(v)) continue;
+    if (id === "__proto__" || id === "constructor" || id === "prototype" || !isObject(v)) continue;
     const e: Personal[string] = {};
     if (typeof v.bookmarked === "boolean") e.bookmarked = v.bookmarked;
     if (typeof v.started === "boolean") e.started = v.started;
