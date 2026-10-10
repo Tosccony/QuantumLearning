@@ -1,24 +1,37 @@
 # Quantum Quest
 
-A quantum computing learning platform: think Brilliant-style lessons, Coursera-style tracks and certificates, and GitHub-style project sharing. Every experiment is a real Qiskit circuit.
+**Learn quantum computing by experiment.** Predict what a circuit will do, run it on real Qiskit simulators (including models of IBM and IonQ machines), and explain the gap between what you expected and what happened. From an 8-year-old's first coin flip to Shor's algorithm.
 
 *This effort is supported by Qollab & IonQ.*
 
-**Learn → Build → Run → Understand → Share**
+## The problem
 
-| Track | Audience | Content |
+Quantum computing is usually taught in one of two ways: linear algebra on a whiteboard, or apps that animate qubits without running anything real. Either way, learners end up repeating slogans ("a qubit is 0 and 1 at the same time", "a quantum computer tries every answer at once") without being able to predict what a circuit will actually do. And almost nobody gets to see how real, noisy hardware changes the answer, even though noise is the main thing holding the field back today.
+
+## How Quantum Quest teaches
+
+- **Predict → Run → Explain.** Lessons ask for a prediction before you run. The wrong options are the common misconceptions, and each one gets a targeted explanation, so a wrong guess becomes a lesson.
+- **Every number is real.** Every circuit runs on Qiskit: Aer in the web app, and on Qollab the built-in simulator, IBM device noise models, or IonQ's Aria and Forte simulators.
+- **Ideal vs this machine.** Each result is compared with the exact ideal answer, so noise becomes something you can see and measure, not a footnote.
+- **One path for everyone.** Four tracks teach the same honest physics at different depths, from no maths at all to density matrices.
+- **Hard topics, hands on.** Error correction (and whether it actually helps on today's machines), BB84 quantum key distribution, the Bell test, teleportation, Grover's search and Shor's algorithm all run as circuits you can edit, with panels that do the arithmetic: the Bell score, and the factors Shor's algorithm finds.
+- **A free-build Lab.** Build any circuit up to 8 qubits, or start from any lesson's circuit, and run the same circuit on an ideal simulator and on IBM and IonQ machine models to see what noise does. The results include the circuit as Qiskit code to copy.
+
+| Track | For | Lessons |
 |---|---|---|
-| 🪐 Explorer | Ages 8–12 | 7 planets of games with Qubit the Robot. The coin flips, treasure clouds, entangled twins, gate machine and door race all run real circuits. |
-| 🎓 Student | High school / first-year undergrad | Qubits & measurement, H & interference, phase, Bell states, teleportation, Deutsch–Jozsa |
-| 💻 Developer | Programmers | Qiskit and bit ordering, transpilation, shots & noise, Grover, QFT, variational circuits |
-| 🔬 Researcher | Graduate | Density matrices, noise & mitigation, the 3-qubit bit-flip code, phase estimation, VQE/QAOA, benchmarking |
+| 🪐 Explorer | Ages 8–12, no maths | 7 planets of games with Qubit the Robot: coin flips, treasure clouds, entangled twins, a gate machine and a door race, all running real circuits |
+| 🎓 Student | High school and first-year university | Qubits and measurement, superposition and interference, phase, Bell states, teleportation, Deutsch–Jozsa, BB84 key distribution, the Bell test |
+| 💻 Developer | Programmers new to quantum | Qiskit and bit ordering, transpilation, shots and noise, Grover's search, the QFT, variational circuits |
+| 🔬 Researcher | Graduate level | Density matrices, noise and mitigation, the bit-flip code, phase estimation, VQE and QAOA, benchmarking, Shor's algorithm |
+
+The 21 Student, Developer and Researcher lessons and the Lab run on Qollab. The Explorer games, community sharing and the Claude tutor need the full web app.
 
 ## Features
 
 - **Quantum Lab** (`/lab`): visual circuit builder with 19 gates (click or drag, multi-qubit and parameterised gates), adjustable shots, and a Qiskit Aer noise model.
 - **Results**: a histogram of the shot counts with exact probabilities overlaid, interactive per-qubit Bloch spheres (reduced states with purity), a statevector table, and step-through Bloch vectors after each gate. The Qiskit tab shows Python code, OpenQASM, a text diagram and transpiled depth/CX counts.
 - **AI tutor**: beginner, intermediate and advanced explanations from Claude, grounded in the actual run results. Without an API key it falls back to a deterministic explainer built from those same results.
-- **Course modules**: 18 lessons. Each has a runnable circuit, "what to look for" notes, experiments to try and a check question.
+- **Course modules**: 21 lessons. Each has a runnable circuit, "what to look for" notes, experiments to try and a check question, and eight start with a prediction.
 - **Community** (`/community`): publish circuits, then search, star and fork them. Publishing re-runs the circuit on the server, so shared results are always verified.
 - **Progress**: XP, streaks, a skill tree with cross-track links, and printable certificates for each track.
 
@@ -37,7 +50,7 @@ To enable the Claude tutor, set `ANTHROPIC_API_KEY` in the environment of `npm r
 
 ## Run it on Qollab
 
-All 18 Student, Developer and Researcher lessons also run on qollab.xyz, on Qollab's free simulators (the built-in ideal simulator, IBM device noise models, and IonQ's Aria and Forte simulators).
+All 21 Student, Developer and Researcher lessons also run on qollab.xyz, on Qollab's free simulators (the built-in ideal simulator, IBM device noise models, and IonQ's Aria and Forte simulators).
 
 1. Open the project on Qollab and go to the **Code** tab.
 2. Press **Run Project**, then **Run**, and pick a simulator in **Select QPU**.
@@ -85,7 +98,7 @@ This project was built for the Qollab × IonQ Quantum Hackathon. The build windo
 - On Oct 10, Claude Code reviewed the project against the hackathon rules. It added this disclosure, the MIT license and the attribution, and fixed the noise model so noisy runs no longer optimise away gates.
 - **TODO(team):** list any other AI tools used to write code or lesson text, and what they were used for.
 
-**Circuits.** The example circuits are standard textbook constructions, not original algorithms: Bell and GHZ states, Grover search, Deutsch–Jozsa, teleportation, the QFT and the 3-qubit bit-flip code. Our contribution is the learning platform built around them.
+**Circuits.** The example circuits are standard, published constructions, not original algorithms: Bell and GHZ states, Grover search, Deutsch–Jozsa, teleportation, the QFT, phase estimation, the 3-qubit bit-flip code, BB84 (Bennett and Brassard, 1984), the CHSH Bell test (Clauser, Horne, Shimony and Holt, 1969) and Shor's algorithm (Shor, 1994). They follow the standard textbook treatments in Nielsen and Chuang's *Quantum Computation and Quantum Information*. The compiled ×7 and ×4 mod 15 circuits in the Shor lesson follow the construction in the Qiskit textbook. The lesson text, predictions and explanations are our own. Our contribution is the learning platform built around these circuits.
 
 **Third-party libraries.** All of these are used as unmodified dependencies.
 
