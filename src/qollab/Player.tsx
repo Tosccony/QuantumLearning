@@ -29,29 +29,34 @@ export default function Player({ backendName }: { backendName: string }) {
         <span className="chip">Simulator: {backendName}</span>
       </header>
       <nav aria-label="Lessons" className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="w-28 text-sm text-muted">🧪 Lab</span>
-          <button
-            onClick={() => { if (!lab) openLab({ qubits: 2, ops: [] }); }}
-            aria-current={lab ? "page" : undefined}
-            className={`chip ${lab ? "!bg-accent !text-white" : "hover:bg-white/20"}`}
-          >
-            Build your own circuit
-          </button>
+        {/* Label column + wrapping chip column, so a track's wrapped lessons line up under its first row. */}
+        <div className="grid grid-cols-[7rem_minmax(0,1fr)] items-start gap-2">
+          <span className="pt-0.5 text-sm text-muted">🧪 Lab</span>
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              onClick={() => { if (!lab) openLab({ qubits: 2, ops: [] }); }}
+              aria-current={lab ? "page" : undefined}
+              className={`chip ${lab ? "!bg-accent !text-white" : "hover:bg-white/20"}`}
+            >
+              Build your own circuit
+            </button>
+          </div>
         </div>
         {LESSON_TRACKS.map((t) => (
-          <div key={t.id} className="flex flex-wrap items-center gap-1.5">
-            <span className="w-28 text-sm text-muted">{t.icon} {t.name}</span>
-            {modulesOf(t.id).map((x, i) => (
-              <button
-                key={x.id}
-                onClick={() => { setLab(null); setId(x.id); }}
-                aria-current={!lab && x.id === id ? "page" : undefined}
-                className={`chip ${!lab && x.id === id ? "!bg-accent !text-white" : "hover:bg-white/20"}`}
-              >
-                {i + 1}. {x.title}
-              </button>
-            ))}
+          <div key={t.id} className="grid grid-cols-[7rem_minmax(0,1fr)] items-start gap-2">
+            <span className="pt-0.5 text-sm text-muted">{t.icon} {t.name}</span>
+            <div className="flex flex-wrap gap-1.5">
+              {modulesOf(t.id).map((x, i) => (
+                <button
+                  key={x.id}
+                  onClick={() => { setLab(null); setId(x.id); }}
+                  aria-current={!lab && x.id === id ? "page" : undefined}
+                  className={`chip ${!lab && x.id === id ? "!bg-accent !text-white" : "hover:bg-white/20"}`}
+                >
+                  {i + 1}. {x.title}
+                </button>
+              ))}
+            </div>
           </div>
         ))}
       </nav>
