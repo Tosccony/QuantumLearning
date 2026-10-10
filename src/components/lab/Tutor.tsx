@@ -13,7 +13,7 @@ const QUICK = [
   { label: "Quiz me", prompt: "Quiz me with one question about this circuit and its results. Wait for my answer." },
 ];
 
-export default function Tutor({ circuit, result, extra = "", compact }: { circuit: Circuit; result: RunResult | null; extra?: string; compact?: boolean }) {
+export default function Tutor({ circuit, result, extra = "", compact, offline }: { circuit: Circuit; result: RunResult | null; extra?: string; compact?: boolean; offline?: boolean }) {
   const [level, setLevel] = useState<Level>("beginner");
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -30,6 +30,8 @@ export default function Tutor({ circuit, result, extra = "", compact }: { circui
     const history: Msg[] = [...msgs, { role: "user", content: text.trim() }];
     setMsgs(history);
     setInput("");
+    // Offline (e.g. on Qollab, where POST is blocked): answer from the run results without calling Claude.
+    if (offline) return setMsgs([...history, { role: "assistant", content: offlineExplain(circuit, result, level), offline: true }]);
     setBusy(true);
     try {
       const res = await fetch("/api/tutor", {
@@ -64,7 +66,7 @@ export default function Tutor({ circuit, result, extra = "", compact }: { circui
   return (
     <section className={`panel flex flex-col ${compact ? "max-h-[520px]" : "h-full min-h-[420px]"}`} aria-label="AI tutor">
       <header className="flex flex-wrap items-center gap-2 border-b border-white/10 p-3">
-        <h2 className="mr-auto font-semibold">🤖 AI tutor</h2>
+        <h2 className="mr-auto font-semibold">{offline ? "🤖 Explainer" : "🤖 AI tutor"}</h2>
         <div className="flex rounded-lg bg-white/5 p-0.5 text-xs" role="radiogroup" aria-label="Explanation level">
           {(["beginner", "intermediate", "advanced"] as Level[]).map((l) => (
             <button key={l} role="radio" aria-checked={level === l} onClick={() => setLevel(l)} className={`rounded-md px-2.5 py-1 capitalize ${level === l ? "bg-accent text-white" : "text-muted"}`}>

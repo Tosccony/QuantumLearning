@@ -54,8 +54,17 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
+/** How a run request reaches Qiskit: the FastAPI service by default, Qollab's Python bridge on qollab.xyz. */
+export type Transport = (body: object) => Promise<RunResult>;
+
+let transport: Transport = (body) => call<RunResult>("/run", { method: "POST", body: JSON.stringify(body) });
+
+export function setTransport(t: Transport) {
+  transport = t;
+}
+
 export function runCircuit(c: Circuit, opts: RunOptions = {}) {
-  return call<RunResult>("/run", { method: "POST", body: JSON.stringify({ ...c, ...opts }) });
+  return transport({ ...c, ...opts });
 }
 
 // ---------------------------------------------------------------- gate catalog
