@@ -88,15 +88,16 @@ This project was built for the Qollab × IonQ Quantum Hackathon. The build windo
 
 **Before the build window**
 
-> **TODO(team): replace this line before submitting.** Either list what existed before Oct 9, 19:00 ET (code, designs, lesson text) and where it came from, or write "Nothing: all code and content were written during the build window."
+Nothing. All code and content were written during the build window. Nothing was forked or copied from another project. The app started from a fresh `create-next-app` scaffold (see below).
 
 **Starter template.** The app was scaffolded with `create-next-app`. The config files (`next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `postcss.config.mjs`) started from that template, and the SVGs in `public/` are its unused defaults.
 
 **AI tools**
 
 - At runtime, the in-app tutor calls Claude (`claude-opus-5-5`) through the Anthropic API.
-- On Oct 10, Claude Code reviewed the project against the hackathon rules. It added this disclosure, the MIT license and the attribution, and fixed the noise model so noisy runs no longer optimise away gates.
-- **TODO(team):** list any other AI tools used to write code or lesson text, and what they were used for.
+- The team used Claude and ChatGPT as coding and writing assistants while building the app and its lessons.
+- On Oct 10, Claude Code reviewed the project against the hackathon rules, added this disclosure, the MIT license and the attribution, and fixed the noise model so noisy runs no longer optimise away gates.
+- Between Oct 10 and Oct 11, at the team's direction, Claude Code built the Qollab version: the shared Qiskit engine, the lesson player and free-build Lab, Predict → Run → Explain, Ideal vs this machine, and the BB84, Bell test and Shor's algorithm lessons.
 
 **Circuits.** The example circuits are standard, published constructions, not original algorithms: Bell and GHZ states, Grover search, Deutsch–Jozsa, teleportation, the QFT, phase estimation, the 3-qubit bit-flip code, BB84 (Bennett and Brassard, 1984), the CHSH Bell test (Clauser, Horne, Shimony and Holt, 1969) and Shor's algorithm (Shor, 1994). They follow the standard textbook treatments in Nielsen and Chuang's *Quantum Computation and Quantum Information*. The compiled ×7 and ×4 mod 15 circuits in the Shor lesson follow the construction in the Qiskit textbook. The lesson text, predictions and explanations are our own. Our contribution is the learning platform built around these circuits.
 
