@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import Markdown from "@/components/Markdown";
 import CircuitEditor, { layout, toCircuit, type EOp } from "@/components/lab/CircuitEditor";
+import IdealVsMachine from "@/components/lab/IdealVsMachine";
 import Predict from "@/components/lab/Predict";
 import ResultsPanel from "@/components/lab/ResultsPanel";
 import Tutor from "@/components/lab/Tutor";
 import { MODULES, TRACKS, modulesOf, type Module } from "@/lib/curriculum";
-import { runCircuit, type RunResult } from "@/lib/quantum";
+import { onesRate } from "@/lib/explain";
+import { runCircuit, type Circuit, type RunResult } from "@/lib/quantum";
 
 const REPO = "https://github.com/Tosccony/QuantumLearning";
 const LESSON_TRACKS = TRACKS.filter((t) => t.id !== "explorer");
@@ -96,6 +98,7 @@ function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
           {result && (
             <>
               <p className="rounded-xl bg-accent/15 p-3 text-sm"><b>What to look for:</b> {m.observe}</p>
+              <IdealVsMachine result={result} hint="On your next Run, pick an IBM or IonQ machine in Select QPU to see real-world noise." />
               <ResultsPanel result={result} circuit={circuit} />
             </>
           )}
@@ -104,6 +107,7 @@ function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
             <ul className="mt-1 list-disc pl-5 text-muted">{m.tryIt.map((t) => <li key={t}>{t}</li>)}</ul>
           </div>
         </section>
+        {m.compare && <CodeVsBare circuit={m.compare} />}
         <section className="panel flex flex-col gap-3 p-4" aria-label="Check your understanding">
           <h3 className="font-semibold">✅ Check your understanding</h3>
           <p>{m.check.q}</p>
@@ -129,5 +133,47 @@ function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
         <Tutor compact offline circuit={circuit} result={result} extra={`Lesson: ${m.title}. What to look for: ${m.observe}`} />
       </aside>
     </article>
+  );
+}
+
+function CodeVsBare({ circuit }: { circuit: Circuit }) {
+  const [r, setR] = useState<RunResult | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const bare = r ? onesRate(r.counts, 0) : 0;
+  const coded = r ? onesRate(r.counts, 1) : 0;
+  const pc = (x: number) => `${(x * 100).toFixed(1)}%`;
+
+  async function run() {
+    setBusy(true);
+    setError(null);
+    try {
+      setR(await runCircuit(circuit, { shots: 1024 }));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="panel flex flex-col gap-3 p-4" aria-label="Bare qubit versus protected qubit">
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="mr-auto font-semibold">🛡️ Does the code help on this machine?</h3>
+        <button className="pbtn-primary" onClick={run} disabled={busy}>{busy ? "Running…" : "▶ Run bare vs protected"}</button>
+      </div>
+      <p className="text-sm text-muted">One circuit holds a bare qubit and a qubit protected by the 3-qubit code, both storing 0. Any 1 we read is an error.</p>
+      {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
+      {r && (
+        <p role="status" className="text-sm">
+          Bare qubit error: <b>{pc(bare)}</b> · Protected qubit error: <b>{pc(coded)}</b>.{" "}
+          {bare === 0 && coded === 0
+            ? "No errors at all: this is a perfect machine. Pick an IBM or IonQ simulator on your next Run."
+            : coded < bare
+              ? "The code helped: it caught flips that hit the bare qubit unprotected."
+              : "The code lost: its extra gates added more errors than it fixed. Error correction pays off only once gates are good enough, below the fault-tolerance threshold."}
+        </p>
+      )}
+    </section>
   );
 }

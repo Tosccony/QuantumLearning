@@ -38,6 +38,7 @@ export type Module = {
   tryIt: string[];
   check: Check;
   predict?: Predict;
+  compare?: Circuit;
 };
 
 const PI = Math.PI;
@@ -306,6 +307,19 @@ export const MODULES: Module[] = [
         "The ancillas detect the error by checking parities, and the controlled corrections act on that information. The data never needs to be measured directly.",
         "The syndrome checks only parities (Z₀Z₁ and Z₁Z₂), which are the same for |000⟩ and |111⟩. That reveals the error without disturbing the superposition.",
         "This code fully corrects a single X error. Damage starts only with two or more errors, or with errors it can't see, such as Z flips.",
+      ],
+    },
+    // q0: a bare qubit. q1–q3: the same bit protected by the 3-qubit code (ancillas q4, q5).
+    // One circuit, so it fits IonQ's one-job-per-Run rule. Bare error = P(q0 = 1), protected = P(q1 = 1).
+    compare: {
+      qubits: 6,
+      ops: [
+        g("cx", [2], [1]), g("cx", [3], [1]),
+        g("cx", [4], [1]), g("cx", [4], [2]), g("cx", [5], [2]), g("cx", [5], [3]),
+        g("ccx", [2], [4, 5]),
+        g("x", [5]), g("ccx", [1], [4, 5]), g("x", [5]),
+        g("x", [4]), g("ccx", [3], [4, 5]), g("x", [4]),
+        g("cx", [3], [1]), g("cx", [2], [1]),
       ],
     },
   },

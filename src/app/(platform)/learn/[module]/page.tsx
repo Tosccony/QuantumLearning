@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import FlowSteps, { type FlowStep } from "@/components/FlowSteps";
 import Markdown from "@/components/Markdown";
 import CircuitEditor, { layout } from "@/components/lab/CircuitEditor";
+import IdealVsMachine from "@/components/lab/IdealVsMachine";
 import Predict from "@/components/lab/Predict";
 import ResultsPanel from "@/components/lab/ResultsPanel";
 import Tutor from "@/components/lab/Tutor";
@@ -100,6 +101,7 @@ export default function LessonPage() {
           {result && (
             <>
               <p className="rounded-xl bg-accent/15 p-3 text-sm"><b>What to look for:</b> {m.observe}</p>
+              <IdealVsMachine result={result} hint="Turn on noise in the Lab to see how a real device drifts." />
               <ResultsPanel result={result} circuit={m.circuit} />
             </>
           )}

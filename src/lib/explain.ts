@@ -26,6 +26,31 @@ export function labContext(c: Circuit, r: RunResult | null, extra = ""): string 
 
 const pct = (x: number) => `${(x * 100).toFixed(x < 0.1 ? 1 : 0)}%`;
 
+/** Total-variation distance between sampled counts and the exact distribution: 0 = identical, 1 = disjoint. */
+export function tvd(r: Pick<RunResult, "counts" | "probabilities">): number {
+  const shots = Object.values(r.counts).reduce((a, b) => a + b, 0);
+  const keys = new Set([...Object.keys(r.counts), ...Object.keys(r.probabilities)]);
+  let d = 0;
+  for (const k of keys) d += Math.abs((r.counts[k] ?? 0) / shots - (r.probabilities[k] ?? 0));
+  return d / 2;
+}
+
+/** The TVD a perfect machine still shows from finite shots: mean binomial deviation, summed over outcomes. */
+export function shotNoiseTvd(r: Pick<RunResult, "probabilities" | "shots">): number {
+  return Object.values(r.probabilities).reduce((a, p) => a + Math.sqrt((2 * p * (1 - p)) / (Math.PI * r.shots)), 0) / 2;
+}
+
+/** Fraction of shots where qubit q read 1. Qiskit bitstrings are little-endian: q0 is the last character. */
+export function onesRate(counts: Record<string, number>, q: number): number {
+  let ones = 0;
+  let shots = 0;
+  for (const [k, v] of Object.entries(counts)) {
+    shots += v;
+    if (k[k.length - 1 - q] === "1") ones += v;
+  }
+  return shots ? ones / shots : 0;
+}
+
 /**
  * Deterministic explanation built from the real Qiskit results. Used when no Claude API
  * credentials are configured, so the "Understand" step always works.
@@ -41,7 +66,7 @@ export function offlineExplain(c: Circuit, r: RunResult | null, level: Level): s
   const hasPhase = used.some((g) => ["z", "s", "t", "sdg", "tdg", "rz", "p", "cz", "cp", "crz"].includes(g));
   const two = used.filter((g) => (GATES[g]?.controls ?? 0) !== 0 || g === "swap");
   const shots = Object.values(r.counts).reduce((a, b) => a + b, 0);
-  const totalShotDev = probs.reduce((a, [k, p]) => a + Math.abs((r.counts[k] ?? 0) / shots - p), 0) / 2;
+  const totalShotDev = tvd(r); // includes outcomes the ideal machine never produces, which is where noise lands
   const out: string[] = [];
 
   if (level === "beginner") {
