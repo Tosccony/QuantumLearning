@@ -168,7 +168,8 @@ def execute(req: RunRequest) -> dict:
     measured = qc.copy()
     measured.measure_all()
     sim = AerSimulator(noise_model=noise_model(req.noise)) if req.noise else AerSimulator()
-    tqc = transpile(measured, sim)
+    # No optimisation: cancelling gate pairs would also cancel the noise each gate is meant to add.
+    tqc = transpile(measured, sim, optimization_level=0)
     result = sim.run(tqc, shots=req.shots, memory=req.memory, seed_simulator=req.seed).result()
     counts = dict(sorted(result.get_counts().items()))
 
