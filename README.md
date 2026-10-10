@@ -10,7 +10,7 @@ Quantum computing is usually taught in one of two ways: linear algebra on a whit
 
 ## How Quantum Quest teaches
 
-- **Predict → Run → Explain.** Lessons ask for a prediction before you run. The wrong options are the common misconceptions, and each one gets a targeted explanation, so a wrong guess becomes a lesson.
+- **Predict → Run → Explain.** Eight key lessons ask for a prediction before you run. The wrong options are the common misconceptions, and each one gets a targeted explanation, so a wrong guess becomes a lesson.
 - **Every number is real.** Every circuit runs on Qiskit: Aer in the web app, and on Qollab the built-in simulator, IBM device noise models, or IonQ's Aria and Forte simulators.
 - **Ideal vs this machine.** Each result is compared with the exact ideal answer, so noise becomes something you can see and measure, not a footnote.
 - **One path for everyone.** Four tracks teach the same honest physics at different depths, from no maths at all to density matrices.
@@ -66,12 +66,18 @@ To rebuild the upload: `npm run qollab:build` writes `dist/qollab.zip`. Use `REL
 Next.js (TypeScript, Tailwind, Framer Motion, Three.js)
  ├─ /api/tutor ─────────────► Claude API (streamed; offline fallback in the browser)
  └─ /api/qiskit/* (rewrite) ─► backend/main.py (FastAPI)
-                                ├─ POST /run       build QuantumCircuit → Aer sampling (+noise)
-                                │                  → Statevector, partial traces, transpile
-                                └─ /projects       community store (SQLite), re-runs on publish
+                                ├─ POST /run    validate → backend/engine.py on Qiskit Aer (+ noise model)
+                                └─ /projects    community store (SQLite), re-runs on publish
+
+qollab.xyz (runs in the browser, Pyodide)
+ src/qollab/  lesson player + Lab, bundled by scripts/build-qollab.sh
+   └─ quantum/engine.py (the same engine) ─► the simulator picked in Select QPU
 ```
 
-- `src/lib/quantum.ts` contains the circuit types, gate catalog, API client and Qiskit code export.
+- `backend/engine.py` is the shared Qiskit core: it builds circuits, computes statevectors, Bloch vectors and purity, and samples on any Qiskit backend. The web service and the Qollab project run the same file.
+- `src/qollab/` is the Qollab entry: the lesson player, the Lab, and the bridge that calls `engine.py` from JavaScript.
+- `npm run check:py`, `npm run check:lessons` (every lesson circuit through the engine, with physics assertions) and `npm run check:js` are the self-checks.
+- `src/lib/quantum.ts` contains the circuit types, gate catalog, API client and Qiskit code export. Runs go through a swappable transport: HTTP in the web app, Qollab's Python bridge on Qollab.
 - `src/lib/curriculum.ts` holds tracks, modules and the circuits behind the Explorer games.
 - `src/components/lab/` has the editor, histogram, Bloch sphere, statevector table and tutor.
 - Learner progress is stored in `localStorage` (`src/lib/progress.tsx`). Community projects are stored on the server.
@@ -79,7 +85,7 @@ Next.js (TypeScript, Tailwind, Framer Motion, Three.js)
 ## Not yet built
 
 - Accounts (Supabase). Progress and certificates are per-device for now, and certificate IDs aren't server-verifiable.
-- Running on real IBM Quantum hardware. Everything runs on the Qiskit Aer simulator, optionally with noise.
+- Runs on real quantum hardware. The web app uses the Qiskit Aer simulator (optionally with noise). On Qollab the lessons run on Qollab's simulators, including IBM and IonQ device noise models, but not yet on real QPUs.
 - The Explorer teacher dashboard is still single-learner, and there's no adaptive difficulty yet.
 
 ## Disclosure
