@@ -14,7 +14,7 @@
 - **Order.** The engine extraction (Task 1) comes before the Qollab bridge test (Task 2), so that the test exercises the real engine. Every fallback path needs the engine anyway, so no work is wasted.
 - **Sampled circuit.** The engine samples the circuit with `initialize` decomposed and resets and barriers removed (`_unitary`), on every backend. This is what makes it portable to Qollab, and it's equivalent because every run starts from |0…0⟩. In the web app, one side effect is that a noisy run now applies noise to the gates `initialize` decomposes into, which is more realistic.
 - **Progress.** The Qollab player tracks no progress (no XP or checkmarks), because nothing persists between Runs on Qollab. Progress stays a web-app feature.
-- **Amendment (user request, Oct 10).** Added Task 8 (the BB84 and Bell test lessons), Task 9 (Shor's algorithm) and Task 10 (the project-page story). The old wrap-up is now Task 11. Execution order is 1–4, 6, 7, 8, 9, 10, then 5 (publish once, with everything), then 11.
+- **Amendment (user request, Oct 10).** Added Task 8 (the BB84 and Bell test lessons), Task 9 (Shor's algorithm) and Task 10 (the project-page story). The user then approved Task 10, a free-build Lab in the Qollab player, so the README task became Task 11 and the old wrap-up became Task 12. Execution order is 1–4, 6, 7, 8, 9, 10, 11, then 5 (publish once, with everything), then 12.
 
 ## Global Constraints
 
@@ -2026,7 +2026,175 @@ git commit -m "Add Shor's algorithm lesson with a factor-finding readout"
 
 ---
 
-### Task 10: Project page story (README)
+### Task 10: Free-build Lab in the Qollab player
+
+The web app already has a full Lab at `/lab`. On Qollab, learners and judges can so far only edit a lesson's circuit, with that lesson's fixed number of qubits. This task adds a free-build Lab: any circuit up to 8 qubits, run on the simulator picked in Select QPU, so the same circuit can be compared across the built-in, IBM and IonQ machines. Saving and sharing are left out, because Qollab persists nothing and blocks POST; the Qiskit tab in the results already gives the circuit as code to copy.
+
+**Files:**
+- Create: `src/qollab/Lab.tsx`
+- Modify: `src/qollab/Player.tsx`: a Lab entry in the navigation, switching between the lesson and Lab views, and "Open in Lab →" in `Lesson`
+
+**Interfaces:**
+- Consumes:
+  - `CircuitEditor`, `layout`, `toCircuit` and `EOp`
+  - `ResultsPanel`, `Tutor` (`offline`), `IdealVsMachine` (`{ result, hint }`)
+  - `MODULES`
+  - `runCircuit`, `Circuit` and `RunResult`
+- Produces: default export `Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean })`. `Lesson` gains the prop `onOpenLab: (c: Circuit) => void`.
+
+- [ ] **Step 1: Write the Lab**
+
+`src/qollab/Lab.tsx`:
+```tsx
+import { useMemo, useState } from "react";
+import CircuitEditor, { layout, toCircuit, type EOp } from "@/components/lab/CircuitEditor";
+import IdealVsMachine from "@/components/lab/IdealVsMachine";
+import ResultsPanel from "@/components/lab/ResultsPanel";
+import Tutor from "@/components/lab/Tutor";
+import { MODULES } from "@/lib/curriculum";
+import { runCircuit, type Circuit, type RunResult } from "@/lib/quantum";
+
+const MAX_QUBITS = 8;
+
+/** Free-build Lab on Qollab: any circuit up to 8 qubits, run on the simulator picked in "Select QPU". */
+export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean }) {
+  const [qubits, setQubits] = useState(start.qubits);
+  const [ops, setOps] = useState<EOp[]>(() => layout(start));
+  const circuit = useMemo(() => toCircuit(qubits, ops), [qubits, ops]);
+  const [result, setResult] = useState<RunResult | null>(null);
+  const [running, setRunning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Any edit makes the last result stale, so drop it rather than show numbers for a different circuit.
+  const edit = (next: EOp[]) => {
+    setOps(next);
+    setResult(null);
+  };
+  const load = (c: Circuit) => {
+    setQubits(c.qubits);
+    edit(layout(c));
+  };
+  const changeQubits = (n: number) => {
+    if (n < 1 || n > MAX_QUBITS) return;
+    setQubits(n);
+    edit(ops.filter((op) => [...(op.controls ?? []), ...op.targets].every((q) => q < n)));
+  };
+
+  async function run() {
+    setRunning(true);
+    setError(null);
+    try {
+      setResult(await runCircuit(circuit, { shots: 1024 }));
+    } catch (e) {
+      setResult(null);
+      setError((e as Error).message);
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  return (
+    <article className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="flex min-w-0 flex-col gap-5">
+        <header>
+          <h2 className="text-2xl font-bold">🧪 Lab: build your own circuit</h2>
+          <p className="text-muted">
+            Pick a gate from the palette and place it on the wires, then run on the simulator you chose in Select QPU. Run the same circuit on the built-in simulator and on an IBM or IonQ machine to see what real-world noise does to it.
+          </p>
+        </header>
+        <section className="panel flex flex-col gap-3 p-4" aria-label="Circuit builder">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1" role="group" aria-label="Number of qubits">
+              <button className="pbtn-ghost" onClick={() => changeQubits(qubits - 1)} disabled={running || qubits <= 1} aria-label="Remove a qubit">−</button>
+              <span className="chip">{qubits} qubit{qubits > 1 ? "s" : ""}</span>
+              <button className="pbtn-ghost" onClick={() => changeQubits(qubits + 1)} disabled={running || qubits >= MAX_QUBITS} aria-label="Add a qubit">+</button>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              Start from
+              <select
+                className="rounded-lg bg-white/10 px-2 py-1"
+                value=""
+                disabled={running}
+                onChange={(e) => {
+                  const m = MODULES.find((x) => x.id === e.target.value);
+                  load(m ? m.circuit : { qubits, ops: [] });
+                }}
+              >
+                <option value="" disabled>Choose…</option>
+                <option value="blank">Blank circuit</option>
+                {MODULES.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
+              </select>
+            </label>
+            <button className="pbtn-primary ml-auto" onClick={run} disabled={running}>{running ? "Running…" : "▶ Run"}</button>
+          </div>
+          {isIonQ && <p className="text-xs text-muted">IonQ simulators take one job per Run. To run again, press Stop and Run, or pick a local simulator.</p>}
+          <CircuitEditor qubits={qubits} ops={ops} onChange={edit} />
+          {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
+          {result && (
+            <>
+              <IdealVsMachine result={result} hint="On your next Run, pick an IBM or IonQ machine in Select QPU to see real-world noise." />
+              <ResultsPanel result={result} circuit={circuit} />
+            </>
+          )}
+        </section>
+      </div>
+      <aside className="lg:sticky lg:top-4 lg:self-start">
+        <Tutor compact offline circuit={circuit} result={result} extra="Free-build Lab on Qollab." />
+      </aside>
+    </article>
+  );
+}
+```
+
+- [ ] **Step 2: Wire it into the player**
+
+In `src/qollab/Player.tsx`:
+1. Add `import Lab from "./Lab";`, and change the quantum import to `import { runCircuit, type Circuit, type RunResult } from "@/lib/quantum";`. Keep any other names that line already imports.
+2. In `Player`, after `const m = …`, add:
+   ```tsx
+     const isIonQ = /ionq/i.test(backendName);
+     // `n` re-keys the Lab, so opening it from a lesson starts fresh with that lesson's circuit.
+     const [lab, setLab] = useState<{ start: Circuit; n: number } | null>(null);
+     const openLab = (start: Circuit) => setLab((l) => ({ start, n: (l?.n ?? 0) + 1 }));
+   ```
+3. As the first child of `<nav aria-label="Lessons" …>`, add:
+   ```tsx
+           <div className="flex flex-wrap items-center gap-1.5">
+             <span className="w-28 text-sm text-muted">🧪 Lab</span>
+             <button
+               onClick={() => { if (!lab) openLab({ qubits: 2, ops: [] }); }}
+               aria-current={lab ? "page" : undefined}
+               className={`chip ${lab ? "!bg-accent !text-white" : "hover:bg-white/20"}`}
+             >
+               Build your own circuit
+             </button>
+           </div>
+   ```
+4. In the lesson buttons, change `onClick={() => setId(x.id)}` to `onClick={() => { setLab(null); setId(x.id); }}`, and `aria-current={x.id === id ? "page" : undefined}` to `aria-current={!lab && x.id === id ? "page" : undefined}`. In their `className`, change the condition `x.id === id` to `!lab && x.id === id`.
+5. Replace `<Lesson key={m.id} m={m} isIonQ={/ionq/i.test(backendName)} />` with:
+   ```tsx
+         {lab ? <Lab key={lab.n} start={lab.start} isIonQ={isIonQ} /> : <Lesson key={m.id} m={m} isIonQ={isIonQ} onOpenLab={openLab} />}
+   ```
+6. Change `Lesson`'s signature to `function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLab: (c: Circuit) => void })`. Directly before its Reset button, add:
+   ```tsx
+            <button className="pbtn-ghost" onClick={() => onOpenLab(circuit)} disabled={running}>Open in Lab →</button>
+   ```
+
+- [ ] **Step 3: Verify**
+
+Run: `npx tsc --noEmit && npm run lint && npm run check:lessons && npm run build && npm run qollab:build`
+Expected: all pass. `main.js` stays under 2 MB.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/qollab/Lab.tsx src/qollab/Player.tsx
+git commit -m "Add a free-build Lab to the Qollab player"
+```
+
+---
+
+### Task 11: Project page story (README)
 
 The README becomes the Qollab project page, which is the first thing judges read. Judging covers novelty and creativity, technical execution, impact potential, and documentation quality. The page also has to state "what problem it explores".
 
@@ -2059,6 +2227,7 @@ Quantum computing is usually taught in one of two ways: linear algebra on a whit
 - **Ideal vs this machine.** Each result is compared with the exact ideal answer, so noise becomes something you can see and measure, not a footnote.
 - **One path for everyone.** Four tracks teach the same honest physics at different depths, from no maths at all to density matrices.
 - **Hard topics, hands on.** Error correction (and whether it actually helps on today's machines), BB84 quantum key distribution, the Bell test, teleportation, Grover's search and Shor's algorithm all run as circuits you can edit, with panels that do the arithmetic: the Bell score, and the factors Shor's algorithm finds.
+- **A free-build Lab.** Build any circuit up to 8 qubits, or start from any lesson's circuit, and run the same circuit on an ideal simulator and on IBM and IonQ machine models to see what noise does. The results include the circuit as Qiskit code to copy.
 
 | Track | For | Lessons |
 |---|---|---|
@@ -2067,7 +2236,7 @@ Quantum computing is usually taught in one of two ways: linear algebra on a whit
 | 💻 Developer | Programmers new to quantum | Qiskit and bit ordering, transpilation, shots and noise, Grover's search, the QFT, variational circuits |
 | 🔬 Researcher | Graduate level | Density matrices, noise and mitigation, the bit-flip code, phase estimation, VQE and QAOA, benchmarking, Shor's algorithm |
 
-The 21 Student, Developer and Researcher lessons run on Qollab. The Explorer games, community sharing and the Claude tutor need the full web app.
+The 21 Student, Developer and Researcher lessons and the Lab run on Qollab. The Explorer games, community sharing and the Claude tutor need the full web app.
 
 ```
 
@@ -2098,7 +2267,7 @@ git commit -m "Tell the project story on the README / Qollab project page"
 
 ---
 
-### Task 11: Wrap-up
+### Task 12: Wrap-up
 
 **Files:**
 - Delete: `scripts/qollab-smoke/` and the `qollab:smoke` script in `package.json`
