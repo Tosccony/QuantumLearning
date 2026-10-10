@@ -8,14 +8,12 @@ export default function Predict({ p, picked, onPick, revealed }: { p: PredictDat
     <section className="panel flex flex-col gap-3 p-4" aria-label="Predict before you run">
       <h3 className="font-semibold">🔮 Predict first</h3>
       <p>{p.q}</p>
-      <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Your prediction">
+      <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Your prediction">
         {p.options.map((o, k) => (
           <button
             key={k}
-            role="radio"
-            aria-checked={picked === k}
-            disabled={picked !== null}
-            onClick={() => onPick(k)}
+            aria-pressed={picked === k}
+            onClick={() => { if (picked === null) onPick(k); }}
             className={`rounded-xl bg-white/5 p-3 text-left text-sm ${picked === k ? "ring-2 ring-accent" : picked === null ? "hover:bg-white/10" : "opacity-50"}`}
           >
             {o}
