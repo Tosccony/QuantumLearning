@@ -12,6 +12,7 @@ export default function LearnCatalog() {
       <header>
         <h1 className="text-3xl font-bold">Choose your track</h1>
         <p className="mt-1 text-muted">Four paths from first steps to research. Every lesson ends with a real circuit you run on Qiskit.</p>
+        <Link href="/roadmaps" className="pbtn-ghost mt-4">Explore interactive roadmaps →</Link>
       </header>
       <div className="grid gap-4 md:grid-cols-2">
         {TRACKS.map((t) => {

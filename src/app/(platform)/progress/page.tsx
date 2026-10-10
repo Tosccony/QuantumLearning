@@ -39,6 +39,7 @@ export default function ProgressPage() {
       <header className="flex flex-wrap items-end gap-4">
         <div className="mr-auto">
           <h1 className="text-3xl font-bold">Your progress</h1>
+          <Link href="/roadmaps" className="mt-2 inline-block text-sm underline">Plan your next step with Roadmaps →</Link>
           <p className="mt-1 text-muted">{state.name ? `${state.name} · ` : ""}Skills unlock as you finish modules. Certificates arrive when you complete a track.</p>
         </div>
       </header>

@@ -8,6 +8,7 @@ import { useProgress } from "@/lib/progress";
 
 const LINKS = [
   { href: "/learn", label: "Learn" },
+  { href: "/roadmaps", label: "Roadmaps" },
   { href: "/lab", label: "Lab" },
   { href: "/community", label: "Community" },
   { href: "/progress", label: "Progress" },
@@ -26,7 +27,7 @@ export default function NavBar() {
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-lg" aria-hidden>⚛</span>
           Quantum Quest
         </Link>
-        <ul className="flex gap-1 text-sm">
+        <ul className="flex flex-wrap gap-x-1 gap-y-3 text-sm">
           {LINKS.map((l) => {
             const active = path === l.href || path.startsWith(`${l.href}/`) || (l.href === "/learn" && (path.startsWith("/tracks") || path.startsWith("/learn")));
             return (
