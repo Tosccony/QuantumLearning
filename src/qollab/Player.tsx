@@ -9,6 +9,7 @@ import Tutor from "@/components/lab/Tutor";
 import { MODULES, TRACKS, modulesOf, type Module } from "@/lib/curriculum";
 import { onesRate } from "@/lib/explain";
 import { runCircuit, type Circuit, type RunResult } from "@/lib/quantum";
+import Lab from "./Lab";
 
 const REPO = "https://github.com/Tosccony/QuantumLearning";
 const LESSON_TRACKS = TRACKS.filter((t) => t.id !== "explorer");
@@ -17,6 +18,10 @@ const LESSON_TRACKS = TRACKS.filter((t) => t.id !== "explorer");
 export default function Player({ backendName }: { backendName: string }) {
   const [id, setId] = useState(MODULES[0].id);
   const m = MODULES.find((x) => x.id === id)!;
+  const isIonQ = /ionq/i.test(backendName);
+  // `n` re-keys the Lab, so opening it from a lesson starts fresh with that lesson's circuit.
+  const [lab, setLab] = useState<{ start: Circuit; n: number } | null>(null);
+  const openLab = (start: Circuit) => setLab((l) => ({ start, n: (l?.n ?? 0) + 1 }));
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 p-4">
       <header className="flex flex-wrap items-center gap-3">
@@ -24,15 +29,25 @@ export default function Player({ backendName }: { backendName: string }) {
         <span className="chip">Simulator: {backendName}</span>
       </header>
       <nav aria-label="Lessons" className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="w-28 text-sm text-muted">🧪 Lab</span>
+          <button
+            onClick={() => { if (!lab) openLab({ qubits: 2, ops: [] }); }}
+            aria-current={lab ? "page" : undefined}
+            className={`chip ${lab ? "!bg-accent !text-white" : "hover:bg-white/20"}`}
+          >
+            Build your own circuit
+          </button>
+        </div>
         {LESSON_TRACKS.map((t) => (
           <div key={t.id} className="flex flex-wrap items-center gap-1.5">
             <span className="w-28 text-sm text-muted">{t.icon} {t.name}</span>
             {modulesOf(t.id).map((x, i) => (
               <button
                 key={x.id}
-                onClick={() => setId(x.id)}
-                aria-current={x.id === id ? "page" : undefined}
-                className={`chip ${x.id === id ? "!bg-accent !text-white" : "hover:bg-white/20"}`}
+                onClick={() => { setLab(null); setId(x.id); }}
+                aria-current={!lab && x.id === id ? "page" : undefined}
+                className={`chip ${!lab && x.id === id ? "!bg-accent !text-white" : "hover:bg-white/20"}`}
               >
                 {i + 1}. {x.title}
               </button>
@@ -40,7 +55,7 @@ export default function Player({ backendName }: { backendName: string }) {
           </div>
         ))}
       </nav>
-      <Lesson key={m.id} m={m} isIonQ={/ionq/i.test(backendName)} />
+      {lab ? <Lab key={lab.n} start={lab.start} isIonQ={isIonQ} /> : <Lesson key={m.id} m={m} isIonQ={isIonQ} onOpenLab={openLab} />}
       <footer className="pb-4 text-center text-xs text-muted">
         Kids&apos; Explorer games, community sharing and the AI tutor live in the full web app: <a className="underline" href={REPO}>{REPO}</a>. MIT licensed.
         <br />
@@ -50,7 +65,7 @@ export default function Player({ backendName }: { backendName: string }) {
   );
 }
 
-function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
+function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLab: (c: Circuit) => void }) {
   const [ops, setOps] = useState<EOp[]>(() => layout(m.circuit));
   const circuit = useMemo(() => toCircuit(m.circuit.qubits, ops), [m.circuit.qubits, ops]);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -90,6 +105,7 @@ function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
         <section className="panel flex flex-col gap-3 p-4" aria-label="Lesson circuit">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="mr-auto font-semibold">🧩 The circuit (you can edit it)</h3>
+            <button className="pbtn-ghost" onClick={() => onOpenLab(circuit)} disabled={running}>Open in Lab →</button>
             <button className="pbtn-ghost" disabled={running} onClick={() => { setOps(layout(m.circuit)); setResult(null); setError(null); }}>Reset</button>
             <button className="pbtn-primary" onClick={run} disabled={running || (!!m.predict && guess === null)}>{running ? "Running…" : m.predict && guess === null ? "Predict first ↑" : "▶ Run"}</button>
           </div>
@@ -109,7 +125,7 @@ function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
             <ul className="mt-1 list-disc pl-5 text-muted">{m.tryIt.map((t) => <li key={t}>{t}</li>)}</ul>
           </div>
         </section>
-        {m.compare && <CodeVsBare circuit={m.compare} />}
+        {m.compare && <CodeVsBare circuit={m.compare} isIonQ={isIonQ} />}
         <section className="panel flex flex-col gap-3 p-4" aria-label="Check your understanding">
           <h3 className="font-semibold">✅ Check your understanding</h3>
           <p>{m.check.q}</p>
@@ -138,7 +154,7 @@ function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
   );
 }
 
-function CodeVsBare({ circuit }: { circuit: Circuit }) {
+function CodeVsBare({ circuit, isIonQ }: { circuit: Circuit; isIonQ: boolean }) {
   const [r, setR] = useState<RunResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -165,6 +181,7 @@ function CodeVsBare({ circuit }: { circuit: Circuit }) {
         <button className="pbtn-primary" onClick={run} disabled={busy}>{busy ? "Running…" : "▶ Run bare vs protected"}</button>
       </div>
       <p className="text-sm text-muted">One circuit holds a bare qubit that just waits and a qubit protected by the 3-qubit code, both storing 0. Any 1 we read is an error. The protected qubit pays for its protection with about 15 extra gates.</p>
+      {isIonQ && <p className="text-xs text-muted">IonQ simulators take one job per Run. If you already ran the lesson circuit, press Stop and Run before this comparison.</p>}
       {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
       {r && (
         <p role="status" className="text-sm">
