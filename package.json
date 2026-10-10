@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "check:py": "backend/.venv/bin/python backend/test_engine.py",
     "backend": "cd backend && .venv/bin/uvicorn main:app --port 8000 --reload",
     "backend:setup": "cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt"
   },
