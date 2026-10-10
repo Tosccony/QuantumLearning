@@ -89,6 +89,11 @@ assert.equal(planetStatus(emptyProgress, 1), "available");
 assert.equal(planetStatus(emptyProgress, 2), "locked");
 assert.equal(planetStatus(planet1Done, 1), "done");
 assert.equal(planetStatus(planet1Done, 2), "available");
+assert.equal(planetStatus(planet1Done, 3), "locked");
+const onlyPlanet2 = { ...emptyProgress, levels: { 2: { completed: true } } } as unknown as State;
+assert.equal(planetStatus(onlyPlanet2, 1), "available");
+assert.equal(planetStatus(onlyPlanet2, 2), "done");
+assert.equal(planetStatus(onlyPlanet2, 3), "available");
 for (const st of [emptyProgress, planet1Done])
   for (const topic of roadmapTopics("explorer")) {
     assert.equal(topic.source.kind, "planet");
@@ -102,8 +107,10 @@ for (const t of TRACKS)
   }
 // Roadmap done counts agree with the shared trackProgress.
 const sample = { ...doneThrough(["s1", "s2", "d1"]), levels: { 1: { completed: true } } } as unknown as State;
-for (const t of TRACKS)
-  assert.equal(roadmapTopics(t.id).filter(x => topicStatus(sample, x) === "done").length, trackProgress(sample, t.id).done, `${t.id}: done count`);
+const sample2 = { ...doneThrough(["s1", "s2", "s3", "s4", "r1"]), levels: { 1: { completed: true }, 2: { completed: true }, 3: { completed: true } } } as unknown as State;
+for (const st of [sample, sample2])
+  for (const t of TRACKS)
+    assert.equal(roadmapTopics(t.id).filter(x => topicStatus(st, x) === "done").length, trackProgress(st, t.id).done, `${t.id}: done count`);
 
 // Malformed stored notes are dropped, never thrown.
 assert.deepEqual(sanitizePersonal({ s1: { reviewed: 5, note: 3, bookmarked: true } }), { s1: { bookmarked: true } });

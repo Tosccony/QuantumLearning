@@ -15,9 +15,10 @@ const algorithms: Resource = { title: "Fundamentals of quantum algorithms", url:
 const mixed: Resource = { title: "Density matrices and quantum channels", url: "https://quantum.cloud.ibm.com/learning/en/courses/general-formulation-of-quantum-information", kind: "Reading", provider: "IBM Quantum", level: "Advanced" };
 const variational: Resource = { title: "Variational algorithm design", url: "https://quantum.cloud.ibm.com/learning/en/courses/variational-algorithm-design", kind: "Reading", provider: "IBM Quantum", level: "Advanced programming" };
 
-const reading: Record<string, Resource> = { s5: teleport, s6: algorithms, d1: docs, d2: docs, d3: docs, d4: algorithms, d5: algorithms, d6: variational, r1: mixed, r2: mixed, r3: correction, r4: algorithms, r5: variational, r6: algorithms };
 
 // Shared courses are labeled as broader resources rather than topic-specific videos.
+const reading: Record<string, Resource> = { s5: teleport, s6: algorithms, d1: docs, d2: docs, d3: docs, d4: algorithms, d5: algorithms, d6: variational, r1: mixed, r2: mixed, r3: correction, r4: algorithms, r5: variational, r6: algorithms };
+
 function buildTopics(track: TrackId): RoadmapTopic[] {
   if (track === "explorer") return PLANETS.map((p, i) => ({ id: `e${p.id}`, source: { kind: "planet" as const, id: p.id }, title: p.concept, summary: p.blurb, lesson: `/planet/${p.id}`, requires: i ? [`e${p.id - 1}`] : [], resources: [intro, basics], challenge: `Play ${p.name}, then explain ${p.concept.toLowerCase()} in your own words.` }));
   return modulesOf(track).map(m => ({ id: m.id, source: { kind: "module" as const, id: m.id }, title: m.skill, summary: m.summary, lesson: `/learn/${m.id}`, lab: `/lab?module=${m.id}`, requires: m.requires, minutes: m.minutes, resources: [m.id === "d4" ? grover : intro, reading[m.id] ?? basics], challenge: m.tryIt[0] }));

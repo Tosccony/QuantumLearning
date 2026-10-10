@@ -48,7 +48,7 @@ export default function RoadmapView({ track }: { track: Track }) {
   const topic = topics.find(n => n.id === selected)!;
   const status = topicStatus(state, topic);
   const { done } = trackProgress(state, track.id);
-  // Statuses come from the shared rules in skills.ts.
+  // Counts and statuses come from the shared rules in skills.ts.
   const next = topics.find(n => topicStatus(state, n) === "available");
   // A missing prerequisite may itself be locked, so point at the first lesson that can actually be started on the way to it.
   const blocked = topics.flatMap(n => n.requires).find(id => moduleById(id) && !state.modules[id]);
