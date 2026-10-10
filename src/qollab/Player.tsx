@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import Markdown from "@/components/Markdown";
 import CircuitEditor, { layout, toCircuit, type EOp } from "@/components/lab/CircuitEditor";
 import IdealVsMachine from "@/components/lab/IdealVsMachine";
+import LessonReadout from "@/components/lab/LessonReadout";
 import Predict from "@/components/lab/Predict";
 import ResultsPanel from "@/components/lab/ResultsPanel";
 import Tutor from "@/components/lab/Tutor";
@@ -99,6 +100,7 @@ function Lesson({ m, isIonQ }: { m: Module; isIonQ: boolean }) {
             <>
               <p className="rounded-xl bg-accent/15 p-3 text-sm"><b>What to look for:</b> {m.observe}</p>
               <IdealVsMachine result={result} hint="On your next Run, pick an IBM or IonQ machine in Select QPU to see real-world noise." />
+              {m.readout && <LessonReadout readout={m.readout} result={result} />}
               <ResultsPanel result={result} circuit={circuit} />
             </>
           )}

@@ -51,6 +51,23 @@ export function onesRate(counts: Record<string, number>, q: number): number {
   return shots ? ones / shots : 0;
 }
 
+/** Agreement score E = P(same) − P(different) for qubits a and b: +1 always agree, −1 always disagree. */
+export function pairCorrelation(counts: Record<string, number>, a: number, b: number): number {
+  let shots = 0;
+  let score = 0;
+  for (const [k, v] of Object.entries(counts)) {
+    shots += v;
+    score += k[k.length - 1 - a] === k[k.length - 1 - b] ? v : -v;
+  }
+  return shots ? score / shots : 0;
+}
+
+/** CHSH score for the Bell-test lesson: pairs (q0,q1) (q2,q3) (q4,q5) (q6,q7), S = E₀ + E₁ + E₂ − E₃. */
+export function bellScore(counts: Record<string, number>): { E: number[]; S: number } {
+  const E = [0, 1, 2, 3].map((p) => pairCorrelation(counts, 2 * p, 2 * p + 1));
+  return { E, S: E[0] + E[1] + E[2] - E[3] };
+}
+
 /**
  * Deterministic explanation built from the real Qiskit results. Used when no Claude API
  * credentials are configured, so the "Understand" step always works.

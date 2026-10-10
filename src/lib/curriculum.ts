@@ -24,6 +24,9 @@ export type Check = { q: string; options: string[]; answer: number; why: string 
 /** A prediction made before running. Each wrong option is a common misconception, answered in `feedback`. */
 export type Predict = { q: string; options: string[]; answer: number; feedback: string[] };
 
+/** Lesson-specific arithmetic shown under the results (see LessonReadout). */
+export type Readout = { kind: "bell" };
+
 export type Module = {
   id: string;
   track: Exclude<TrackId, "explorer">;
@@ -39,6 +42,7 @@ export type Module = {
   check: Check;
   predict?: Predict;
   compare?: Circuit;
+  readout?: Readout;
 };
 
 const PI = Math.PI;
@@ -155,6 +159,80 @@ export const MODULES: Module[] = [
     observe: "The inputs (the right-most two bits of each bitstring) are always 11. The ancilla bit stays random, which is expected.",
     tryIt: ["Delete both oracle CNOTs to get a constant function. What do q0, q1 read now?", "Keep only one CNOT. Is f still balanced?"],
     check: { q: "If Deutsch–Jozsa measures all zeros on the input register, the function is…", options: ["Constant", "Balanced", "Undetermined", "Both"], answer: 0, why: "Only a constant function makes every amplitude interfere constructively back to |0…0⟩." },
+  },
+
+  {
+    id: "s7", track: "student", title: "Quantum key distribution: BB84", minutes: 12, skill: "Quantum cryptography", requires: ["s3"],
+    summary: "Alice and Bob build a shared secret key from single qubits. Measuring in the wrong basis disturbs a state, so an eavesdropper leaves errors they can detect.",
+    sections: [
+      { heading: "Why quantum helps with secrets", body: "To encrypt messages, two people first need a shared secret key: a string of random bits nobody else knows. Sent over an ordinary channel, those bits can be copied without leaving a trace. Qubits are different. An unknown quantum state can't be copied (the **no-cloning theorem**), and measuring it in the wrong basis changes it. BB84, proposed by Charles Bennett and Gilles Brassard in 1984, turns that fragility into a burglar alarm." },
+      { heading: "The protocol", body: "1. For each qubit, Alice picks a random bit and a random basis: **Z** (|0⟩, |1⟩) or **X** (|+⟩, |−⟩).\n2. Bob picks his own random basis for each qubit and measures in it.\n3. Over a public channel they compare **bases, never bits**, and keep only the rounds where the bases matched. This step is called sifting.\n4. When the bases match, Bob's bit always equals Alice's. When they don't, Bob gets a coin flip, so those rounds are thrown away." },
+      { heading: "This circuit", body: "Each qubit is one round, with the random choices written into the circuit. Alice uses `X` to send a 1 and `H` to switch to the X basis. Bob measuring in the X basis is an `H` just before measurement.\n\n- q0: Alice sends 0 in Z, Bob measures Z. Kept.\n- q1: Alice sends 1 in Z, Bob measures X. Thrown away.\n- q2: Alice sends 1 in X, Bob measures X. Kept.\n- q3: Alice sends 0 in X, Bob measures Z. Thrown away.\n- q4: Alice sends 1 in Z, Bob measures Z. Kept.\n- q5: Alice sends 0 in X, Bob measures X. Kept.\n\nq6 is Eve's notebook. She isn't listening yet, so it always reads 0. The shared key is q0, q2, q4, q5 = **0, 1, 1, 0**." },
+      { heading: "Catching Eve", body: "Eve can't copy the qubits, so to learn anything she has to measure them, and she doesn't know Alice's bases. Whenever she guesses the wrong basis, she knocks the qubit into the other basis, and Bob's result turns into a coin flip even though his basis matched Alice's. Over many rounds that's a 25% error rate in the sifted key. Alice and Bob publicly compare a random sample of key bits; if too many disagree, they know someone listened, throw the key away and start again. In the circuit, a `CX` from a key qubit into q6 plays Eve: it records the qubit's Z value, which disturbs it exactly like a Z-basis measurement." },
+    ],
+    circuit: {
+      qubits: 7,
+      ops: [
+        g("x", [1]), g("x", [2]), g("h", [2]), g("h", [3]), g("x", [4]), g("h", [5]), // Alice
+        g("h", [1]), g("h", [2]), g("h", [5]), // Bob
+      ],
+    },
+    observe: "Read each bitstring right to left (q0 first). q0, q2, q4 and q5 never change: they hold the key 0, 1, 1, 0. Only q1 and q3 flip, because those rounds used different bases and get thrown away. q6, Eve's notebook, stays 0.",
+    tryIt: [
+      "Let Eve listen to round q2: add a `CX` with q2 as control and q6 as target, after Alice's `H` and before Bob's `H`. How often is q2 wrong now?",
+      "Move Eve to round q4 instead, a Z-basis round. Does the key change? Why do Alice and Bob need to check many bits, not just one?",
+    ],
+    check: { q: "Why can't Eve just copy each qubit and measure her copy later?", options: ["Unknown quantum states can't be copied (no-cloning)", "Qubits travel faster than light", "Alice encrypts each qubit first", "Bob always measures before Eve can"], answer: 0, why: "The no-cloning theorem rules out a perfect copy of an unknown state. Eve has to measure the original, and measuring in the wrong basis disturbs it, which Alice and Bob can detect." },
+    predict: {
+      q: "Rounds q1 and q3 used different bases for Alice and Bob. What will Bob read on those qubits?",
+      options: ["Always Alice's bit", "Always the opposite of Alice's bit", "A random 0 or 1, 50/50", "Always 0"],
+      answer: 2,
+      feedback: [
+        "Only matching bases guarantee that. A Z-basis state measured in the X basis, or the reverse, gives a coin flip.",
+        "There's no systematic flip. With mismatched bases the result is completely random, so it carries no information about Alice's bit.",
+        "Right. A Z-basis state measured in the X basis, or the reverse, is a perfect coin flip. That's why these rounds are thrown away during sifting.",
+        "Nothing forces 0. q1 starts as |1⟩ and q3 as |+⟩, and measured in the other basis each gives 0 or 1 with equal odds.",
+      ],
+    },
+  },
+  {
+    id: "s8", track: "student", title: "Is entanglement real? The Bell test", minutes: 14, skill: "Bell inequalities", requires: ["s4"],
+    summary: "If entangled pairs secretly carried pre-agreed answers, a score called S could never exceed 2. Real quantum pairs score about 2.83.",
+    sections: [
+      { heading: "Hidden instructions?", body: "Entangled qubits always agree when they're measured the same way. Einstein suspected a boring explanation: perhaps each pair leaves the source carrying a hidden instruction sheet, like twins who agreed on their answers in advance. In 1964 John Bell showed that this idea makes a testable prediction, and that quantum mechanics disagrees with it." },
+      { heading: "The CHSH game", body: "Alice measures her qubit along one of two directions (a₀ or a₁), and Bob along one of two (b₀ or b₁). For each combination they compute an agreement score:\n\n```\nE = P(same result) − P(different result)\nS = E(a₀,b₀) + E(a₀,b₁) + E(a₁,b₀) − E(a₁,b₁)\n```\n\nWith hidden instruction sheets, S can never be larger than 2, whatever the sheets say. Quantum mechanics allows up to 2√2 ≈ 2.83, which is called Tsirelson's bound." },
+      { heading: "This circuit", body: "Four Bell pairs, one for each combination of settings: A (q0, q1), B (q2, q3), C (q4, q5) and D (q6, q7). Measuring along an angle θ is an `Ry(−θ)` just before measurement. Alice uses a₀ = 0 and a₁ = π/2; Bob uses b₀ = π/4 and b₁ = −π/4. For these pairs E = cos(θ_Alice − θ_Bob), so pairs A, B and C score +0.71 and pair D scores −0.71, giving S ≈ 2.83. The Bell score panel under the results does the arithmetic." },
+      { heading: "Why it matters", body: "Experiments since the 1970s have measured S above 2, closing loophole after loophole, and the 2022 Nobel Prize in Physics went to Alain Aspect, John Clauser and Anton Zeilinger for this work. Entanglement-based key distribution (Ekert's E91 protocol) uses the same test: if S drops to 2 or below, someone has disturbed the pairs." },
+    ],
+    circuit: {
+      qubits: 8,
+      ops: [
+        g("h", [0]), g("cx", [1], [0]), g("h", [2]), g("cx", [3], [2]),
+        g("h", [4]), g("cx", [5], [4]), g("h", [6]), g("cx", [7], [6]),
+        g("ry", [1], [], [-PI / 4]), // A: Alice 0, Bob π/4
+        g("ry", [3], [], [PI / 4]), // B: Alice 0, Bob −π/4
+        g("ry", [4], [], [-PI / 2]), g("ry", [5], [], [-PI / 4]), // C: Alice π/2, Bob π/4
+        g("ry", [6], [], [-PI / 2]), g("ry", [7], [], [PI / 4]), // D: Alice π/2, Bob −π/4
+      ],
+    },
+    observe: "Pairs A, B and C agree about 85% of the time (E ≈ +0.71); pair D disagrees about 85% of the time (E ≈ −0.71). The Bell score adds them up to about 2.83, comfortably above the classical limit of 2.",
+    tryIt: [
+      "Set every `Ry` angle to 0, so Alice and Bob always measure the same way. Predict S before you run.",
+      "Turn Bob's angles up to ±π/2: give q1 and q5 `Ry(−π/2)`, and q3 and q7 `Ry(π/2)`. Does S grow or shrink? Why is π/4 the sweet spot?",
+    ],
+    check: { q: "What does a measured S of about 2.83 rule out?", options: ["Pairs carrying pre-agreed answers (local hidden variables)", "Quantum mechanics", "Any correlation between the qubits", "Randomness in each single result"], answer: 0, why: "Any hidden-instruction model scores at most 2, so measuring 2.83 means no such instruction sheet can explain the results. Each single result is still random, so the correlation can't be used to send a message." },
+    predict: {
+      q: "Hidden instruction sheets can score at most S = 2. What will these entangled pairs score?",
+      options: ["Exactly 2, the same as instruction sheets", "About 2.83, above the classical limit", "4, the largest value the formula allows", "About 0, because every single result is random"],
+      answer: 1,
+      feedback: [
+        "Instruction sheets top out at 2, but entanglement isn't an instruction sheet. These pairs go beyond it.",
+        "Right. Each pair is individually random, yet the correlations reach 2√2 ≈ 2.83, which no pre-agreed answers can match.",
+        "The formula allows 4, but quantum mechanics stops at 2√2 ≈ 2.83 (Tsirelson's bound). Reaching 4 would need correlations stranger than quantum ones.",
+        "Each single result is random, but the pairs are strongly correlated. S measures the correlations, not the individual results.",
+      ],
+    },
+    readout: { kind: "bell" },
   },
 
   // ------------------------------------------------------------------ Developer
