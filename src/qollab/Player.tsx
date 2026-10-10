@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Markdown from "@/components/Markdown";
 import CircuitEditor, { layout, toCircuit, type EOp } from "@/components/lab/CircuitEditor";
 import IdealVsMachine from "@/components/lab/IdealVsMachine";
@@ -68,6 +68,11 @@ export default function Player({ backendName }: { backendName: string }) {
 function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLab: (c: Circuit) => void }) {
   const [ops, setOps] = useState<EOp[]>(() => layout(m.circuit));
   const circuit = useMemo(() => toCircuit(m.circuit.qubits, ops), [m.circuit.qubits, ops]);
+  // The circuit on screen right now; a run that finishes after an edit must not show its stale result.
+  const current = useRef(circuit);
+  useEffect(() => {
+    current.current = circuit;
+  }, [circuit]);
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +83,9 @@ function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLa
     setRunning(true);
     setError(null);
     try {
-      setResult(await runCircuit(circuit, { shots: 1024 }));
+      const sent = circuit;
+      const r = await runCircuit(sent, { shots: 1024 });
+      if (current.current === sent) setResult(r);
     } catch (e) {
       setResult(null);
       setError((e as Error).message);

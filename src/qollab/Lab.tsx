@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import CircuitEditor, { layout, toCircuit, type EOp } from "@/components/lab/CircuitEditor";
 import IdealVsMachine from "@/components/lab/IdealVsMachine";
 import ResultsPanel from "@/components/lab/ResultsPanel";
@@ -13,6 +13,11 @@ export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean
   const [qubits, setQubits] = useState(start.qubits);
   const [ops, setOps] = useState<EOp[]>(() => layout(start));
   const circuit = useMemo(() => toCircuit(qubits, ops), [qubits, ops]);
+  // The circuit on screen right now; a run that finishes after an edit must not show its stale result.
+  const current = useRef(circuit);
+  useEffect(() => {
+    current.current = circuit;
+  }, [circuit]);
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +41,9 @@ export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean
     setRunning(true);
     setError(null);
     try {
-      setResult(await runCircuit(circuit, { shots: 1024 }));
+      const sent = circuit;
+      const r = await runCircuit(sent, { shots: 1024 });
+      if (current.current === sent) setResult(r);
     } catch (e) {
       setResult(null);
       setError((e as Error).message);
