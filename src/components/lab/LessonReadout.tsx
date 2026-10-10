@@ -17,7 +17,7 @@ export default function LessonReadout({ readout, result }: { readout: Readout; r
         <p role="status" className="mt-2">
           S = E(A) + E(B) + E(C) − E(D) = <b>{S.toFixed(2)}</b>.{" "}
           {S > 2.1
-            ? "That's above 2: no hidden instruction sheet can produce these correlations."
+            ? "That's above 2: if the settings were chosen at random, no hidden instruction sheet could produce these correlations."
             : "That's not clearly above 2 (results wobble by about ±0.1 from run to run), so hidden instruction sheets could still explain it. Check the angles, or noise may have washed out the entanglement."}
           {" "}Classical limit 2, quantum limit 2√2 ≈ 2.83.
         </p>

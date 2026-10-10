@@ -179,7 +179,7 @@ export const MODULES: Module[] = [
     },
     observe: "Read each bitstring right to left (q0 first). q0, q2, q4 and q5 never change: they hold the key 0, 1, 1, 0. Only q1 and q3 flip, because those rounds used different bases and get thrown away. q6, Eve's notebook, stays 0.",
     tryIt: [
-      "Let Eve listen to round q2: add a `CX` with q2 as control and q6 as target, after Alice's `H` and before Bob's `H`. How often is q2 wrong now?",
+      "Let Eve listen to round q2: add a CX with q2 as control and q6 as target, after Alice's H and before Bob's H. How often is q2 wrong now?",
       "Move Eve to round q4 instead, a Z-basis round. Does the key change? Why do Alice and Bob need to check many bits, not just one?",
     ],
     check: { q: "Why can't Eve just copy each qubit and measure her copy later?", options: ["Unknown quantum states can't be copied (no-cloning)", "Qubits travel faster than light", "Alice encrypts each qubit first", "Bob always measures before Eve can"], answer: 0, why: "The no-cloning theorem rules out a perfect copy of an unknown state. Eve has to measure the original, and measuring in the wrong basis disturbs it, which Alice and Bob can detect." },
@@ -201,7 +201,7 @@ export const MODULES: Module[] = [
     sections: [
       { heading: "Hidden instructions?", body: "Entangled qubits always agree when they're measured the same way. Einstein suspected a boring explanation: perhaps each pair leaves the source carrying a hidden instruction sheet, like twins who agreed on their answers in advance. In 1964 John Bell showed that this idea makes a testable prediction, and that quantum mechanics disagrees with it." },
       { heading: "The CHSH game", body: "Alice measures her qubit along one of two directions (a₀ or a₁), and Bob along one of two (b₀ or b₁). For each combination they compute an agreement score:\n\n```\nE = P(same result) − P(different result)\nS = E(a₀,b₀) + E(a₀,b₁) + E(a₁,b₀) − E(a₁,b₁)\n```\n\nWith hidden instruction sheets, S can never be larger than 2, whatever the sheets say. Quantum mechanics allows up to 2√2 ≈ 2.83, which is called Tsirelson's bound." },
-      { heading: "This circuit", body: "Four Bell pairs, one for each combination of settings: A (q0, q1), B (q2, q3), C (q4, q5) and D (q6, q7). Measuring along an angle θ is an `Ry(−θ)` just before measurement. Alice uses a₀ = 0 and a₁ = π/2; Bob uses b₀ = π/4 and b₁ = −π/4. For these pairs E = cos(θ_Alice − θ_Bob), so pairs A, B and C score +0.71 and pair D scores −0.71, giving S ≈ 2.83. The Bell score panel under the results does the arithmetic." },
+      { heading: "This circuit", body: "Four Bell pairs, one for each combination of settings: A (q0, q1), B (q2, q3), C (q4, q5) and D (q6, q7). Measuring along an angle θ is an `Ry(−θ)` just before measurement. Alice uses a₀ = 0 and a₁ = π/2; Bob uses b₀ = π/4 and b₁ = −π/4. For these pairs E = cos(θ_Alice − θ_Bob), so pairs A, B and C score +0.71 and pair D scores −0.71, giving S ≈ 2.83. The Bell score panel under the results does the arithmetic. In a real Bell test each pair's settings are chosen at random after the pair leaves the source, so no instruction sheet can know them in advance. Here each pair gets a fixed combination so that one run collects all four scores." },
       { heading: "Why it matters", body: "Experiments since the 1970s have measured S above 2, closing loophole after loophole, and the 2022 Nobel Prize in Physics went to Alain Aspect, John Clauser and Anton Zeilinger for this work. Entanglement-based key distribution (Ekert's E91 protocol) uses the same test: if S drops to 2 or below, someone has disturbed the pairs." },
     ],
     circuit: {
@@ -217,8 +217,8 @@ export const MODULES: Module[] = [
     },
     observe: "Pairs A, B and C agree about 85% of the time (E ≈ +0.71); pair D disagrees about 85% of the time (E ≈ −0.71). The Bell score adds them up to about 2.83, comfortably above the classical limit of 2.",
     tryIt: [
-      "Set every `Ry` angle to 0, so Alice and Bob always measure the same way. Predict S before you run.",
-      "Turn Bob's angles up to ±π/2: give q1 and q5 `Ry(−π/2)`, and q3 and q7 `Ry(π/2)`. Does S grow or shrink? Why is π/4 the sweet spot?",
+      "Set every Ry angle to 0, so Alice and Bob always measure the same way. Predict S before you run.",
+      "Turn Bob's angles up to ±π/2: give q1 and q5 Ry(−π/2), and q3 and q7 Ry(π/2). Does S grow or shrink? Why is π/4 the sweet spot?",
     ],
     check: { q: "What does a measured S of about 2.83 rule out?", options: ["Pairs carrying pre-agreed answers (local hidden variables)", "Quantum mechanics", "Any correlation between the qubits", "Randomness in each single result"], answer: 0, why: "Any hidden-instruction model scores at most 2, so measuring 2.83 means no such instruction sheet can explain the results. Each single result is still random, so the correlation can't be used to send a message." },
     predict: {

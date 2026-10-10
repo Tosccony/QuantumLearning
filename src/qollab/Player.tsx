@@ -168,6 +168,7 @@ function CodeVsBare({ circuit, isIonQ }: { circuit: Circuit; isIonQ: boolean }) 
   const bare = r ? onesRate(r.counts, 0) : 0;
   const coded = r ? onesRate(r.counts, 1) : 0;
   const pc = (x: number) => `${(x * 100).toFixed(1)}%`;
+  const se = r ? Math.sqrt((bare * (1 - bare) + coded * (1 - coded)) / r.shots) : 0;
 
   async function run() {
     setBusy(true);
@@ -187,7 +188,7 @@ function CodeVsBare({ circuit, isIonQ }: { circuit: Circuit; isIonQ: boolean }) 
         <h3 className="mr-auto font-semibold">🛡️ Does the code help on this machine?</h3>
         <button className="pbtn-primary" onClick={run} disabled={busy}>{busy ? "Running…" : "▶ Run bare vs protected"}</button>
       </div>
-      <p className="text-sm text-muted">One circuit holds a bare qubit that just waits and a qubit protected by the 3-qubit code, both storing 0. Any 1 we read is an error. The protected qubit pays for its protection with about 15 extra gates.</p>
+      <p className="text-sm text-muted">One circuit holds a bare qubit and a qubit protected by the 3-qubit code, both storing 0. Any 1 we read is an error. The bare qubit can only be misread. The protected one can be misread too, plus whatever its 15 extra gates (about 26 two-qubit gates once compiled) add. A stored 0 barely suffers from waiting, so this is a tough test for the code.</p>
       {isIonQ && <p className="text-xs text-muted">IonQ simulators take one job per Run. If you already ran the lesson circuit, press Stop and Run before this comparison.</p>}
       {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
       {r && (
@@ -195,9 +196,11 @@ function CodeVsBare({ circuit, isIonQ }: { circuit: Circuit; isIonQ: boolean }) 
           Bare qubit error: <b>{pc(bare)}</b> · Protected qubit error: <b>{pc(coded)}</b>.{" "}
           {bare === 0 && coded === 0
             ? "No errors at all: this is a perfect machine. Pick an IBM or IonQ simulator on your next Run."
-            : coded < bare
-              ? "The code helped: it caught flips that hit the bare qubit unprotected."
-              : "The code lost: its own gates added more errors than it fixed. Error correction pays off only once gates are good enough, below the fault-tolerance threshold. Real hardware is a little kinder to the code than this test, because a real idle qubit also decays while it waits."}
+            : Math.abs(coded - bare) <= 2 * se
+              ? "Too close to call: the difference is within shot-to-shot wobble. Run again to check."
+              : coded < bare
+                ? "The protected qubit came out ahead. On this test that can only mean q1 reads out more reliably than q0, because the bare qubit's only possible error is a misread."
+                : "The code lost: its own gates added more errors than it can fix. Error correction pays off only once gates are good enough (below the fault-tolerance threshold) and the stored qubit actually suffers errors while it waits."}
         </p>
       )}
     </section>
