@@ -1,0 +1,68 @@
+import { formatAngle, GATES, type Circuit, type RunResult } from "./quantum";
+
+export type Level = "beginner" | "intermediate" | "advanced";
+
+/** Everything the AI tutor knows about the learner's current experiment, as plain text. */
+export function labContext(c: Circuit, r: RunResult | null, extra = ""): string {
+  const ops = c.ops
+    .map((o, i) => `${i + 1}. ${o.gate}${o.params?.length ? `(${o.params.map(formatAngle).join(", ")})` : ""} ${o.controls?.length ? `controls=[${o.controls}] ` : ""}targets=[${o.targets}]`)
+    .join("\n");
+  const parts = [`Circuit: ${c.qubits} qubit(s), ${c.ops.length} op(s)\n${ops || "(empty)"}`];
+  if (r) {
+    const top = Object.entries(r.counts).sort((a, b) => b[1] - a[1]).slice(0, 16);
+    parts.push(
+      `Backend: ${r.backend}, ${r.shots} shots, Qiskit ${r.qiskit_version}`,
+      `Diagram:\n${r.diagram}`,
+      `Counts (top): ${top.map(([k, v]) => `${k}:${v}`).join(", ")}`,
+      `Exact probabilities: ${Object.entries(r.probabilities).slice(0, 16).map(([k, v]) => `${k}:${v.toFixed(4)}`).join(", ")}`,
+      `Bloch vectors (x,y,z) per qubit: ${r.bloch.map((b, q) => `q${q}=(${b.map((n) => n.toFixed(3)).join(",")})`).join(" ")}`,
+      `Purity per qubit: ${r.purity.map((p, q) => `q${q}=${p.toFixed(3)}`).join(" ")}; entangled=${r.entangled}`,
+      `Depth ${r.depth}; transpiled to ${r.transpiled.basis.join(",")}: depth ${r.transpiled.depth}, gates ${JSON.stringify(r.transpiled.gate_counts)}`,
+    );
+  } else parts.push("Not run yet.");
+  if (extra) parts.push(extra);
+  return parts.join("\n\n");
+}
+
+const pct = (x: number) => `${(x * 100).toFixed(x < 0.1 ? 1 : 0)}%`;
+
+/**
+ * Deterministic explanation built from the real Qiskit results. Used when no Claude API
+ * credentials are configured, so the "Understand" step always works.
+ */
+export function offlineExplain(c: Circuit, r: RunResult | null, level: Level): string {
+  if (!c.ops.length) return "The circuit is empty. Every qubit starts in |0⟩, so measuring gives all zeros. Add an `H` gate to create your first superposition.";
+  if (!r) return "Press **Run** first. I explain using the actual Qiskit results, not guesses.";
+
+  const used = Array.from(new Set(c.ops.map((o) => o.gate)));
+  const probs = Object.entries(r.probabilities).sort((a, b) => b[1] - a[1]);
+  const certain = probs.length === 1;
+  const hasH = used.some((g) => ["h", "ry", "rx", "sx", "initialize"].includes(g));
+  const hasPhase = used.some((g) => ["z", "s", "t", "sdg", "tdg", "rz", "p", "cz", "cp", "crz"].includes(g));
+  const two = used.filter((g) => (GATES[g]?.controls ?? 0) !== 0 || g === "swap");
+  const shots = Object.values(r.counts).reduce((a, b) => a + b, 0);
+  const totalShotDev = probs.reduce((a, [k, p]) => a + Math.abs((r.counts[k] ?? 0) / shots - p), 0) / 2;
+  const out: string[] = [];
+
+  if (level === "beginner") {
+    out.push(`Your circuit uses ${used.map((g) => `\`${GATES[g]?.label ?? g}\``).join(", ")} on ${c.qubits} qubit${c.qubits > 1 ? "s" : ""}.`);
+    if (certain) out.push(`Every single shot gave **${probs[0][0]}**. The circuit sends the qubits to one definite answer${hasH ? ". The superposition in the middle was undone by interference, a bit like waves cancelling out" : ""}.`);
+    else out.push(`Results are spread over ${probs.length} answers. The most likely is **${probs[0][0]}** (${pct(probs[0][1])}). Each run is like a fresh coin toss with these odds.`);
+    if (r.entangled) out.push("The qubits are **entangled**: their answers are linked, so looking at one tells you about the other. That's why the Bloch arrows shrank toward the centre.");
+    out.push(certain ? "**Try:** remove one gate and predict what changes before you run it." : "**Try:** run it again. The counts wobble but stay close to the yellow lines, which are the exact odds.");
+  } else if (level === "intermediate") {
+    out.push(`Statevector support: ${probs.slice(0, 6).map(([k, p]) => `|${k}⟩ (${p.toFixed(3)})`).join(", ")}${probs.length > 6 ? ", …" : ""}.`);
+    if (hasH && certain) out.push("You created superposition and then ended in a basis state. That is **interference**: amplitudes into the other outcomes cancelled.");
+    if (hasPhase) out.push("Phase gates (`Z`, `S`, `T`, `Rz`, `CZ`, `CP`) don't change Z-basis probabilities directly. Their effect shows up only after a later basis change such as `H`.");
+    out.push(`Bloch vectors: ${r.bloch.map((b, q) => `q${q} (${b.map((n) => n.toFixed(2)).join(", ")}), |r| = ${Math.hypot(...b).toFixed(2)}`).join("; ")}.`);
+    if (r.entangled) out.push(`Some reduced states are mixed (purity ${r.purity.map((p) => p.toFixed(2)).join(", ")}). That signals entanglement created by ${two.map((g) => `\`${g}\``).join(", ") || "multi-qubit gates"}.`);
+    out.push(`Sampling: total-variation distance between counts and exact probabilities is ${totalShotDev.toFixed(3)} at ${shots} shots. Expect it to shrink like 1/√shots.`);
+  } else {
+    out.push(`Logical depth ${r.depth}, transpiled to {${r.transpiled.basis.join(", ")}}: depth ${r.transpiled.depth} with ${r.transpiled.gate_counts.cx ?? 0} CX. On hardware, two-qubit error rates of ~10⁻³–10⁻² per CX make that count the main fidelity driver.`);
+    out.push(`Reduced-state purities: ${r.purity.map((p, q) => `q${q}: ${p.toFixed(3)}`).join(", ")}. ${r.entangled ? "Purity < 1 for a globally pure state means nonzero entanglement entropy across that cut." : "All marginals are pure, so the state is a product state (no entanglement)."}`);
+    out.push(`Empirical TVD to the ideal distribution: ${totalShotDev.toFixed(3)} (${shots} shots${r.backend.includes("noisy") ? ", noisy model, so this includes systematic error, not just shot noise" : ""}).`);
+    if (r.backend.includes("noisy")) out.push("To separate shot noise from model error, compare against the ideal run at higher shot counts. For mitigation, try readout-matrix inversion or zero-noise extrapolation over 2–3 noise levels.");
+    out.push("**Next:** step through the circuit and watch where purity first drops. That is the gate that creates the correlations.");
+  }
+  return out.join("\n\n");
+}
