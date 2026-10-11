@@ -189,7 +189,7 @@ export const MODULES: Module[] = [
     ],
     circuitPanel: false,
     sidebarNote: {
-      heading: "🔢 Why guessing all 0s still gets 3/4 right",
+      heading: "Why guessing all 0s still gets 3/4 right",
       body: "Half the bits are unrotated, so a 0 guess reveals them for sure (50%). The other half are rotated, so a 0 guess never cancels the lock — each one is a coin flip. Half of that remaining half lands on the correct value purely by chance, which is half of 50%, or another 25%. 50% + 25% = **75%** correct on average — although revealed, you can't tell which bits were stable or luckily landed on the correct value from a single check, so you never know which 75% to trust.",
     },
     circuit: {
