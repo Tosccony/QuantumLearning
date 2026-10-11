@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import CircuitEditor, { layout } from "@/components/lab/CircuitEditor";
 import Histogram from "@/components/lab/Histogram";
-import { g, runCircuit, type Circuit, type Op, type RunResult } from "@/lib/quantum";
+import { g, labLink, runCircuit, type Circuit, type Op, type RunResult } from "@/lib/quantum";
 
 /** The three interactive demos called for in the quantum money lesson outline. */
 export default function QuantumMoneyDemo({ kind }: { kind: "qm-angle" | "qm-lock" | "qm-multi" }) {
@@ -102,7 +103,10 @@ function LockDemo() {
         {matched ? "Keys match — the rotations cancel, so the qubit should return a predictable value." : "Keys differ — the rotation isn't undone, so the qubit should come back unpredictable."}
       </p>
       <CircuitEditor qubits={1} ops={layout(circuit)} readOnly />
-      <button className="pbtn-ghost self-start" onClick={run} disabled={running}>{running ? "Running…" : "▶ Run 1000 shots on Qiskit"}</button>
+      <div className="flex flex-wrap items-center gap-2">
+        <button className="pbtn-ghost" onClick={run} disabled={running}>{running ? "Running…" : "▶ Run 1000 shots on Qiskit"}</button>
+        <Link href={`${labLink(circuit)}&from=${encodeURIComponent("Quantum money: lock demo")}`} className="pbtn-ghost">Open in Lab to modify →</Link>
+      </div>
       {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
       {result && <Histogram counts={result.counts} shots={result.shots} probabilities={result.probabilities} />}
     </div>
@@ -111,7 +115,7 @@ function LockDemo() {
 
 function BitToggle({ label, value, onChange }: { label: string; value: 0 | 1; onChange: (v: 0 | 1) => void }) {
   return (
-    <label className="flex flex-col gap-1 text-sm">
+    <label className="flex flex-col items-start gap-1 text-sm">
       <span className="text-muted">{label}</span>
       <div className="flex rounded-lg bg-white/5 p-0.5" role="group" aria-label={label}>
         {([0, 1] as const).map((v) => (
@@ -253,7 +257,8 @@ function MultiDemo() {
       <CircuitEditor qubits={N} ops={layout(circuit)} readOnly />
 
       <div className="flex flex-wrap items-center gap-2">
-        <button className="pbtn-ghost self-start" onClick={run} disabled={running}>{running ? "Running…" : result ? "▶ Run again" : "▶ Run 1000 shots on Qiskit"}</button>
+        <button className="pbtn-ghost" onClick={run} disabled={running}>{running ? "Running…" : result ? "▶ Run again" : "▶ Run 1000 shots on Qiskit"}</button>
+        <Link href={`${labLink(circuit)}&from=${encodeURIComponent("Quantum money: banknote demo")}`} className="pbtn-ghost">Open in Lab to modify →</Link>
         {result && <span className="chip">✓ ran {result.shots.toLocaleString()} shots in {result.elapsed_ms} ms on {result.backend}</span>}
       </div>
       <p role="status" className="sr-only">{running ? "Running…" : result ? "Results ready." : ""}</p>
