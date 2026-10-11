@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 
-/** Minimal Markdown for lesson text and tutor replies: paragraphs, bullets, simple | tables, ``` blocks, `code`, **bold**. */
+/** Minimal Markdown for lesson text and tutor replies: paragraphs, bullets, simple | tables, ``` blocks, `code`, **bold**, [links](https://…). */
 export default function Markdown({ text, className = "" }: { text: string; className?: string }) {
   const blocks = text.split(/```/);
   return (
@@ -47,10 +47,15 @@ export default function Markdown({ text, className = "" }: { text: string; class
 
 const cells = (l: string) => l.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
 
+/** Only http(s) links become anchors; anything else (javascript:, data:, relative) stays plain text. */
+const safeUrl = (u: string) => /^https?:\/\//i.test(u.trim());
+
 function inline(s: string) {
-  return s.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((part, k) =>
-    part.startsWith("`") && part.endsWith("`") ? <code key={k}>{part.slice(1, -1)}</code>
-    : part.startsWith("**") && part.endsWith("**") ? <strong key={k}>{part.slice(2, -2)}</strong>
-    : <Fragment key={k}>{part}</Fragment>,
-  );
+  return s.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g).map((part, k) => {
+    const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
+    return part.startsWith("`") && part.endsWith("`") ? <code key={k}>{part.slice(1, -1)}</code>
+      : part.startsWith("**") && part.endsWith("**") ? <strong key={k}>{part.slice(2, -2)}</strong>
+      : link && safeUrl(link[2]) ? <a key={k} href={link[2].trim()} target="_blank" rel="noopener noreferrer">{link[1]}<span className="sr-only"> (opens in a new tab)</span></a>
+      : <Fragment key={k}>{part}</Fragment>;
+  });
 }
