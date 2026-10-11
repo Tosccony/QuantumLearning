@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
+import Icon from "@/components/ui/Icon";
+import { Stripe, Window } from "@/components/ui/primitives";
 import { modulesOf, TRACKS, type TrackId } from "@/lib/curriculum";
 import { PLANETS } from "@/lib/levels";
 import { useProgress } from "@/lib/progress";
@@ -16,47 +18,86 @@ export default function CertificatePage() {
 
   const c = certificate(state, t.id as TrackId);
   const p = trackProgress(state, t.id);
+  const unit = t.id === "explorer" ? "planet" : "module";
+
   if (!c)
     return (
-      <div className="mx-auto flex max-w-lg flex-col items-center gap-4 py-16 text-center">
-        <span className="text-5xl" aria-hidden>🔒</span>
-        <h1 className="text-2xl font-bold">{t.certificate} certificate</h1>
-        <p className="text-muted">Complete all {p.total} {t.id === "explorer" ? "planets" : "modules"} of the {t.name} track to earn it. You&apos;ve done {p.done}.</p>
-        <Link href={t.id === "explorer" ? "/explorer" : `/tracks/${t.id}`} className="pbtn-primary">Continue the track</Link>
-      </div>
+      <Window as="section" className="mx-auto my-8 flex w-full max-w-lg flex-col items-center gap-4 p-6 text-center sm:my-16 sm:p-8" aria-labelledby="cert-locked-heading">
+        <Stripe track={t.id} className="absolute inset-x-0 top-0" />
+        <span className="flex h-14 w-14 items-center justify-center border border-navy-ink" aria-hidden>
+          <Icon name="lock" size={28} />
+        </span>
+        <h1 id="cert-locked-heading" className="display text-3xl">{t.certificate} certificate</h1>
+        <p className="max-w-prose text-[#46587a]">
+          Complete all {p.total} {unit}s of the {t.name} track to earn it. You&apos;ve done {p.done}.
+        </p>
+        <p className="code text-sm text-[#46587a]">{p.done}/{p.total} {unit}s</p>
+        <Link href={t.id === "explorer" ? "/explorer" : `/tracks/${t.id}`} className="keycap-paper-primary">
+          Continue the track
+          <Icon name="next" size={16} />
+        </Link>
+      </Window>
     );
 
   const skills = t.id === "explorer" ? PLANETS.map((x) => x.concept) : modulesOf(t.id as Exclude<TrackId, "explorer">).map((m) => m.skill);
+  const issued = new Date(c.issued).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="flex gap-2 print:hidden">
-        <button className="pbtn-primary" onClick={() => window.print()}>🖨 Print / save as PDF</button>
-        <Link href="/progress" className="pbtn-ghost">Back to progress</Link>
+    <div className="flex flex-col items-center gap-5 print:gap-0">
+      <div className="flex flex-wrap justify-center gap-2 print:hidden">
+        <button type="button" className="keycap-primary" onClick={() => window.print()}>
+          <Icon name="print" size={16} />
+          Print / save as PDF
+        </button>
+        <Link href="/progress" className="keycap">
+          <Icon name="back" size={16} />
+          Back to progress
+        </Link>
       </div>
-      <section className="relative w-full max-w-3xl overflow-hidden rounded-3xl bg-[#fdfbf4] p-10 text-center text-[#1b2160] shadow-2xl print:shadow-none" aria-label="Certificate">
-        <div className="pointer-events-none absolute inset-3 rounded-2xl border-4 border-double" style={{ borderColor: t.color }} />
-        <p className="text-sm uppercase tracking-[0.3em] text-[#6b6f99]">Quantum Quest · Certificate of completion</p>
-        <h1 className="mt-6 text-4xl font-bold">{t.certificate}</h1>
-        <p className="mt-6 text-[#6b6f99]">This certifies that</p>
-        <p className="mt-2 font-[family-name:var(--font-fredoka)] text-4xl">{state.name || "Quantum Explorer"}</p>
-        <p className="mx-auto mt-4 max-w-xl text-[#3b3f6b]">
-          completed every {t.id === "explorer" ? "planet" : "module"} of the {t.name} track, running real quantum circuits on Qiskit and demonstrating:
-        </p>
-        <p className="mx-auto mt-3 max-w-xl text-sm font-medium">{skills.join(" · ")}</p>
-        <div className="mt-10 flex items-end justify-between text-left text-xs text-[#6b6f99]">
-          <div>
-            <p>Issued</p>
-            <p className="text-sm font-semibold text-[#1b2160]">{new Date(c.issued).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</p>
-          </div>
-          <span className="text-5xl" aria-hidden>🏅</span>
-          <div className="text-right">
-            <p>Credential ID</p>
-            <p className="font-mono text-sm font-semibold text-[#1b2160]">{c.id}</p>
+
+      {/* The certificate stays on paper so it prints as it reads. */}
+      <Window as="section" className="w-full max-w-3xl p-3 [print-color-adjust:exact] print:max-w-none print:p-0" aria-label="Certificate">
+        <Stripe track={t.id} className="absolute inset-x-0 top-0" />
+        <div className="border border-navy-ink p-1">
+          <div className="flex flex-col items-center border border-navy-ink px-5 py-8 text-center sm:px-10 sm:py-12">
+            <p className="label text-[#46587a]">Quantum Quest · Certificate of completion</p>
+            <h1 className="display mt-6 text-4xl sm:text-5xl">{t.certificate}</h1>
+
+            <p className="mt-8 text-[#46587a]">This certifies that</p>
+            <p className="display mt-2 text-3xl sm:text-4xl">{state.name || "Quantum Explorer"}</p>
+
+            <p className="mt-6 max-w-xl text-[#46587a]">
+              completed every {unit} of the {t.name} track, running real quantum circuits on the Qiskit Aer simulator and demonstrating:
+            </p>
+            <ul className="code mt-4 flex max-w-xl flex-wrap justify-center gap-x-3 gap-y-1 text-sm" aria-label="Skills demonstrated">
+              {skills.map((s, i) => (
+                <li key={s} className="flex items-center gap-3">
+                  {i > 0 && <span aria-hidden className="text-[#46587a]">·</span>}
+                  <span>{s}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-10 grid w-full grid-cols-[1fr_auto_1fr] items-end gap-4 border-t border-paper-3 pt-5 text-left">
+              <div>
+                <p className="label-sm text-[#46587a]">Issued</p>
+                <p className="code mt-1 text-sm">{issued}</p>
+              </div>
+              <span className="flex h-16 w-16 items-center justify-center border border-navy-ink" aria-hidden>
+                <Icon name="badge" size={48} strokeWidth={1.25} />
+              </span>
+              <div className="text-right">
+                <p className="label-sm text-[#46587a]">Credential ID</p>
+                <p className="code mt-1 text-sm">{c.id}</p>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
-      <p className="max-w-xl text-center text-xs text-muted print:hidden">Certificates are issued from progress stored on this device. Verifiable, account-backed credentials need the planned Supabase accounts.</p>
+      </Window>
+
+      <p className="max-w-xl text-center text-xs text-fog print:hidden">
+        Certificates are issued from progress stored on this device. Verifiable, account-backed credentials need the planned Supabase accounts.
+      </p>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import Icon from "@/components/ui/Icon";
+import Dialog from "@/components/ui/Dialog";
 import { useProgress } from "@/lib/progress";
 import { speak } from "@/lib/speak";
 import { QubitBot } from "./Qubit";
@@ -79,60 +80,62 @@ export default function AskQubit() {
 
   return (
     <>
-      <motion.button
+      <button
+        type="button"
         onClick={() => setOpen(!open)}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-full bg-white py-1 pl-1 pr-4 text-lg font-semibold text-[#1b2160] shadow-2xl print:hidden"
+        className="keycap-primary fixed bottom-4 right-4 z-50 !min-h-12 print:hidden"
         aria-expanded={open}
-        aria-label="Ask Qubit a question"
+        aria-label={open ? "Close Qubit chat" : "Ask Qubit a question"}
       >
-        <span className="rounded-full bg-[#1b2160]"><QubitBot size={48} /></span>
+        <Icon name={open ? "close" : "tutor"} size={20} />
         {open ? "Close" : "Ask Qubit"}
-      </motion.button>
-      <AnimatePresence>
+      </button>
         {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-20 right-4 z-50 flex h-[min(520px,70dvh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-3xl bg-white text-[#1b2160] shadow-2xl"
-            role="dialog"
-            aria-label="Chat with Qubit"
-          >
+          <Dialog title={<span className="flex items-center gap-2"><QubitBot size={32} />Ask Qubit</span>} onClose={() => setOpen(false)} sheet>
+            <div className="flex h-[min(520px,65dvh)] flex-col">
             <div className="flex-1 space-y-3 overflow-y-auto p-4" aria-live="polite">
               {msgs.map((m, k) => (
-                <div key={k} className={`max-w-[85%] rounded-2xl px-4 py-2 text-lg ${m.from === "me" ? "ml-auto bg-accent text-white" : "bg-[#eef0ff]"}`}>
-                  {m.text}
+                <div key={k} className={`max-w-[85%] px-4 py-2 text-lg ${m.from === "me" ? "ml-auto bg-navy-ink text-paper" : "bg-paper-2 text-navy-ink"}`}>
+                  {m.text.replace(/\p{Extended_Pictographic}[\uFE0F\u200D]*/gu, "").trim()}
                 </div>
               ))}
               {msgs.length === 1 && (
                 <div className="flex flex-wrap gap-2">
                   {STARTERS.map((s) => (
-                    <button key={s} onClick={() => ask(s)} className="rounded-full border-2 border-accent px-3 py-1 text-base text-accent">{s}</button>
+                    <button key={s} type="button" onClick={() => ask(s)} className="chip min-h-11 px-3 !text-sm hover:bg-paper-2">{s}</button>
                   ))}
                 </div>
               )}
               <div ref={end} />
             </div>
-            <form className="flex gap-2 border-t border-[#e0e4ff] p-3" onSubmit={(e) => { e.preventDefault(); ask(input); }}>
+            <form className="flex gap-2 border-t border-paper-3 p-3" onSubmit={(e) => { e.preventDefault(); ask(input); }}>
               <input
+                data-autofocus
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type a question…"
                 maxLength={200}
-                className="min-w-0 flex-1 rounded-2xl bg-[#eef0ff] px-4 py-3 text-lg outline-none focus:ring-2 focus:ring-accent"
+                className="field min-w-0 flex-1 text-lg"
                 aria-label="Your question"
               />
               {SR && (
-                <button type="button" onClick={listen} className={`rounded-2xl px-3 text-2xl ${listening ? "bg-bad" : "bg-[#eef0ff]"}`} aria-label="Ask with your voice">
-                  🎤
+                <button
+                  type="button"
+                  onClick={listen}
+                  className={`keycap-paper !px-3 ${listening ? "blink" : ""}`}
+                  aria-label="Ask with your voice"
+                  aria-pressed={listening}
+                >
+                  <Icon name="mic" size={20} />
                 </button>
               )}
-              <button className="rounded-2xl bg-accent px-4 text-xl text-white" aria-label="Send">➤</button>
+              <button className="keycap-paper-primary !px-3" aria-label="Send">
+                <Icon name="send" size={20} />
+              </button>
             </form>
-          </motion.div>
+            </div>
+          </Dialog>
         )}
-      </AnimatePresence>
     </>
   );
 }

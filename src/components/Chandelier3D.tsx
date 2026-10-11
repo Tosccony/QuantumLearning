@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 /** A drag-to-spin model of the golden "chandelier" fridge that cools superconducting quantum chips. */
-export default function Chandelier3D({ accent = "#7b6cff" }: { accent?: string }) {
+export default function Chandelier3D({ accent = "#6fe6ff" }: { accent?: string }) {
   const host = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,9 +65,24 @@ export default function Chandelier3D({ accent = "#7b6cff" }: { accent?: string }
     const down = (e: PointerEvent) => { dragging = true; lastX = e.clientX; el.setPointerCapture(e.pointerId); };
     const move = (e: PointerEvent) => { if (!dragging) return; vel = (e.clientX - lastX) * 0.004; rig.rotation.y += vel; lastX = e.clientX; };
     const up = () => { dragging = false; };
+    const turn = (event: KeyboardEvent) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      rig.rotation.y += event.key === "ArrowLeft" ? -0.2 : 0.2;
+    };
     el.addEventListener("pointerdown", down);
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    el.addEventListener("lostpointercapture", up);
+    el.addEventListener("blur", up);
+    el.addEventListener("keydown", turn);
+    const resize = new ResizeObserver(() => {
+      renderer.setSize(el.clientWidth, el.clientHeight);
+      camera.aspect = el.clientWidth / el.clientHeight;
+      camera.updateProjectionMatrix();
+    });
+    resize.observe(el);
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
@@ -76,7 +91,7 @@ export default function Chandelier3D({ accent = "#7b6cff" }: { accent?: string }
         if (!reduce) rig.rotation.y += vel;
         vel += (0.006 - vel) * 0.02;
       }
-      chip.material.emissiveIntensity = 0.8 + Math.sin(t / 300) * 0.4;
+      chip.material.emissiveIntensity = reduce ? 0.8 : 0.8 + Math.sin(t / 300) * 0.4;
       renderer.render(scene, camera);
       raf = requestAnimationFrame(tick);
     };
@@ -87,6 +102,17 @@ export default function Chandelier3D({ accent = "#7b6cff" }: { accent?: string }
       el.removeEventListener("pointerdown", down);
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+      el.removeEventListener("lostpointercapture", up);
+      el.removeEventListener("blur", up);
+      el.removeEventListener("keydown", turn);
+      resize.disconnect();
+      rig.traverse((object) => {
+        if (object instanceof THREE.Mesh) object.geometry.dispose();
+      });
+      gold.dispose();
+      copper.dispose();
+      chip.material.dispose();
       renderer.dispose();
       el.removeChild(renderer.domElement);
     };
@@ -95,9 +121,10 @@ export default function Chandelier3D({ accent = "#7b6cff" }: { accent?: string }
   return (
     <div
       ref={host}
-      className="h-80 w-full max-w-sm cursor-grab touch-none rounded-3xl bg-gradient-to-b from-[#0e1442] to-[#1b2160] active:cursor-grabbing"
+      tabIndex={0}
+      className="h-80 w-full max-w-sm cursor-grab touch-none bg-navy-ink active:cursor-grabbing"
       role="img"
-      aria-label="3D model of a golden quantum computer fridge. Drag to spin it."
+      aria-label="3D model of a golden quantum computer fridge. Drag or use the left and right arrow keys to spin it."
     />
   );
 }

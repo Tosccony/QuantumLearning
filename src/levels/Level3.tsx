@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import LessonShell, { type StepApi } from "@/components/LessonShell";
+import Icon from "@/components/ui/Icon";
 import { runCircuit } from "@/lib/quantum";
 import { OFFLINE_MSG } from "@/lib/useShots";
 
@@ -18,15 +19,15 @@ function SplitChest({ done, say }: StepApi) {
   const [split, setSplit] = useState(false);
   return (
     <div className="flex flex-col items-center gap-5">
-      <div className="relative h-56 w-full max-w-md">
+      <div className="relative h-56 w-full max-w-md border border-paper-3 bg-paper-2">
         {SPOTS.map((s, k) => (
           <motion.div
             key={k}
-            className="absolute text-6xl"
+            className="absolute text-6xl leading-none"
             initial={false}
             animate={split ? { left: `${s.x}%`, top: `${s.y}%`, opacity: 0.55, scale: 0.9 } : { left: "45%", top: "35%", opacity: k === 0 ? 1 : 0, scale: 1 }}
-            transition={{ type: "spring", stiffness: 80, delay: k * 0.05 }}
-            style={{ filter: split ? "drop-shadow(0 0 14px var(--accent))" : "none", translate: "-50% -50%" }}
+            transition={{ type: "spring", stiffness: 80, damping: 16, delay: k * 0.05 }}
+            style={{ translate: "-50% -50%" }}
             aria-hidden
           >
             🧰
@@ -34,7 +35,8 @@ function SplitChest({ done, say }: StepApi) {
         ))}
       </div>
       <button
-        className="btn-primary"
+        type="button"
+        className="keycap-xl keycap-paper-primary"
         onClick={() => {
           setSplit(!split);
           if (!split) {
@@ -43,7 +45,8 @@ function SplitChest({ done, say }: StepApi) {
           } else say("Back to one normal chest. Tap again to make it quantum!");
         }}
       >
-        {split ? "Make it normal 📦" : "Make it quantum ✨"}
+        <Icon name={split ? "reset" : "wand"} size={20} />
+        {split ? "Make it normal" : "Make it quantum"}
       </button>
     </div>
   );
@@ -101,20 +104,22 @@ function TreasureHunt({ done, say }: StepApi) {
   return (
     <div className="flex w-full flex-col items-center gap-4">
       <div className="flex w-full justify-between text-lg">
-        <span>Round {Math.min(round + 1, 4)} of 4</span>
-        <span>💰 Found: {found}</span>
+        <span className="label text-[#46587a]">Round <span className="code">{Math.min(round + 1, 4)}</span> of 4</span>
+        <span className="flex items-center gap-2">💰 Found: <b className="code">{found}</b></span>
       </div>
-      <div className="relative aspect-[4/3] w-full max-w-xl overflow-hidden rounded-3xl bg-gradient-to-b from-[#1e88a8] to-[#156b85]">
-        <div className="absolute inset-[8%] rounded-[45%] bg-[#e7c27d]" aria-hidden />
+      {/* The island: a navy plate with a graticule; each cloud is a probability cell sized by its chance. */}
+      <div className="graticule-navy relative aspect-[4/3] w-full max-w-xl overflow-hidden border-2 border-navy-ink bg-navy-ink">
+        <div className="absolute inset-[8%] border-2 border-dashed border-[var(--line)]" aria-hidden />
         {SPOTS.map((s, k) => {
           const size = 50 + weights[k] * 260;
           const show = !result || result.at === k;
           return (
             <button
               key={`${round}-${k}`}
+              type="button"
               onClick={() => look(k)}
               disabled={!!result}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
+              className="absolute grid min-h-11 min-w-11 -translate-x-1/2 -translate-y-1/2 place-items-center"
               style={{ left: `${s.x + 6}%`, top: `${s.y + 6}%` }}
               aria-label={`Look at the ${s.name}, about ${Math.round(weights[k] * 100)} percent chance`}
             >
@@ -122,27 +127,37 @@ function TreasureHunt({ done, say }: StepApi) {
                 {show && (
                   <motion.span
                     initial={{ scale: 0, opacity: 0 }}
-                    animate={result ? { scale: 0.6, opacity: 1 } : { scale: [1, 1.08, 1], opacity: 0.85 }}
+                    animate={result ? { scale: 0.6, opacity: 1 } : { scale: [1, 1.06, 1], opacity: 0.9 }}
                     exit={{ scale: 0, opacity: 0 }}
-                    transition={result ? { type: "spring" } : { duration: 2, repeat: Infinity }}
-                    className="flex items-center justify-center rounded-full"
+                    transition={result ? { type: "spring", stiffness: 160, damping: 18 } : { duration: 2, repeat: Infinity }}
+                    className="flex items-center justify-center"
                     style={{
                       width: size,
                       height: size,
-                      background: result ? "transparent" : "radial-gradient(circle, #fff 0%, color-mix(in srgb, var(--accent) 85%, white) 30%, color-mix(in srgb, var(--accent) 60%, transparent) 55%, transparent 72%)",
+                      background: result ? "transparent" : "color-mix(in srgb, var(--accent) 55%, transparent)",
+                      border: result ? "none" : "2px solid var(--accent)",
                     }}
                   >
-                    {result ? <span className="text-6xl">{result.at === result.pick ? "💰" : "🧰"}</span> : <span className="text-3xl">{s.icon}</span>}
+                    {result ? <span className="text-6xl leading-none">{result.at === result.pick ? "💰" : "🧰"}</span> : <span className="text-3xl leading-none">{s.icon}</span>}
                   </motion.span>
                 )}
               </AnimatePresence>
-              {result?.pick === k && <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-3xl">👀</span>}
-              {result && result.at !== k && <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl opacity-50">{s.icon}</span>}
+              {result?.pick === k && (
+                <span className="absolute -top-3 left-1/2 grid h-8 w-8 -translate-x-1/2 place-items-center bg-ice" aria-hidden>
+                  <Icon name="eye" size={18} className="text-navy-ink" />
+                </span>
+              )}
+              {result && result.at !== k && <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl leading-none opacity-50">{s.icon}</span>}
             </button>
           );
         })}
       </div>
-      {result && round < 3 && <button className="btn-ghost" onClick={nextRound}>New island 🏝️</button>}
+      {result && round < 3 && (
+        <button type="button" className="keycap-xl keycap-paper" onClick={nextRound}>
+          <Icon name="next" size={20} />
+          New island
+        </button>
+      )}
     </div>
   );
 }

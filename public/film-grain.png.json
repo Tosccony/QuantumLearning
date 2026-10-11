@@ -1,0 +1,10 @@
+{
+  "source": "Procedurally generated for Quantum Quest using Python's random.Random(42), struct and zlib; no external image source.",
+  "dimensions": [
+    160,
+    160
+  ],
+  "recipe": "RGBA PNG: white pixels with uniformly distributed alpha values 0-28 (about 5.5% average), row-major order; seed 42.",
+  "usage": "Repeating film-grain tile painted into the body background over the navy stock, so it scrolls with the page.",
+  "license": "MIT"
+}

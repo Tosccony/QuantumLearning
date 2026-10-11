@@ -3,23 +3,28 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import LessonShell, { type StepApi } from "@/components/LessonShell";
+import Icon from "@/components/ui/Icon";
 import { EXPLORER_CIRCUITS } from "@/lib/curriculum";
 import { OFFLINE_MSG, useShots } from "@/lib/useShots";
 
+/** A square token: one colour per face, both colours at once while the quantum coin spins. */
 function Coin({ face, spinning, quantum }: { face: "H" | "T" | null; spinning: boolean; quantum?: boolean }) {
+  const mixed = !!quantum && spinning;
   return (
     <motion.div
       animate={spinning ? { rotateY: [0, 360] } : { rotateY: 0 }}
-      transition={spinning ? { duration: quantum ? 0.5 : 0.25, repeat: Infinity, ease: "linear" } : { type: "spring" }}
-      className="relative flex h-40 w-40 items-center justify-center rounded-full text-6xl font-bold"
-      style={{
-        background: quantum && spinning ? "conic-gradient(var(--a), var(--b), var(--a))" : face === "T" ? "var(--b)" : "var(--a)",
-        boxShadow: quantum ? "0 0 50px 10px color-mix(in srgb, var(--accent) 70%, transparent)" : "0 10px 0 #0006",
-        color: "#1b2160",
-      }}
+      transition={spinning ? { duration: quantum ? 0.5 : 0.25, repeat: Infinity, ease: "linear" } : { type: "spring", stiffness: 160, damping: 18 }}
+      className="display relative flex h-40 w-40 items-center justify-center overflow-hidden border-[3px] border-navy-ink text-5xl text-navy-ink"
+      style={{ background: mixed ? "transparent" : face === "T" ? "var(--b)" : "var(--a)" }}
       aria-live="polite"
     >
-      {spinning ? (quantum ? "H+T" : "?") : face === "H" ? "😀 H" : face === "T" ? "🐉 T" : "🪙"}
+      {mixed && (
+        <span className="absolute inset-0 flex" aria-hidden>
+          <span className="h-full w-1/2" style={{ background: "var(--a)" }} />
+          <span className="h-full w-1/2" style={{ background: "var(--b)" }} />
+        </span>
+      )}
+      <span className="relative">{spinning ? (quantum ? "H+T" : "?") : face === "H" ? "😀 H" : face === "T" ? "🐉 T" : "🪙"}</span>
     </motion.div>
   );
 }
@@ -37,7 +42,10 @@ function NormalCoin({ done, say }: StepApi) {
   return (
     <div className="flex flex-col items-center gap-5">
       <Coin face={face} spinning={false} />
-      <button className="btn-ghost" onClick={flip}>Flip the normal coin 🪙</button>
+      <button type="button" className="keycap-xl keycap-paper-primary" onClick={flip}>
+        <Icon name="reset" size={20} />
+        Flip the normal coin
+      </button>
     </div>
   );
 }
@@ -68,14 +76,23 @@ function QuantumCoin({ done, say }: StepApi) {
     <div className="flex flex-col items-center gap-5">
       <Coin face={face} spinning={spinning} quantum />
       <div className="flex flex-wrap justify-center gap-3">
-        <button className="btn-primary" onClick={look} disabled={!spinning}>👀 Look at it!</button>
-        <button className="btn-ghost" onClick={() => { setSpinning(true); say("Spinning again… it's both heads AND tails until you look! 🌀"); }} disabled={spinning}>
-          🌀 Spin again
+        <button type="button" className="keycap-xl keycap-paper-primary" onClick={look} disabled={!spinning}>
+          <Icon name="eye" size={20} />
+          Look at it
+        </button>
+        <button
+          type="button"
+          className="keycap-xl keycap-paper"
+          onClick={() => { setSpinning(true); say("Spinning again… it's both heads AND tails until you look! 🌀"); }}
+          disabled={spinning}
+        >
+          <Icon name="reset" size={20} />
+          Spin again
         </button>
       </div>
       <div className="flex gap-6 text-xl" aria-label="Results so far">
-        <span>😀 Heads: <b>{tally.H}</b></span>
-        <span>🐉 Tails: <b>{tally.T}</b></span>
+        <span>😀 Heads: <b className="code">{tally.H}</b></span>
+        <span>🐉 Tails: <b className="code">{tally.T}</b></span>
       </div>
     </div>
   );

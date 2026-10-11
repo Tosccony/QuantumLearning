@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Chandelier3D from "@/components/Chandelier3D";
 import LessonShell, { type StepApi } from "@/components/LessonShell";
+import Icon from "@/components/ui/Icon";
+import { Mark } from "@/components/ui/primitives";
 
 const LABS = [
   {
@@ -26,6 +28,15 @@ const LABS = [
   },
 ];
 
+/** A punched navy cell carrying the grease-cross "done" mark, for use on paper. */
+function DoneCell() {
+  return (
+    <span className="ml-auto grid h-9 w-9 shrink-0 place-items-center bg-navy-ink" role="img" aria-label="Done">
+      <Mark kind="done" size={18} />
+    </span>
+  );
+}
+
 function VirtualLab({ done, say }: StepApi) {
   const [seen, setSeen] = useState<string[]>([]);
   const visit = (id: string) => {
@@ -37,23 +48,31 @@ function VirtualLab({ done, say }: StepApi) {
   };
   return (
     <div className="flex w-full flex-col items-center gap-5 md:flex-row md:items-start">
-      <div className="flex w-full flex-col items-center gap-2">
-        <Chandelier3D />
-        <p className="text-center text-muted">👆 Drag to spin! This golden “chandelier” is a super-cold fridge. The quantum chip lives at the very bottom.</p>
+      <div className="flex w-full flex-col items-center gap-3">
+        {/* The 3D fridge sits in a square navy frame; the model's own rounded/gradient box is squared off here. */}
+        <div className="w-full max-w-sm border-2 border-navy-ink bg-navy-ink [&>div]:rounded-none [&>div]:bg-none [&>div]:bg-navy-ink">
+          <Chandelier3D accent="#6fe6ff" />
+        </div>
+        <p className="text-center text-[#46587a]">Drag to spin! This golden “chandelier” is a super-cold fridge. The quantum chip lives at the very bottom.</p>
       </div>
       <div className="flex w-full flex-col gap-3">
-        {LABS.map((l) => (
-          <motion.button
-            key={l.id}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => visit(l.id)}
-            className={`flex min-h-20 items-center gap-4 rounded-2xl bg-space-2 p-4 text-left text-xl ${seen.includes(l.id) ? "ring-4 ring-good" : ""}`}
-          >
-            <span className="text-4xl" aria-hidden>{l.icon}</span>
-            Visit the {l.who} lab
-            {seen.includes(l.id) && <span className="ml-auto" aria-label="visited">✅</span>}
-          </motion.button>
-        ))}
+        {LABS.map((l) => {
+          const visited = seen.includes(l.id);
+          return (
+            <motion.button
+              key={l.id}
+              type="button"
+              whileTap={{ scale: 0.98 }}
+              onClick={() => visit(l.id)}
+              aria-pressed={visited}
+              className={`flex min-h-20 items-center gap-4 border-2 bg-paper-2 p-4 text-left text-xl ${visited ? "border-good" : "border-paper-3 hover:border-navy-ink"}`}
+            >
+              <span className="text-4xl leading-none" aria-hidden>{l.icon}</span>
+              Visit the {l.who} lab
+              {visited && <DoneCell />}
+            </motion.button>
+          );
+        })}
       </div>
     </div>
   );
@@ -79,18 +98,22 @@ function ColdChallenge({ done, say }: StepApi) {
   const pct = (Math.abs(TEMPS[k].c) / 273) * 100;
   return (
     <div className="flex flex-col items-center gap-6 sm:flex-row">
-      <div className="relative h-72 w-16 overflow-hidden rounded-full border-4 border-white/40 bg-[#ff6b6b]" aria-hidden>
-        <motion.div className="absolute inset-x-0 top-0 bg-[#7bdff2]" animate={{ height: `${pct}%` }} />
+      {/* Thermometer: a tall cell that fills with ice from the top as it gets colder. */}
+      <div className="relative h-72 w-16 overflow-hidden border-2 border-navy-ink" style={{ background: "var(--bad)" }} role="img" aria-label={`About ${TEMPS[k].c} degrees Celsius`}>
+        <motion.div className="absolute inset-x-0 top-0 bg-ice" animate={{ height: `${pct}%` }} />
       </div>
       <div className="flex flex-col gap-3">
         {TEMPS.map((t, j) => (
-          <div key={t.place} className={`flex items-center gap-3 rounded-2xl p-3 text-xl ${j <= k ? "bg-space-2" : "opacity-30"}`}>
-            <span className="text-4xl" aria-hidden>{t.icon}</span>
+          <div key={t.place} className={`flex items-center gap-3 border p-3 text-xl ${j <= k ? "border-paper-3 bg-paper-2" : "border-transparent opacity-30"}`}>
+            <span className="text-4xl leading-none" aria-hidden>{t.icon}</span>
             <span>{t.place}</span>
-            <b className="ml-auto tabular-nums">{t.c}°C</b>
+            <b className="code ml-auto">{t.c}°C</b>
           </div>
         ))}
-        <button className="btn-primary" onClick={cool} disabled={k === TEMPS.length - 1}>❄️ Make it colder!</button>
+        <button type="button" className="keycap-xl keycap-paper-primary" onClick={cool} disabled={k === TEMPS.length - 1}>
+          <Icon name="cold" size={22} />
+          Make it colder
+        </button>
       </div>
     </div>
   );
@@ -110,16 +133,19 @@ function FutureDream({ done, say }: StepApi) {
       {DREAMS.map((d, k) => (
         <motion.button
           key={d.label}
-          whileTap={{ scale: 0.96 }}
+          type="button"
+          whileTap={{ scale: 0.98 }}
           onClick={() => {
             setPick(k);
             say(`Great choice! Scientists hope quantum computers will help us ${d.label.toLowerCase()}. Maybe YOU will be the one to do it! 🌟`);
             done();
           }}
-          className={`flex min-h-24 items-center gap-4 rounded-2xl bg-space-2 p-4 text-left text-xl ${pick === k ? "ring-4 ring-on" : ""}`}
+          aria-pressed={pick === k}
+          className={`flex min-h-24 items-center gap-4 border-2 bg-paper-2 p-4 text-left text-xl ${pick === k ? "border-navy-ink" : "border-paper-3 hover:border-navy-ink"}`}
         >
-          <span className="text-5xl" aria-hidden>{d.icon}</span>
+          <span className="text-5xl leading-none" aria-hidden>{d.icon}</span>
           {d.label}
+          {pick === k && <DoneCell />}
         </motion.button>
       ))}
     </div>
