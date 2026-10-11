@@ -7,6 +7,10 @@ export type SkillStatus = "done" | "available" | "locked";
 export const moduleStatus = (s: State, m: Module): SkillStatus =>
   s.modules[m.id] ? "done" : m.requires.every((r) => s.modules[r]) ? "available" : "locked";
 
+/** Explorer planets unlock in order: the first is always open, and each later one opens once the planet before it is completed. */
+export const planetStatus = (s: State, id: number): SkillStatus =>
+  s.levels[id]?.completed ? "done" : id === PLANETS[0].id || s.levels[id - 1]?.completed ? "available" : "locked";
+
 export function trackProgress(s: State, t: TrackId) {
   if (t === "explorer") {
     const done = PLANETS.filter((p) => s.levels[p.id]?.completed).length;

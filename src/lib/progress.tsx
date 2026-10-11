@@ -1,6 +1,7 @@
 "use client";
 
 import { MotionConfig } from "framer-motion";
+import { ROADMAP_STORAGE_KEY } from "./roadmaps";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 export type LevelStat = {
@@ -190,7 +191,10 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const reset = useCallback(() => setState(initial), []);
+  const reset = useCallback(() => {
+    setState(initial);
+    try { localStorage.removeItem(ROADMAP_STORAGE_KEY); } catch {}
+  }, []);
 
   const value = useMemo(
     () => ({ state, ready, update, addXp, completeLevel, logTime, completeModule, recordRun, recordShare, toggleStar, reset }),

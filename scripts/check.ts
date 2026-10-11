@@ -1,7 +1,10 @@
 // Runnable checks for the logic the Qollab player depends on. Run: npm run check:js
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { MODULES } from "@/lib/curriculum";
+import { MODULES, moduleById, TRACKS } from "@/lib/curriculum";
+import { firstStartable, roadmapTopics, sanitizePersonal, topicStatus } from "@/lib/roadmaps";
+import type { State } from "@/lib/progress";
+import { planetStatus, trackProgress } from "@/lib/skills";
 import { bellScore, noiseVisible, onesRate, pairCorrelation, registerCounts, shorFactors, shotNoiseTvd, tvd } from "@/lib/explain";
 import { QuantumServiceError } from "@/lib/quantum";
 import { pythonErrorMessage, qollabTransport } from "@/qollab/bridge";
@@ -59,5 +62,64 @@ assert.match(shorFactors(8, 4, 14, 15).note, /≡ −1/); // a = 14 ≡ −1: r 
 // Every lesson circuit, for backend/check_lessons.py to run through the real engine.
 mkdirSync("dist", { recursive: true });
 writeFileSync("dist/lessons.json", JSON.stringify(Object.fromEntries(MODULES.map((m) => [m.id, m.circuit]))));
+
+// Concepts IDs retain their original prefixes, and prerequisites cross tracks.
+// Neither must prevent the roadmap from rendering or unlocking correctly.
+const concepts = roadmapTopics("concepts");
+assert.deepEqual(concepts.map(t => t.id), ["s7", "s8", "r7"]);
+const emptyProgress = { modules: {}, levels: {} } as State;
+for (const topic of concepts) {
+  assert.equal(topicStatus(emptyProgress, topic), "locked");
+  const prerequisiteProgress = { ...emptyProgress, modules: Object.fromEntries(topic.requires.map(id => [id, { completedAt: "2026-10-10", correct: true }])) };
+  assert.equal(topicStatus(prerequisiteProgress, topic), "available");
+  const completedProgress = { ...prerequisiteProgress, modules: { ...prerequisiteProgress.modules, [topic.id]: { completedAt: "2026-10-10", correct: true } } };
+  assert.equal(topicStatus(completedProgress, topic), "done");
+}
+
+// "Start prerequisites" lands on the first lesson actually startable on the way to the blocker.
+assert.equal(firstStartable(emptyProgress, "r4"), "r1");
+assert.equal(firstStartable(emptyProgress, "s3"), "s1");
+const doneThrough = (ids: string[]) => ({ ...emptyProgress, modules: Object.fromEntries(ids.map(id => [id, { completedAt: "2026-10-10", correct: true }])) }) as State;
+assert.equal(firstStartable(doneThrough(["s1", "s2", "s3"]), "s3"), null);
+assert.equal(firstStartable(doneThrough(["s1", "s2", "s3"]), "s4"), "s4");
+
+// Explorer unlock rules live in planetStatus; roadmap topics point at their source instead of parsing ids.
+const planet1Done = { ...emptyProgress, levels: { 1: { completed: true } } } as unknown as State;
+assert.equal(planetStatus(emptyProgress, 1), "available");
+assert.equal(planetStatus(emptyProgress, 2), "locked");
+assert.equal(planetStatus(planet1Done, 1), "done");
+assert.equal(planetStatus(planet1Done, 2), "available");
+assert.equal(planetStatus(planet1Done, 3), "locked");
+const onlyPlanet2 = { ...emptyProgress, levels: { 2: { completed: true } } } as unknown as State;
+assert.equal(planetStatus(onlyPlanet2, 1), "available");
+assert.equal(planetStatus(onlyPlanet2, 2), "done");
+assert.equal(planetStatus(onlyPlanet2, 3), "available");
+for (const st of [emptyProgress, planet1Done])
+  for (const topic of roadmapTopics("explorer")) {
+    assert.equal(topic.source.kind, "planet");
+    if (topic.source.kind === "planet") assert.equal(topicStatus(st, topic), planetStatus(st, topic.source.id));
+  }
+assert.equal(roadmapTopics("student"), roadmapTopics("student")); // built once
+for (const t of TRACKS)
+  for (const topic of roadmapTopics(t.id)) {
+    assert.equal(topic.source.kind, t.id === "explorer" ? "planet" : "module");
+    if (topic.source.kind === "module") assert.ok(moduleById(topic.source.id), `${topic.id}: module source resolves`);
+  }
+// Roadmap done counts agree with the shared trackProgress.
+const sample = { ...doneThrough(["s1", "s2", "d1"]), levels: { 1: { completed: true } } } as unknown as State;
+const sample2 = { ...doneThrough(["s1", "s2", "s3", "s4", "r1"]), levels: { 1: { completed: true }, 2: { completed: true }, 3: { completed: true } } } as unknown as State;
+for (const st of [sample, sample2])
+  for (const t of TRACKS)
+    assert.equal(roadmapTopics(t.id).filter(x => topicStatus(st, x) === "done").length, trackProgress(st, t.id).done, `${t.id}: done count`);
+
+// Malformed stored notes are dropped, never thrown.
+assert.deepEqual(sanitizePersonal({ s1: { reviewed: 5, note: 3, bookmarked: true } }), { s1: { bookmarked: true } });
+assert.deepEqual(sanitizePersonal([1]), {});
+assert.deepEqual(sanitizePersonal(null), {});
+assert.deepEqual(sanitizePersonal({ s1: { reviewed: ["a", 2] } }), { s1: { reviewed: ["a"] } });
+
+const poisoned = sanitizePersonal(JSON.parse('{"__proto__":{"bookmarked":true},"s1":{"started":true}}'));
+assert.deepEqual(poisoned, { s1: { started: true } });
+assert.equal(Object.getPrototypeOf(poisoned), Object.prototype);
 
 console.log("js: all checks passed");

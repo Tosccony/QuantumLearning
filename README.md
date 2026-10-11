@@ -29,6 +29,7 @@ All 21 lessons (Student, Developer, Researcher and Concepts) and the Lab run on 
 
 ## Features
 
+- **Learning roadmaps** (`/roadmaps`): five prerequisite-aware paths connecting the existing lessons and Explorer games to circuit experiments, credited external resources, bookmarks, notes, and completion progress. Resource review is separate from assessed lesson completion. See [ROADMAPS.md](ROADMAPS.md) for implemented features and remaining phases.
 - **Quantum Lab** (`/lab`): visual circuit builder with 19 gates (click or drag, multi-qubit and parameterised gates), adjustable shots, and a Qiskit Aer noise model.
 - **Results**: a histogram of the shot counts with exact probabilities overlaid, interactive per-qubit Bloch spheres (reduced states with purity), a statevector table, and step-through Bloch vectors after each gate. The Qiskit tab shows Python code, OpenQASM, a text diagram and transpiled depth/CX counts.
 - **AI tutor**: beginner, intermediate and advanced explanations from Claude, grounded in the actual run results. Without an API key it falls back to a deterministic explainer built from those same results.
@@ -103,8 +104,11 @@ Nothing. All code and content were written during the build window. Nothing was 
 
 - At runtime, the in-app tutor calls Claude (`claude-opus-5-5`) through the Anthropic API.
 - The team used Claude and ChatGPT as coding and writing assistants while building the app and its lessons.
+- OpenAI Codex helped build the learning roadmaps feature (`/roadmaps`).
 - On Oct 10, Claude Code reviewed the project against the hackathon rules, added this disclosure, the MIT license and the attribution, and fixed the noise model so noisy runs no longer optimise away gates.
-- Between Oct 10 and Oct 11, at the team's direction, Claude Code built the Qollab version: the shared Qiskit engine, the lesson player and free-build Lab, Predict → Run → Explain, Ideal vs this machine, and the BB84, Bell test and Shor's algorithm lessons.
+- Between Oct 10 and Oct 11, at the team's direction, Claude Code built the Qollab version (the shared Qiskit engine, the lesson player and free-build Lab, Predict → Run → Explain, Ideal vs this machine, and the BB84, Bell test and Shor's algorithm lessons) and fixed review findings in the roadmaps feature.
+
+**Roadmap inspiration and resources.** Inspired by [roadmap.sh](https://roadmap.sh/), using our own curriculum and implementation. External videos and reading are credited to their providers and remain under their original terms.
 
 **Circuits.** The example circuits are standard, published constructions, not original algorithms: Bell and GHZ states, Grover search, Deutsch–Jozsa, teleportation, the QFT, phase estimation, the 3-qubit bit-flip code, BB84 (Bennett and Brassard, 1984), the CHSH Bell test (Clauser, Horne, Shimony and Holt, 1969) and Shor's algorithm (Shor, 1994). They follow the standard textbook treatments in Nielsen and Chuang's *Quantum Computation and Quantum Information*. The compiled ×7 and ×4 mod 15 circuits in the Shor lesson follow the construction in the Qiskit textbook. The lesson text, predictions and explanations are our own. Our contribution is the learning platform built around these circuits.
 
