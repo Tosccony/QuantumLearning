@@ -6,12 +6,11 @@ const STEPS: { key: string; icon: IconName; label: string }[] = [
   { key: "build", icon: "chip", label: "Build" },
   { key: "run", icon: "run", label: "Run" },
   { key: "understand", icon: "tutor", label: "Understand" },
-  { key: "share", icon: "share", label: "Share" },
 ];
 
-export type FlowStep = "learn" | "build" | "run" | "understand" | "share";
+export type FlowStep = "learn" | "build" | "run" | "understand";
 
-/** The platform's loop as five frames on a short rail; a cross marks done, a flag marks now. */
+/** The platform's loop as four frames on a short rail; a cross marks done, a flag marks now. */
 export default function FlowSteps({ current, done = [] }: { current: FlowStep; done?: FlowStep[] }) {
   return (
     <ol className="flex items-stretch" aria-label="Learning flow">

@@ -32,8 +32,7 @@ All 21 lessons are one click away under **Browse all 21 lessons →** (the Learn
 Next.js (TypeScript, Tailwind, Framer Motion, Three.js)
  ├─ /api/tutor ─────────────► Claude API (streamed; offline fallback in the browser)
  └─ /api/qiskit/* (rewrite) ─► backend/main.py (FastAPI)
-                                ├─ POST /run    validate → backend/engine.py on Qiskit Aer (+ noise model)
-                                └─ /projects    community store (SQLite), re-runs on publish
+                                └─ POST /run    validate → backend/engine.py on Qiskit Aer (+ noise model)
 
 qollab.xyz (runs in the browser, Pyodide)
  src/qollab/  lesson player + Lab, bundled by scripts/build-qollab.sh
@@ -61,7 +60,7 @@ Quantum computing is usually taught in one of two ways: linear algebra on a whit
 | 🔬 Researcher | Graduate level | Density matrices, noise and mitigation, the bit-flip code, phase estimation, VQE and QAOA, benchmarking |
 | 🔓 Concepts | After the Student basics | Wiesner's quantum money, the Bell test (is entanglement real?), Shor's algorithm factoring 15 |
 
-All 21 lessons (Student, Developer, Researcher and Concepts) and the Lab run on Qollab. The Explorer games, community sharing and the Claude tutor need the full web app.
+All 21 lessons (Student, Developer, Researcher and Concepts) and the Lab run on Qollab. The Explorer games and the Claude tutor need the full web app.
 
 ## Features
 
@@ -72,7 +71,6 @@ All 21 lessons (Student, Developer, Researcher and Concepts) and the Lab run on 
 - **Break the Code** (on Qollab's start screen and in the error-correction lesson): inject no error, one X error on any data qubit, or two, then read the syndrome, the correction, the logical outcome and the run's provenance from one run.
 - **Learning paths**: Roadmaps lay out each track's lessons in prerequisite order, with credited videos and readings, on Qollab as well as in the web app. The web app also keeps your notes, bookmarks and progress.
 - **Course modules**: 21 lessons. Each has a runnable circuit, "what to look for" notes, experiments to try and a check question, and eight start with a prediction.
-- **Community** (`/community`): publish circuits, then search, star and fork them. Publishing re-runs the circuit on the server, so shared results are always verified.
 - **Progress**: XP, streaks, a skill tree with cross-track links, and printable certificates for each track.
 
 ## Run it
@@ -110,7 +108,7 @@ The diagram is at the top of this README, under [How it fits together](#how-it-f
 - `src/lib/quantum.ts` contains the circuit types, gate catalog, API client and Qiskit code export. Runs go through a swappable transport: HTTP in the web app, Qollab's Python bridge on Qollab.
 - `src/lib/curriculum.ts` holds tracks, modules and the circuits behind the Explorer games.
 - `src/components/lab/` has the editor, histogram, Bloch sphere, statevector table and tutor.
-- Learner progress is stored in `localStorage` (`src/lib/progress.tsx`). Community projects are stored on the server.
+- Learner progress is stored in `localStorage` (`src/lib/progress.tsx`).
 
 ## Not yet built
 

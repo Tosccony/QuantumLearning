@@ -82,7 +82,7 @@ export default function Player({ backendName }: { backendName: string }) {
       <footer className="rail -mx-3 sm:-mx-4">
         <Perf />
         <div className="flex flex-col items-center gap-1 px-4 py-3 text-center text-xs text-fog">
-          <p>Kids&apos; Explorer games, community sharing and the AI tutor live in the full web app: <a className="text-ice underline underline-offset-4 hover:text-paper" href={REPO}>{REPO}</a>. MIT licensed.</p>
+          <p>Kids&apos; Explorer games and the AI tutor live in the full web app: <a className="text-ice underline underline-offset-4 hover:text-paper" href={REPO}>{REPO}</a>. MIT licensed.</p>
           <p className="label-sm">This effort is supported by Qollab &amp; IonQ</p>
         </div>
         <Perf />

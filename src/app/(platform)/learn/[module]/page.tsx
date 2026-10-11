@@ -72,7 +72,7 @@ export default function LessonPage() {
   }
 
   const ran = !!result || codeRan;
-  const flow: FlowStep = picked !== null ? "share" : ran || asked ? "understand" : "run";
+  const flow: FlowStep = ran || asked || picked !== null ? "understand" : "run";
   const flowDone: FlowStep[] = ["learn", "build", ...(ran ? (["run"] as FlowStep[]) : []), ...(asked || picked !== null ? (["understand"] as FlowStep[]) : [])];
   const correct = picked !== null && picked === m.check.answer;
 
@@ -129,7 +129,7 @@ export default function LessonPage() {
           </p>
           <div className="flex flex-wrap gap-2">
             <Link href={`/lab?module=${m.id}`} className="keycap-paper">
-              <Icon name="share" size={14} /> Remix in the Lab and share
+              <Icon name="chip" size={14} /> Remix in the Lab
             </Link>
             {next ? (
               <Link href={`/learn/${next.id}`} className="keycap-paper-primary">

@@ -50,7 +50,7 @@ type Props = {
   readOnly?: boolean;
   /** Index (in execution order) of the last op to show at full strength, for step-through. */
   stepIndex?: number | null;
-  /** Compact strips (community cards, home) hide the edge codes. */
+  /** Compact strips (home) hide the edge codes. */
   compact?: boolean;
   /** Step-through ruler on the strip: one tick per gate, the handle snaps to gate pitch. */
   scrub?: { value: number | null; max: number; onChange: (v: number | null) => void; label?: string };

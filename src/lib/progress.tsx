@@ -30,8 +30,6 @@ export type State = {
   settings: Settings;
   modules: Record<string, { completedAt: string; correct: boolean }>;
   labRuns: number;
-  projects: string[]; // community project ids this learner published
-  starred: string[];
 };
 
 const KEY = "quantum-quest-v1";
@@ -49,8 +47,6 @@ const initial: State = {
   settings: { narration: false, colorblind: false, bigText: false },
   modules: {},
   labRuns: 0,
-  projects: [],
-  starred: [],
 };
 
 export const today = (d = new Date()) => d.toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
@@ -65,8 +61,6 @@ type Ctx = {
   logTime: (sec: number) => void;
   completeModule: (id: string, correct: boolean) => void;
   recordRun: () => void;
-  recordShare: (projectId: string) => void;
-  toggleStar: (projectId: string) => void;
   reset: () => void;
 };
 
@@ -87,7 +81,10 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) {
-        const saved = JSON.parse(raw) as State;
+        const saved = JSON.parse(raw) as State & { projects?: unknown; starred?: unknown };
+        // Drop fields that older saves still carry from a removed feature.
+        delete saved.projects;
+        delete saved.starred;
         // A missed day breaks the streak.
         if (saved.lastDay && saved.lastDay !== today() && saved.lastDay !== yesterday()) saved.streak = 0;
         setState({ ...initial, ...saved, settings: { ...initial.settings, ...saved.settings } });
@@ -177,28 +174,14 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const recordShare = useCallback(
-    (id: string) =>
-      setState((s) => {
-        const t = today();
-        return touchDay({ ...s, projects: [id, ...s.projects], xp: s.xp + 50, activity: { ...s.activity, [t]: (s.activity[t] ?? 0) + 50 } });
-      }),
-    [],
-  );
-
-  const toggleStar = useCallback(
-    (id: string) => setState((s) => ({ ...s, starred: s.starred.includes(id) ? s.starred.filter((x) => x !== id) : [...s.starred, id] })),
-    [],
-  );
-
   const reset = useCallback(() => {
     setState(initial);
     try { localStorage.removeItem(ROADMAP_STORAGE_KEY); } catch {}
   }, []);
 
   const value = useMemo(
-    () => ({ state, ready, update, addXp, completeLevel, logTime, completeModule, recordRun, recordShare, toggleStar, reset }),
-    [state, ready, update, addXp, completeLevel, logTime, completeModule, recordRun, recordShare, toggleStar, reset],
+    () => ({ state, ready, update, addXp, completeLevel, logTime, completeModule, recordRun, reset }),
+    [state, ready, update, addXp, completeLevel, logTime, completeModule, recordRun, reset],
   );
 
   return (

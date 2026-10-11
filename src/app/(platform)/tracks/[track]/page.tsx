@@ -13,7 +13,6 @@ const LOOP: { icon: IconName; label: string; text: string }[] = [
   { icon: "chip", label: "Build", text: "the circuit" },
   { icon: "run", label: "Run", text: "it on Qiskit" },
   { icon: "tutor", label: "Understand", text: "it with the tutor" },
-  { icon: "share", label: "Share", text: "your variation" },
 ];
 
 /** Progress as frame cells inside a window: done cells are crossed out in navy ink. */

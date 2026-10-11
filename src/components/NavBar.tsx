@@ -12,7 +12,6 @@ const LINKS: { href: string; label: string; icon: IconName; match: (p: string) =
   { href: "/learn", label: "Learn", icon: "learn", match: (p) => p.startsWith("/learn") || p.startsWith("/tracks") || p.startsWith("/certificate") },
   { href: "/roadmaps", label: "Roadmaps", icon: "map", match: (p) => p.startsWith("/roadmaps") },
   { href: "/lab", label: "Lab", icon: "lab", match: (p) => p.startsWith("/lab") },
-  { href: "/community", label: "Community", icon: "community", match: (p) => p.startsWith("/community") },
   { href: "/progress", label: "Progress", icon: "progress", match: (p) => p.startsWith("/progress") },
 ];
 

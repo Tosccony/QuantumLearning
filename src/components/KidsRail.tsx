@@ -50,7 +50,7 @@ export default function KidsRail() {
           <span className="label hidden sm:inline">Grown-ups</span>
           <span className="sr-only sm:hidden">Grown-ups</span>
         </RailLink>
-        <RailLink href="/" title="All tracks, the Lab and the community">
+        <RailLink href="/" title="All tracks and the Lab">
           <Icon name="atom" size={18} />
           <span className="label hidden sm:inline">All tracks</span>
           <span className="sr-only sm:hidden">All tracks</span>

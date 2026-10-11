@@ -66,7 +66,7 @@ function Progress({ state }: { state: State }) {
           <Tele icon="streak" value={state.streak} unit="day streak" />
           <Tele icon="progress" value={`${doneCount}/${ns.length}`} unit="skills" />
           <Tele icon="lab" value={state.labRuns} unit="circuits run" note="Qiskit Aer" />
-          <Tele icon="share" value={state.projects.length} unit="shared" note={`${state.starred.length} starred`} />
+          <Tele icon="learn" value={Object.keys(state.modules).length} unit="lessons completed" />
         </ul>
         <Perf />
       </section>

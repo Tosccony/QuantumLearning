@@ -8,7 +8,6 @@ import Histogram, { ScaleBar } from "@/components/lab/Histogram";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import { EdgeCode, Flag, Notice, Perf, Stripe, TRACK_VAR } from "@/components/ui/primitives";
 import { DEMO_NOISE } from "@/lib/breakTheCode";
-import { listProjects, type Project } from "@/lib/community";
 import { moduleById, modulesOf, TRACKS, type TrackId } from "@/lib/curriculum";
 import { useProgress } from "@/lib/progress";
 import { runCircuit, type RunResult } from "@/lib/quantum";
@@ -34,13 +33,10 @@ const CLAIMS: { icon: IconName; title: string; text: string; href: string; proof
   { icon: "chip", title: "Build", text: "Nineteen gates on a visual strip, by mouse, drag or keyboard.", href: "/lab", proof: "The strip above is the editor" },
   { icon: "run", title: "Run", text: "Every number comes back from the Qiskit Aer simulator, ideal or noisy.", href: "/lab", proof: "Backend and version printed on each result" },
   { icon: "tutor", title: "Understand", text: "A tutor grounded in the counts, Bloch vectors and purity of your own run.", href: "/lab", proof: "Offline explainer when no API key is set" },
-  { icon: "share", title: "Share", text: "Publish a circuit; it is re-run on the server so shared results are verified.", href: "/community", proof: "Browse verified community circuits" },
 ];
 
 export default function Home() {
   const { state, ready, recordRun } = useProgress();
-  const [featured, setFeatured] = useState<Project[] | null>(null);
-  const [offline, setOffline] = useState(false);
   const [runResult, setResult] = useState<RunResult | null>(null);
   const [step, setStep] = useState<number | null>(null);
   const [ranNoisy, setRanNoisy] = useState(true);
@@ -56,10 +52,6 @@ export default function Home() {
   }, [runResult]);
   const prefix = useCircuitPrefix(DEMO.circuit, runResult, step, ranNoisy ? DEMO_NOISE : null);
   const result = prefix.result;
-
-  useEffect(() => {
-    listProjects("stars").then((p) => setFeatured(p.slice(0, 3))).catch(() => setOffline(true));
-  }, []);
 
   async function run(noisy: boolean) {
     setRunning(noisy ? "noisy" : "ideal");
@@ -244,48 +236,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ---------------------------------------------------------------- Pins */}
-      <section aria-labelledby="community-title" className="flex flex-col gap-4">
-        <div className="flex items-end gap-3">
-          <h2 id="community-title" className="display mr-auto text-3xl sm:text-4xl">Hanging on the pins</h2>
-          <Link href="/community" className="label text-ice underline-offset-4 hover:underline">All circuits</Link>
-        </div>
-        {offline ? (
-          <Notice tone="warn" role="status">The Qiskit service isn&apos;t running, so community circuits and the Lab are unavailable. Start it with <code className="code">npm run backend</code>.</Notice>
-        ) : (
-          <div className="relative">
-            <div className="absolute inset-x-0 top-3 h-px bg-[var(--line-strong)]" aria-hidden />
-            <ul className="grid gap-4 sm:grid-cols-3">
-              {(featured ?? Array.from({ length: 3 }, () => null)).map((p, i) => (
-                <li key={p?.id ?? i} className="relative flex flex-col items-center">
-                  <span className="mb-2 block h-3 w-3 rounded-full bg-ice ring-4 ring-navy" aria-hidden />
-                  {p ? (
-                    <Link href={`/community/${p.id}`} className="frame flex w-full flex-col gap-2 p-4 transition hover:border-[var(--line-strong)]">
-                      <MiniHistogram counts={p.counts} />
-                      <h3 className="display text-xl leading-tight">{p.title}</h3>
-                      <p className="line-clamp-2 text-sm text-fog">{p.description}</p>
-                      <p className="mt-auto flex items-center gap-3 pt-1 text-xs text-fog">
-                        <span className="truncate">by {p.author}</span>
-                        <span className="ml-auto flex items-center gap-1 code"><Icon name="star" size={12} /> {p.stars}</span>
-                        <span className="flex items-center gap-1 code"><Icon name="fork" size={12} /> {p.forks}</span>
-                      </p>
-                    </Link>
-                  ) : (
-                    <div className="frame frame-ghost h-44 w-full" aria-hidden />
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
-
       {/* ---------------------------------------------------------------- Claims and proofs */}
       <section aria-labelledby="loop-title" className="flex flex-col gap-4">
-        <h2 id="loop-title" className="display text-3xl sm:text-4xl">Learn, build, run, understand, share</h2>
+        <h2 id="loop-title" className="display text-3xl sm:text-4xl">Learn, build, run, understand</h2>
         <div className="rail">
           <Perf />
-          <ol className="grid gap-2 px-2 py-3 sm:grid-cols-2 sm:px-3 lg:grid-cols-5">
+          <ol className="grid gap-2 px-2 py-3 sm:grid-cols-2 sm:px-3 lg:grid-cols-4">
             {CLAIMS.map((c) => (
               <li key={c.title}>
                 <Link href={c.href} className="frame flex h-full flex-col gap-2 p-4 transition hover:border-[var(--line-strong)]">
@@ -311,14 +267,4 @@ function topSyndrome(counts: Record<string, number>) {
   const agg: Record<string, number> = {};
   for (const [k, v] of Object.entries(counts)) agg[k.slice(0, 2)] = (agg[k.slice(0, 2)] ?? 0) + v;
   return Object.entries(agg).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
-}
-
-function MiniHistogram({ counts }: { counts: Record<string, number> }) {
-  const entries = Object.entries(counts).sort((a, b) => a[0].localeCompare(b[0])).slice(0, 32);
-  const max = Math.max(...entries.map(([, v]) => v), 1);
-  return (
-    <div className="graticule-navy flex h-16 items-end gap-0.5 border-b border-l border-[var(--line-strong)] p-1" aria-hidden>
-      {entries.map(([k, v]) => <div key={k} className="flex-1 bg-ice" style={{ height: `${(v / max) * 100}%`, minHeight: 2 }} />)}
-    </div>
-  );
 }

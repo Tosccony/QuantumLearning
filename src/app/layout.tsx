@@ -9,7 +9,7 @@ const mono = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"] }
 
 export const metadata: Metadata = {
   title: "Quantum Quest",
-  description: "Learn, build, run, understand and share real quantum circuits, from first steps to research.",
+  description: "Learn, build, run, understand real quantum circuits, from first steps to research.",
 };
 
 export const viewport: Viewport = { themeColor: "#10294f" };

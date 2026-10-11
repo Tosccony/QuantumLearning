@@ -264,7 +264,6 @@ export default function RoadmapView({ track }: { track: Track }) {
                   );
                 })}
               </ol>
-              <Link href="/community" className="inline-flex min-h-11 w-fit items-center gap-2 text-sm text-ice hover:text-paper"><Icon name="community" size={16} /> Explore shared circuits</Link>
             </div>
             <Perf />
           </section>
