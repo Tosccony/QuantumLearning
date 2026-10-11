@@ -84,7 +84,7 @@ These apply to the code that runs **on Qollab**:
 - Browsers: Chrome, Edge, Brave, Opera, or Firefox 153+. **Safari isn't supported.** Record the demo in Chrome.
 - Judges run on a free local simulator. Using IonQ hardware earns no extra points.
 
-**Still to confirm:** what a Qollab project actually contains (files, Python runtime, whether `qiskit_aer` is available). Someone needs to log in and open a template before we build the Qollab version.
+**Verified:** the Qollab project format works (qollab.xyz, Oct 10, built-in simulator; lesson 1 returned the expected ~75/25 split). The bundle contents are listed in the checklist below.
 
 ---
 

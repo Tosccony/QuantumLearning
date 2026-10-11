@@ -92,7 +92,7 @@ export function explainProof(inj: Injection, r: RunResult, level: Level): string
   else
     out.push(`Two errors fool the code. X on q0 and q1 leaves Z₀Z₁ unchanged and breaks Z₁Z₂, so the syndrome reads ${want.syndrome}, the same as a single error on q2. The code "fixes" q2, which leaves all three flipped: a logical X, and q0 decodes as ${vec(p.exactBloch)} instead of ${vec(START)}. A distance-3 code corrects one error; stronger protection needs bigger codes and better gates.`);
   if (p.syndrome !== want.syndrome)
-    out.push(`This run's most common measured syndrome was ${p.syndrome}, not ${want.syndrome}, because of noise: the ancillas and the gates that fill them can fail too. A machine that reads ${p.syndrome} would have ${p.fixes === null ? "applied no correction" : `corrected X on q${p.fixes}`}.`);
+    out.push(`This run's most common measured syndrome was ${p.syndrome}, not ${want.syndrome}, most likely because of noise: the ancillas and the gates that fill them can fail too. A machine that reads ${p.syndrome} would have ${p.fixes === null ? "applied no correction" : `corrected X on q${p.fixes}`}.`);
   if (level !== "beginner")
     out.push(`Exact q0 Bloch vector ${vec(p.exactBloch)}, started at ${vec(START)}. P(q0 = 1): measured ${pct(p.measuredOne)} vs exact ${pct(p.exactOne)}.`);
   if (level === "advanced")
