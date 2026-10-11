@@ -8,8 +8,8 @@
 
 | | |
 |---|---|
-| **Run it on Qollab** | TODO(team): Qollab project link |
-| **Demo video (2–3 min)** | TODO(team): public video link |
+| **Run it on Qollab** | [qollab.xyz/u/kverhulp/quantum-quest](https://qollab.xyz/u/kverhulp/quantum-quest#run) |
+| **Demo video (3 min)** | [Watch the demo](https://github.com/Tosccony/QuantumLearning/blob/main/docs/qq_full_demo.mp4) |
 | **Web app** | Runs locally; see [Run it](#run-it) |
 | **Source** | https://github.com/Tosccony/QuantumLearning (MIT) |
 

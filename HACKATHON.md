@@ -127,9 +127,9 @@ Tick these off as they're done. Status is as of Oct 11, 12:30 ET. Only items som
 - [x] README *Disclosure* section filled in (pre-window work, starter template, every AI tool used)
 - [x] Attribution line in the README and the app footer
 - [ ] Git history shows work spread across the window, not one big commit (team to judge: `main` has 51 commits, the first at Oct 10, 12:13 ET, and that first commit is large)
-- [ ] README top table: fill the three `TODO(team)` links (Qollab project, demo video, web app). `RELEASE=1 npm run qollab:build` refuses to build until they're filled.
+- [x] README top table: fill the two `TODO(team)` links (Qollab project, demo video). `RELEASE=1 npm run qollab:build` refuses to build until they're filled.
 - [ ] README *How to run* checked on a clean machine
-- [ ] Merge the open redesign PR (#3) and these judge-facing changes into `main`
+- [x] Merge the redesign PR (#3) and the judge-facing changes (#4) into `main`; #5 closed, its lesson ported
 
 **Qollab**
 - [x] Qollab project format confirmed (verified on qollab.xyz, Oct 10, built-in simulator; `npm run qollab:build` → `dist/qollab.zip`: `index.html`, `main.js`, `main.css`, `requirements.txt`, `README.md`, `LICENSE`, `quantum/__init__.py`, `quantum/engine.py`, `docs/images/judge-start.png`)
