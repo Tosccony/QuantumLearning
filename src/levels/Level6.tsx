@@ -3,22 +3,27 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import LessonShell, { type StepApi } from "@/components/LessonShell";
+import Icon from "@/components/ui/Icon";
 import { groverCircuit, runCircuit } from "@/lib/quantum";
 import { OFFLINE_MSG } from "@/lib/useShots";
 
 const N = 16;
+const WOOD = "#8a5a3c";
 
-function Door({ open, star, glow, onClick, dim }: { open: boolean; star: boolean; glow?: number; onClick?: () => void; dim?: boolean }) {
+/** A door cell. `glow` (0–4) follows the real probability of that door and brightens it toward the star colour. */
+function Door({ open, star, glow = 0, onClick, dim }: { open: boolean; star: boolean; glow?: number; onClick?: () => void; dim?: boolean }) {
+  const closedBg = glow > 0 ? `color-mix(in srgb, var(--on) ${Math.round(glow * 20)}%, ${WOOD})` : WOOD;
   return (
     <motion.button
+      type="button"
       onClick={onClick}
       disabled={!onClick || open}
-      animate={{ opacity: dim ? 0.35 : 1, boxShadow: glow ? `0 0 ${glow * 14}px ${glow * 4}px var(--on)` : "0 0 0 0 transparent" }}
-      className="flex aspect-[3/4] items-center justify-center rounded-xl text-3xl sm:text-4xl"
-      style={{ background: open ? (star ? "var(--on)" : "#2a3170") : "#8a5a3c" }}
+      animate={{ opacity: dim ? 0.35 : 1, borderColor: glow >= 2 ? "var(--on)" : "var(--navy-ink)" }}
+      className="flex aspect-[3/4] min-h-11 items-center justify-center border-2 text-3xl leading-none sm:text-4xl"
+      style={{ background: open ? (star ? "var(--on)" : "var(--off)") : closedBg, color: open && !star ? "var(--fog)" : undefined }}
       aria-label={open ? (star ? "Star found" : "Empty") : "Closed door"}
     >
-      {open ? (star ? "⭐" : "·") : <span className="ml-[45%] h-[12%] w-[12%] rounded-full bg-on shadow" aria-hidden />}
+      {open ? (star ? "⭐" : "·") : <span className="ml-[45%] h-[12%] w-[12%] bg-on" aria-hidden />}
     </motion.button>
   );
 }
@@ -97,25 +102,28 @@ function Race({ done, say }: StepApi) {
     <div className="flex w-full flex-col items-center gap-5">
       <div className="grid w-full gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <h3 className="text-xl font-bold">🤖 Classical robot</h3>
+          <h3 className="display flex items-center gap-2 text-xl"><Icon name="chip" size={20} /> Classical robot</h3>
           <div className="grid grid-cols-4 gap-1.5">
             {Array.from({ length: N }, (_, k) => <Door key={k} open={k < cOpen} star={k === star} />)}
           </div>
-          <p className="text-lg">Doors opened: <b>{cOpen}</b></p>
+          <p className="text-lg">Doors opened: <b className="code">{cOpen}</b></p>
         </div>
         <div className="flex flex-col gap-2">
-          <h3 className="text-xl font-bold">✨ Quantum robot</h3>
+          <h3 className="display flex items-center gap-2 text-xl"><Icon name="atom" size={20} /> Quantum robot</h3>
           <div className="grid grid-cols-4 gap-1.5">
             {Array.from({ length: N }, (_, k) => (
               <Door key={k} open={qStep === 4 && k === found} star={k === star} glow={glowFor(k)} dim={qStep >= 2 && probs.length > 0 && probs[Math.min(qStep, 3)][k] < 0.05} />
             ))}
           </div>
-          <p className="text-lg">
-            {qStep < 0 ? "Waiting…" : qStep === 0 ? "Checking ALL doors at once (superposition)…" : qStep < 4 ? `Magic boost ${qStep} of 3 ✨` : "Found it! ⭐"}
+          <p className="text-lg" aria-live="polite">
+            {qStep < 0 ? "Waiting…" : qStep === 0 ? "Checking ALL doors at once (superposition)…" : qStep < 4 ? `Magic boost ${qStep} of 3` : "Found it!"}
           </p>
         </div>
       </div>
-      <button className="btn-primary" onClick={go} disabled={running}>{qStep < 0 ? "🏁 Start the race" : "🔁 Race again"}</button>
+      <button type="button" className="keycap-xl keycap-paper-primary" onClick={go} disabled={running}>
+        <Icon name={qStep < 0 ? "run" : "reset"} size={20} />
+        {qStep < 0 ? "Start the race" : "Race again"}
+      </button>
     </div>
   );
 }

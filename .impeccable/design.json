@@ -1,0 +1,858 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-11T14:40:25Z",
+  "title": "Design System: Quantum Quest",
+  "extensions": {
+    "colorMeta": {
+      "navy": {
+        "role": "neutral",
+        "displayName": "Navy Film",
+        "canonical": "oklch(34.04% 0.0985 259.70)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0985 259.70)",
+          "oklch(26.43% 0.0985 259.70)",
+          "oklch(37.86% 0.0985 259.70)",
+          "oklch(49.29% 0.0985 259.70)",
+          "oklch(60.71% 0.0985 259.70)",
+          "oklch(72.14% 0.0985 259.70)",
+          "oklch(83.57% 0.0985 259.70)",
+          "oklch(95.00% 0.0985 259.70)"
+        ]
+      },
+      "navy-deep": {
+        "role": "neutral",
+        "displayName": "Deep Bench",
+        "canonical": "oklch(28.44% 0.0764 258.68)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0764 258.68)",
+          "oklch(26.43% 0.0764 258.68)",
+          "oklch(37.86% 0.0764 258.68)",
+          "oklch(49.29% 0.0764 258.68)",
+          "oklch(60.71% 0.0764 258.68)",
+          "oklch(72.14% 0.0764 258.68)",
+          "oklch(83.57% 0.0764 258.68)",
+          "oklch(95.00% 0.0764 258.68)"
+        ]
+      },
+      "navy-ink": {
+        "role": "neutral",
+        "displayName": "Near-Navy Ink",
+        "canonical": "oklch(22.00% 0.0533 260.04)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0533 260.04)",
+          "oklch(26.43% 0.0533 260.04)",
+          "oklch(37.86% 0.0533 260.04)",
+          "oklch(49.29% 0.0533 260.04)",
+          "oklch(60.71% 0.0533 260.04)",
+          "oklch(72.14% 0.0533 260.04)",
+          "oklch(83.57% 0.0533 260.04)",
+          "oklch(95.00% 0.0533 260.04)"
+        ]
+      },
+      "ice": {
+        "role": "primary",
+        "displayName": "Ice Ink",
+        "canonical": "oklch(86.54% 0.1121 213.41)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1121 213.41)",
+          "oklch(26.43% 0.1121 213.41)",
+          "oklch(37.86% 0.1121 213.41)",
+          "oklch(49.29% 0.1121 213.41)",
+          "oklch(60.71% 0.1121 213.41)",
+          "oklch(72.14% 0.1121 213.41)",
+          "oklch(83.57% 0.1121 213.41)",
+          "oklch(95.00% 0.1121 213.41)"
+        ]
+      },
+      "ice-deep": {
+        "role": "primary",
+        "displayName": "Pressed Ice",
+        "canonical": "oklch(72.50% 0.1187 216.56)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1187 216.56)",
+          "oklch(26.43% 0.1187 216.56)",
+          "oklch(37.86% 0.1187 216.56)",
+          "oklch(49.29% 0.1187 216.56)",
+          "oklch(60.71% 0.1187 216.56)",
+          "oklch(72.14% 0.1187 216.56)",
+          "oklch(83.57% 0.1187 216.56)",
+          "oklch(95.00% 0.1187 216.56)"
+        ]
+      },
+      "ice-hover": {
+        "role": "primary",
+        "displayName": "Ice Hover",
+        "canonical": "oklch(88.95% 0.0959 211.46)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0959 211.46)",
+          "oklch(26.43% 0.0959 211.46)",
+          "oklch(37.86% 0.0959 211.46)",
+          "oklch(49.29% 0.0959 211.46)",
+          "oklch(60.71% 0.0959 211.46)",
+          "oklch(72.14% 0.0959 211.46)",
+          "oklch(83.57% 0.0959 211.46)",
+          "oklch(95.00% 0.0959 211.46)"
+        ]
+      },
+      "ice-wash": {
+        "role": "primary",
+        "displayName": "Ice Wash",
+        "canonical": "oklch(86.54% 0.1121 213.41 / 0.14)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1121 213.41 / 0.14)",
+          "oklch(26.43% 0.1121 213.41 / 0.14)",
+          "oklch(37.86% 0.1121 213.41 / 0.14)",
+          "oklch(49.29% 0.1121 213.41 / 0.14)",
+          "oklch(60.71% 0.1121 213.41 / 0.14)",
+          "oklch(72.14% 0.1121 213.41 / 0.14)",
+          "oklch(83.57% 0.1121 213.41 / 0.14)",
+          "oklch(95.00% 0.1121 213.41 / 0.14)"
+        ]
+      },
+      "navy-hover": {
+        "role": "neutral",
+        "displayName": "Navy Hover",
+        "canonical": "oklch(33.40% 0.0838 260.85)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0838 260.85)",
+          "oklch(26.43% 0.0838 260.85)",
+          "oklch(37.86% 0.0838 260.85)",
+          "oklch(49.29% 0.0838 260.85)",
+          "oklch(60.71% 0.0838 260.85)",
+          "oklch(72.14% 0.0838 260.85)",
+          "oklch(83.57% 0.0838 260.85)",
+          "oklch(95.00% 0.0838 260.85)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Punched Paper",
+        "canonical": "oklch(97.55% 0.0045 258.32)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0045 258.32)",
+          "oklch(26.43% 0.0045 258.32)",
+          "oklch(37.86% 0.0045 258.32)",
+          "oklch(49.29% 0.0045 258.32)",
+          "oklch(60.71% 0.0045 258.32)",
+          "oklch(72.14% 0.0045 258.32)",
+          "oklch(83.57% 0.0045 258.32)",
+          "oklch(95.00% 0.0045 258.32)"
+        ]
+      },
+      "paper-2": {
+        "role": "neutral",
+        "displayName": "Secondary Paper",
+        "canonical": "oklch(93.51% 0.0138 258.35)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0138 258.35)",
+          "oklch(26.43% 0.0138 258.35)",
+          "oklch(37.86% 0.0138 258.35)",
+          "oklch(49.29% 0.0138 258.35)",
+          "oklch(60.71% 0.0138 258.35)",
+          "oklch(72.14% 0.0138 258.35)",
+          "oklch(83.57% 0.0138 258.35)",
+          "oklch(95.00% 0.0138 258.35)"
+        ]
+      },
+      "paper-3": {
+        "role": "neutral",
+        "displayName": "Paper Rule",
+        "canonical": "oklch(87.61% 0.0234 258.36)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0234 258.36)",
+          "oklch(26.43% 0.0234 258.36)",
+          "oklch(37.86% 0.0234 258.36)",
+          "oklch(49.29% 0.0234 258.36)",
+          "oklch(60.71% 0.0234 258.36)",
+          "oklch(72.14% 0.0234 258.36)",
+          "oklch(83.57% 0.0234 258.36)",
+          "oklch(95.00% 0.0234 258.36)"
+        ]
+      },
+      "paper-muted": {
+        "role": "neutral",
+        "displayName": "Paper Muted",
+        "canonical": "oklch(46.00% 0.0601 262.71)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0601 262.71)",
+          "oklch(26.43% 0.0601 262.71)",
+          "oklch(37.86% 0.0601 262.71)",
+          "oklch(49.29% 0.0601 262.71)",
+          "oklch(60.71% 0.0601 262.71)",
+          "oklch(72.14% 0.0601 262.71)",
+          "oklch(83.57% 0.0601 262.71)",
+          "oklch(95.00% 0.0601 262.71)"
+        ]
+      },
+      "paper-dash": {
+        "role": "neutral",
+        "displayName": "Paper Dash",
+        "canonical": "oklch(73.22% 0.0427 262.23)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0427 262.23)",
+          "oklch(26.43% 0.0427 262.23)",
+          "oklch(37.86% 0.0427 262.23)",
+          "oklch(49.29% 0.0427 262.23)",
+          "oklch(60.71% 0.0427 262.23)",
+          "oklch(72.14% 0.0427 262.23)",
+          "oklch(83.57% 0.0427 262.23)",
+          "oklch(95.00% 0.0427 262.23)"
+        ]
+      },
+      "field-paper": {
+        "role": "neutral",
+        "displayName": "Field Paper",
+        "canonical": "oklch(100.00% 0.0000 0.00)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0000 0.00)",
+          "oklch(26.43% 0.0000 0.00)",
+          "oklch(37.86% 0.0000 0.00)",
+          "oklch(49.29% 0.0000 0.00)",
+          "oklch(60.71% 0.0000 0.00)",
+          "oklch(72.14% 0.0000 0.00)",
+          "oklch(83.57% 0.0000 0.00)",
+          "oklch(95.00% 0.0000 0.00)"
+        ]
+      },
+      "field-placeholder": {
+        "role": "neutral",
+        "displayName": "Field Placeholder",
+        "canonical": "oklch(52.68% 0.0528 263.39)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0528 263.39)",
+          "oklch(26.43% 0.0528 263.39)",
+          "oklch(37.86% 0.0528 263.39)",
+          "oklch(49.29% 0.0528 263.39)",
+          "oklch(60.71% 0.0528 263.39)",
+          "oklch(72.14% 0.0528 263.39)",
+          "oklch(83.57% 0.0528 263.39)",
+          "oklch(95.00% 0.0528 263.39)"
+        ]
+      },
+      "fog": {
+        "role": "neutral",
+        "displayName": "Fog",
+        "canonical": "oklch(82.69% 0.0384 262.12)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0384 262.12)",
+          "oklch(26.43% 0.0384 262.12)",
+          "oklch(37.86% 0.0384 262.12)",
+          "oklch(49.29% 0.0384 262.12)",
+          "oklch(60.71% 0.0384 262.12)",
+          "oklch(72.14% 0.0384 262.12)",
+          "oklch(83.57% 0.0384 262.12)",
+          "oklch(95.00% 0.0384 262.12)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Rail Hairline",
+        "canonical": "oklch(97.55% 0.0045 258.32 / 0.26)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0045 258.32 / 0.26)",
+          "oklch(26.43% 0.0045 258.32 / 0.26)",
+          "oklch(37.86% 0.0045 258.32 / 0.26)",
+          "oklch(49.29% 0.0045 258.32 / 0.26)",
+          "oklch(60.71% 0.0045 258.32 / 0.26)",
+          "oklch(72.14% 0.0045 258.32 / 0.26)",
+          "oklch(83.57% 0.0045 258.32 / 0.26)",
+          "oklch(95.00% 0.0045 258.32 / 0.26)"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "canonical": "oklch(97.55% 0.0045 258.32 / 0.55)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0045 258.32 / 0.55)",
+          "oklch(26.43% 0.0045 258.32 / 0.55)",
+          "oklch(37.86% 0.0045 258.32 / 0.55)",
+          "oklch(49.29% 0.0045 258.32 / 0.55)",
+          "oklch(60.71% 0.0045 258.32 / 0.55)",
+          "oklch(72.14% 0.0045 258.32 / 0.55)",
+          "oklch(83.57% 0.0045 258.32 / 0.55)",
+          "oklch(95.00% 0.0045 258.32 / 0.55)"
+        ]
+      },
+      "scrim": {
+        "role": "neutral",
+        "displayName": "Dialog Scrim",
+        "canonical": "oklch(22.00% 0.0533 260.04 / 0.72)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0533 260.04 / 0.72)",
+          "oklch(26.43% 0.0533 260.04 / 0.72)",
+          "oklch(37.86% 0.0533 260.04 / 0.72)",
+          "oklch(49.29% 0.0533 260.04 / 0.72)",
+          "oklch(60.71% 0.0533 260.04 / 0.72)",
+          "oklch(72.14% 0.0533 260.04 / 0.72)",
+          "oklch(83.57% 0.0533 260.04 / 0.72)",
+          "oklch(95.00% 0.0533 260.04 / 0.72)"
+        ]
+      },
+      "good": {
+        "role": "secondary",
+        "displayName": "Good",
+        "canonical": "oklch(79.68% 0.1636 159.69)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1636 159.69)",
+          "oklch(26.43% 0.1636 159.69)",
+          "oklch(37.86% 0.1636 159.69)",
+          "oklch(49.29% 0.1636 159.69)",
+          "oklch(60.71% 0.1636 159.69)",
+          "oklch(72.14% 0.1636 159.69)",
+          "oklch(83.57% 0.1636 159.69)",
+          "oklch(95.00% 0.1636 159.69)"
+        ]
+      },
+      "bad": {
+        "role": "secondary",
+        "displayName": "Bad",
+        "canonical": "oklch(73.63% 0.1614 21.80)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1614 21.80)",
+          "oklch(26.43% 0.1614 21.80)",
+          "oklch(37.86% 0.1614 21.80)",
+          "oklch(49.29% 0.1614 21.80)",
+          "oklch(60.71% 0.1614 21.80)",
+          "oklch(72.14% 0.1614 21.80)",
+          "oklch(83.57% 0.1614 21.80)",
+          "oklch(95.00% 0.1614 21.80)"
+        ]
+      },
+      "bad-ink": {
+        "role": "secondary",
+        "displayName": "Paper Error Ink",
+        "canonical": "oklch(47.56% 0.1656 18.52)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1656 18.52)",
+          "oklch(26.43% 0.1656 18.52)",
+          "oklch(37.86% 0.1656 18.52)",
+          "oklch(49.29% 0.1656 18.52)",
+          "oklch(60.71% 0.1656 18.52)",
+          "oklch(72.14% 0.1656 18.52)",
+          "oklch(83.57% 0.1656 18.52)",
+          "oklch(95.00% 0.1656 18.52)"
+        ]
+      },
+      "warn": {
+        "role": "secondary",
+        "displayName": "Warn",
+        "canonical": "oklch(87.89% 0.1617 90.94)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1617 90.94)",
+          "oklch(26.43% 0.1617 90.94)",
+          "oklch(37.86% 0.1617 90.94)",
+          "oklch(49.29% 0.1617 90.94)",
+          "oklch(60.71% 0.1617 90.94)",
+          "oklch(72.14% 0.1617 90.94)",
+          "oklch(83.57% 0.1617 90.94)",
+          "oklch(95.00% 0.1617 90.94)"
+        ]
+      },
+      "t-explorer": {
+        "role": "secondary",
+        "displayName": "Explorer Collar",
+        "canonical": "oklch(87.89% 0.1617 90.94)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1617 90.94)",
+          "oklch(26.43% 0.1617 90.94)",
+          "oklch(37.86% 0.1617 90.94)",
+          "oklch(49.29% 0.1617 90.94)",
+          "oklch(60.71% 0.1617 90.94)",
+          "oklch(72.14% 0.1617 90.94)",
+          "oklch(83.57% 0.1617 90.94)",
+          "oklch(95.00% 0.1617 90.94)"
+        ]
+      },
+      "t-student": {
+        "role": "secondary",
+        "displayName": "Student Collar",
+        "canonical": "oklch(84.96% 0.0973 211.33)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0973 211.33)",
+          "oklch(26.43% 0.0973 211.33)",
+          "oklch(37.86% 0.0973 211.33)",
+          "oklch(49.29% 0.0973 211.33)",
+          "oklch(60.71% 0.0973 211.33)",
+          "oklch(72.14% 0.0973 211.33)",
+          "oklch(83.57% 0.0973 211.33)",
+          "oklch(95.00% 0.0973 211.33)"
+        ]
+      },
+      "t-developer": {
+        "role": "secondary",
+        "displayName": "Developer Collar",
+        "canonical": "oklch(79.68% 0.1636 159.69)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1636 159.69)",
+          "oklch(26.43% 0.1636 159.69)",
+          "oklch(37.86% 0.1636 159.69)",
+          "oklch(49.29% 0.1636 159.69)",
+          "oklch(60.71% 0.1636 159.69)",
+          "oklch(72.14% 0.1636 159.69)",
+          "oklch(83.57% 0.1636 159.69)",
+          "oklch(95.00% 0.1636 159.69)"
+        ]
+      },
+      "t-researcher": {
+        "role": "secondary",
+        "displayName": "Researcher Collar",
+        "canonical": "oklch(77.84% 0.1380 303.20)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1380 303.20)",
+          "oklch(26.43% 0.1380 303.20)",
+          "oklch(37.86% 0.1380 303.20)",
+          "oklch(49.29% 0.1380 303.20)",
+          "oklch(60.71% 0.1380 303.20)",
+          "oklch(72.14% 0.1380 303.20)",
+          "oklch(83.57% 0.1380 303.20)",
+          "oklch(95.00% 0.1380 303.20)"
+        ]
+      },
+      "t-concepts": {
+        "role": "secondary",
+        "displayName": "Concepts Collar",
+        "canonical": "oklch(79.15% 0.1238 37.95)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1238 37.95)",
+          "oklch(26.43% 0.1238 37.95)",
+          "oklch(37.86% 0.1238 37.95)",
+          "oklch(49.29% 0.1238 37.95)",
+          "oklch(60.71% 0.1238 37.95)",
+          "oklch(72.14% 0.1238 37.95)",
+          "oklch(83.57% 0.1238 37.95)",
+          "oklch(95.00% 0.1238 37.95)"
+        ]
+      },
+      "on": {
+        "role": "secondary",
+        "displayName": "Light On",
+        "canonical": "oklch(87.89% 0.1617 90.94)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1617 90.94)",
+          "oklch(26.43% 0.1617 90.94)",
+          "oklch(37.86% 0.1617 90.94)",
+          "oklch(49.29% 0.1617 90.94)",
+          "oklch(60.71% 0.1617 90.94)",
+          "oklch(72.14% 0.1617 90.94)",
+          "oklch(83.57% 0.1617 90.94)",
+          "oklch(95.00% 0.1617 90.94)"
+        ]
+      },
+      "off": {
+        "role": "secondary",
+        "displayName": "Light Off",
+        "canonical": "oklch(43.13% 0.0759 264.46)",
+        "tonalRamp": [
+          "oklch(15.00% 0.0759 264.46)",
+          "oklch(26.43% 0.0759 264.46)",
+          "oklch(37.86% 0.0759 264.46)",
+          "oklch(49.29% 0.0759 264.46)",
+          "oklch(60.71% 0.0759 264.46)",
+          "oklch(72.14% 0.0759 264.46)",
+          "oklch(83.57% 0.0759 264.46)",
+          "oklch(95.00% 0.0759 264.46)"
+        ]
+      },
+      "a": {
+        "role": "secondary",
+        "displayName": "Twin A",
+        "canonical": "oklch(73.59% 0.1890 352.42)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1890 352.42)",
+          "oklch(26.43% 0.1890 352.42)",
+          "oklch(37.86% 0.1890 352.42)",
+          "oklch(49.29% 0.1890 352.42)",
+          "oklch(60.71% 0.1890 352.42)",
+          "oklch(72.14% 0.1890 352.42)",
+          "oklch(83.57% 0.1890 352.42)",
+          "oklch(95.00% 0.1890 352.42)"
+        ]
+      },
+      "b": {
+        "role": "secondary",
+        "displayName": "Twin B",
+        "canonical": "oklch(79.68% 0.1636 159.69)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1636 159.69)",
+          "oklch(26.43% 0.1636 159.69)",
+          "oklch(37.86% 0.1636 159.69)",
+          "oklch(49.29% 0.1636 159.69)",
+          "oklch(60.71% 0.1636 159.69)",
+          "oklch(72.14% 0.1636 159.69)",
+          "oklch(83.57% 0.1636 159.69)",
+          "oklch(95.00% 0.1636 159.69)"
+        ]
+      },
+      "cb-a": {
+        "role": "secondary",
+        "displayName": "Colour-blind A (orange)",
+        "canonical": "oklch(78.28% 0.1680 66.20)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1680 66.20)",
+          "oklch(26.43% 0.1680 66.20)",
+          "oklch(37.86% 0.1680 66.20)",
+          "oklch(49.29% 0.1680 66.20)",
+          "oklch(60.71% 0.1680 66.20)",
+          "oklch(72.14% 0.1680 66.20)",
+          "oklch(83.57% 0.1680 66.20)",
+          "oklch(95.00% 0.1680 66.20)"
+        ]
+      },
+      "cb-b": {
+        "role": "secondary",
+        "displayName": "Colour-blind B (blue)",
+        "canonical": "oklch(77.10% 0.1445 230.68)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1445 230.68)",
+          "oklch(26.43% 0.1445 230.68)",
+          "oklch(37.86% 0.1445 230.68)",
+          "oklch(49.29% 0.1445 230.68)",
+          "oklch(60.71% 0.1445 230.68)",
+          "oklch(72.14% 0.1445 230.68)",
+          "oklch(83.57% 0.1445 230.68)",
+          "oklch(95.00% 0.1445 230.68)"
+        ]
+      },
+      "cb-on": {
+        "role": "secondary",
+        "displayName": "Colour-blind On",
+        "canonical": "oklch(90.97% 0.1440 95.11)",
+        "tonalRamp": [
+          "oklch(15.00% 0.1440 95.11)",
+          "oklch(26.43% 0.1440 95.11)",
+          "oklch(37.86% 0.1440 95.11)",
+          "oklch(49.29% 0.1440 95.11)",
+          "oklch(60.71% 0.1440 95.11)",
+          "oklch(72.14% 0.1440 95.11)",
+          "oklch(83.57% 0.1440 95.11)",
+          "oklch(95.00% 0.1440 95.11)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Home headline only; uppercase, balanced, 14ch cap. Not a heading default."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page and section headings from 40rem, the drawer topic title and 'Predict first'; some sections step up to 2.25rem."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Default Heading size, dialog and window titles, track names, readout values."
+      },
+      "title-sm": {
+        "displayName": "Title Small",
+        "purpose": "Card and planet titles, telemetry readout values."
+      },
+      "title-xs": {
+        "displayName": "Title Extra Small",
+        "purpose": "Spine node titles, roadmap project and drawer sub-headings, Predict verdict lines."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default reading and field text on navy and paper."
+      },
+      "prose": {
+        "displayName": "Prose",
+        "purpose": "Lesson copy inside windows, 68ch measure, square list markers."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Nav links, control captions, strip group labels; uppercase."
+      },
+      "label-sm": {
+        "displayName": "Label Small",
+        "purpose": "Readout captions, flow steps, the footer credit, spine status lines, branch kinds, log-table heads, lesson readout header lines."
+      },
+      "keycap": {
+        "displayName": "Keycap",
+        "purpose": "Button text; the 44px minimum is a control rule, not a type size."
+      },
+      "keycap-xl": {
+        "displayName": "Keycap XL",
+        "purpose": "Explorer and lesson-advance buttons; size only, no colour change."
+      },
+      "chip": {
+        "displayName": "Chip",
+        "purpose": "Noninteractive metadata tags."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Bitstrings, counts, angles, backend strings; tabular numerals, size by context."
+      },
+      "edge-code": {
+        "displayName": "Edge Code",
+        "purpose": "Frame addresses (F01, P03, C02, E03) and counts beside headings; never an eyebrow, never wrapped."
+      },
+      "ruler": {
+        "displayName": "Ruler",
+        "purpose": "The STEP label and frame numbers drawn in strip SVG."
+      }
+    },
+    "shadows": [
+      {
+        "name": "active-frame-inset",
+        "value": "inset 0 0 0 1px var(--ice)",
+        "purpose": "Selection stroke beside the ice border on active frames and nav links; not a cast shadow."
+      },
+      {
+        "name": "progress-cell-collar",
+        "value": "inset 0 0 0 1px var(--t-<track>)",
+        "purpose": "Filled progress cells on track cards carry a 1px inset of the track collar."
+      },
+      {
+        "name": "option-inset-ring",
+        "value": "inset 0 0 0 1px var(--navy-ink) | inset 0 0 0 1px var(--bad)",
+        "purpose": "Chosen or correct Predict option (near-navy); wrong pick (bad). Same inset device as the active frame, on paper."
+      }
+    ],
+    "motion": [
+      {
+        "name": "keycap-transition",
+        "value": "150ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Background, colour and transform on keycaps; colour only under reduced motion."
+      },
+      {
+        "name": "keycap-press",
+        "value": "translateY(1px)",
+        "purpose": "Pressed displacement for every keycap."
+      },
+      {
+        "name": "strike",
+        "value": "180ms steps(3, end) both",
+        "purpose": "Results landing: opacity 0.35 to 1, 2px lift; off under reduced motion."
+      },
+      {
+        "name": "rise",
+        "value": "520ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "purpose": "Histogram bars scale up from the baseline; off under reduced motion."
+      },
+      {
+        "name": "drawer-in",
+        "value": "180ms steps(3, end) both; translateY(24px) to none, translateX(24px) from 1024px",
+        "purpose": "Roadmap drawer entering as a bottom sheet (phones) or from the right (lg); off under reduced motion."
+      },
+      {
+        "name": "blink",
+        "value": "1s steps(2, end) infinite",
+        "purpose": "Activity: opacity dips to 0.25 at the half step; off under reduced motion."
+      },
+      {
+        "name": "shot-count",
+        "value": "520ms, 1 - (1 - t)^3",
+        "purpose": "Scale bar counts up to the shot total; final value immediately under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "40rem"
+      },
+      {
+        "name": "md",
+        "value": "48rem"
+      },
+      {
+        "name": "lg",
+        "value": "64rem"
+      },
+      {
+        "name": "xl",
+        "value": "80rem"
+      },
+      {
+        "name": "2xl",
+        "value": "96rem",
+        "purpose": "Branch kind labels return beside an open roadmap drawer."
+      }
+    ],
+    "material": {
+      "grain": {
+        "asset": "public/film-grain.png",
+        "provenance": "public/film-grain.png.json",
+        "tile": "160x160 RGBA, white at alpha 0-28 (about 5.5% average), seed 42, MIT",
+        "applied": "body background-image, repeat, over the navy background-color; scrolls with the page; removed for print"
+      },
+      "perforation": {
+        "band": "14px",
+        "hole": "14x10px, 2.2px corners",
+        "pitch": "24px",
+        "vertical": "14px wide, 7x12px holes on a 20px pitch",
+        "ice": "same holes in ice at 55%"
+      },
+      "punchedCorner": "16px hard-stop diagonal of page navy over the top-right of locked or unavailable frames",
+      "graticule": "1px rules at 10% x 25%; near-navy at 12% on paper, paper at 10% on navy",
+      "cell": "56px frame pitch, 56px left gutter for wire labels",
+      "connector": "2px vertical stub, 32px tall (12px in the index preview), between spine nodes: ice when travelled, strong hairline otherwise, dashed when the next topic does not require the current one; 1px horizontal stub 28px long to each branch frame",
+      "progressCell": "12px-tall cells sharing the row width: ice fill with collar inset when done, ice outline when learning, strong-hairline outline otherwise, .cell-skipped single fog diagonal at 135deg (8% wide) when skipped",
+      "ghostFrame": "dashed hairline frame for anything not yet real: milestone notes, the Destination before completion, a game slot without a circuit",
+      "print": "white page, black ink, grain removed, perforations hidden, rails/frames/windows white with #888 borders and no inset stroke, active frame black, map zoom 1, roadmap grid to block flow, drawer static with 16px top margin"
+    }
+  },
+  "components": [
+    {
+      "name": "Ice primary keycap",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The RUN control: ice fill, near-navy text, 44px minimum, 1px press.",
+      "html": "<div class=\"ds-stage-navy\"><button class=\"ds-btn-primary\" type=\"button\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 5v14l11-7z\" fill=\"currentColor\" stroke=\"none\"/></svg>Run with noise</button></div>",
+      "css": ".ds-stage-navy{padding:16px;background:var(--navy-deep, #10294f)}.ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:44px;min-height:44px;padding:12px 20px;border:1px solid var(--ice, #6fe6ff);border-radius:0;background:var(--ice, #6fe6ff);color:var(--navy-ink, #0b1a33);font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;font-size:0.875rem;font-weight:600;line-height:1;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;user-select:none;transition:background-color 150ms cubic-bezier(0.4,0,0.2,1),color 150ms cubic-bezier(0.4,0,0.2,1),transform 150ms cubic-bezier(0.4,0,0.2,1)}.ds-btn-primary:not(:disabled):hover{background:#8aecff}.ds-btn-primary:not(:disabled):active{transform:translateY(1px)}.ds-btn-primary:disabled{opacity:0.45;pointer-events:none}.ds-btn-primary:focus-visible{outline:2px solid var(--ice, #6fe6ff);outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-btn-primary{transition-property:background-color,color}}"
+    },
+    {
+      "name": "Ice outline keycap",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary rail action: ice text and border on transparency, ice wash on hover.",
+      "html": "<div class=\"ds-stage-navy\"><button class=\"ds-btn-outline\" type=\"button\">Run ideal</button> <button class=\"ds-btn-outline\" type=\"button\" disabled>Running…</button></div>",
+      "css": ".ds-stage-navy{padding:16px;background:var(--navy-deep, #10294f)}.ds-btn-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:44px;min-height:44px;padding:12px 20px;border:1px solid var(--ice, #6fe6ff);border-radius:0;background:transparent;color:var(--ice, #6fe6ff);font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;font-size:0.875rem;font-weight:600;line-height:1;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;user-select:none;transition:background-color 150ms cubic-bezier(0.4,0,0.2,1),color 150ms cubic-bezier(0.4,0,0.2,1),transform 150ms cubic-bezier(0.4,0,0.2,1)}.ds-btn-outline:not(:disabled):hover{background:rgba(111, 230, 255, 0.14)}.ds-btn-outline:not(:disabled):active{transform:translateY(1px)}.ds-btn-outline:disabled{opacity:0.45;pointer-events:none}.ds-btn-outline:focus-visible{outline:2px solid var(--ice, #6fe6ff);outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-btn-outline{transition-property:background-color,color}}"
+    },
+    {
+      "name": "Paper keycaps and XL",
+      "kind": "button",
+      "refersTo": "button-paper-primary",
+      "description": "Inside a window: near-navy outline or fill. The XL modifier only changes size (56px, 1.125rem) for Explorer controls.",
+      "html": "<div class=\"ds-stage-paper\"><button class=\"ds-btn-paper\" type=\"button\">Cancel</button> <button class=\"ds-btn-paper-primary\" type=\"button\">Publish circuit</button> <button class=\"ds-btn-paper-primary ds-btn-xl\" type=\"button\">Next planet</button></div>",
+      "css": ".ds-stage-paper{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:16px;background:var(--paper, #f5f7fa)}.ds-btn-paper{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:44px;min-height:44px;padding:12px 20px;border:1px solid var(--navy-ink, #0b1a33);border-radius:0;background:transparent;color:var(--navy-ink, #0b1a33);font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;font-size:0.875rem;font-weight:600;line-height:1;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;user-select:none;transition:background-color 150ms cubic-bezier(0.4,0,0.2,1),color 150ms cubic-bezier(0.4,0,0.2,1),transform 150ms cubic-bezier(0.4,0,0.2,1)}.ds-btn-paper:not(:disabled):hover{background:var(--paper-2, #e4eaf3)}.ds-btn-paper:not(:disabled):active{transform:translateY(1px)}.ds-btn-paper:disabled{opacity:0.45;pointer-events:none}.ds-btn-paper:focus-visible{outline:2px solid var(--navy-ink, #0b1a33);outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-btn-paper{transition-property:background-color,color}}.ds-btn-paper-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:44px;min-height:44px;padding:12px 20px;border:1px solid var(--navy-ink, #0b1a33);border-radius:0;background:var(--navy-ink, #0b1a33);color:var(--paper, #f5f7fa);font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;font-size:0.875rem;font-weight:600;line-height:1;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;user-select:none;transition:background-color 150ms cubic-bezier(0.4,0,0.2,1),color 150ms cubic-bezier(0.4,0,0.2,1),transform 150ms cubic-bezier(0.4,0,0.2,1)}.ds-btn-paper-primary:not(:disabled):hover{background:#1c3561}.ds-btn-paper-primary:not(:disabled):active{transform:translateY(1px)}.ds-btn-paper-primary:disabled{opacity:0.45;pointer-events:none}.ds-btn-paper-primary:focus-visible{outline:2px solid var(--navy-ink, #0b1a33);outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-btn-paper-primary{transition-property:background-color,color}}.ds-btn-xl{font-size:1.125rem;min-height:56px;padding:16px 28px;letter-spacing:0.06em}"
+    },
+    {
+      "name": "Fields on navy and paper",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Square 44px fields: transparent with a strong hairline on navy, white with a paper rule inside windows. Focus swaps the border.",
+      "html": "<div class=\"ds-fields\"><label class=\"ds-field-label\">Display name<input class=\"ds-field\" type=\"text\" placeholder=\"Your name\" maxlength=\"40\"></label><div class=\"ds-field-window\"><label class=\"ds-field-label\">Circuit title<input class=\"ds-field\" type=\"text\" placeholder=\"Name your circuit\"></label></div></div>",
+      "css": ".ds-fields{display:grid;gap:16px;padding:16px;background:var(--navy-deep, #10294f);color:var(--paper, #f5f7fa);font-family:var(--font-saira-semi, \"Saira Semi Condensed\"), system-ui, sans-serif;font-size:1rem;line-height:1.55}.ds-field-label{display:grid;gap:8px;font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase}.ds-field{width:100%;min-width:0;min-height:44px;padding:8px 12px;border:1px solid var(--line-strong, rgba(245, 247, 250, 0.55));border-radius:0;background:transparent;color:var(--paper, #f5f7fa);font-family:var(--font-saira-semi, \"Saira Semi Condensed\"), system-ui, sans-serif;font-size:1rem;text-transform:none;letter-spacing:normal;font-weight:400}.ds-field::placeholder{color:var(--fog, #b9c7e0);opacity:0.8}.ds-field:focus-visible{outline:2px solid var(--ice, #6fe6ff);outline-offset:0;border-color:var(--ice, #6fe6ff)}.ds-field-window{padding:16px;background:var(--paper, #f5f7fa);color:var(--navy-ink, #0b1a33)}.ds-field-window .ds-field{border-color:var(--paper-3, #cdd7e6);background:#fff;color:var(--navy-ink, #0b1a33)}.ds-field-window .ds-field::placeholder{color:#5b6b8a}.ds-field-window .ds-field:focus-visible{border-color:var(--navy-ink, #0b1a33);outline-color:var(--navy-ink, #0b1a33)}"
+    },
+    {
+      "name": "Rail navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Brand frame plus five framed links (Learn, Roadmaps, Lab, Community, Progress) between 14px perforation bands; the current page is framed active with a folded flag breaking the top band and aria-current.",
+      "html": "<div class=\"ds-nav-rail\"><div class=\"ds-perf\" aria-hidden=\"true\"></div><nav class=\"ds-nav\" aria-label=\"Sample primary navigation\"><a class=\"ds-nav-brand\" href=\"/\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" class=\"ds-ice\"><circle cx=\"12\" cy=\"12\" r=\"2\"/><ellipse cx=\"12\" cy=\"12\" rx=\"9\" ry=\"3.5\"/><ellipse cx=\"12\" cy=\"12\" rx=\"9\" ry=\"3.5\" transform=\"rotate(60 12 12)\"/><ellipse cx=\"12\" cy=\"12\" rx=\"9\" ry=\"3.5\" transform=\"rotate(120 12 12)\"/></svg>Quantum Quest</a><ul class=\"ds-nav-links\"><li><a class=\"ds-nav-link\" href=\"/learn\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 6h7a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H3z\"/><path d=\"M21 6h-7a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h7z\"/></svg><span>Learn</span></a></li><li><a class=\"ds-nav-link\" href=\"/roadmaps\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z\"/><path d=\"M9 4v14M15 6v14\"/></svg><span>Roadmaps</span></a></li><li><a class=\"ds-nav-link\" href=\"/lab\" aria-current=\"page\"><svg class=\"ds-flag\" width=\"18\" height=\"23\" viewBox=\"0 0 22 28\" aria-hidden=\"true\"><path d=\"M0 0h22v20l-11 8L0 20z\" fill=\"var(--ice, #6fe6ff)\"/><path d=\"M0 0h22v6H0z\" fill=\"var(--ice-deep, #2fb8d6)\"/></svg><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 3h6\"/><path d=\"M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2.2h12.4a1.5 1.5 0 0 0 1.3-2.2L14 9V3\"/><path d=\"M7 15h10\"/></svg><span>Lab</span></a></li><li><a class=\"ds-nav-link\" href=\"/community\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"8\" r=\"3\"/><circle cx=\"16.5\" cy=\"9.5\" r=\"2.5\"/><path d=\"M2.5 20a5.5 5.5 0 0 1 11 0\"/><path d=\"M14 20a4.5 4.5 0 0 1 7.5-3.3\"/></svg><span>Community</span></a></li><li><a class=\"ds-nav-link\" href=\"/progress\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 20V10\"/><path d=\"M10 20V4\"/><path d=\"M16 20v-8\"/><path d=\"M22 20H2\"/></svg><span>Progress</span></a></li></ul></nav><div class=\"ds-perf\" aria-hidden=\"true\"></div></div>",
+      "css": ".ds-perf{height:14px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='14'%3E%3Crect x='5' y='2' width='14' height='10' rx='2.2' fill='%230b1a33'/%3E%3C/svg%3E\");background-repeat:repeat-x;background-size:24px 14px}.ds-nav-rail{background:var(--navy-deep, #10294f);color:var(--paper, #f5f7fa)}.ds-nav{display:flex;align-items:stretch;max-width:1400px;margin:auto;padding:0 8px}.ds-nav-links{display:flex;min-width:0;flex:1;gap:4px;margin:0;padding:0;list-style:none;overflow-x:auto;scrollbar-width:none}.ds-nav-brand,.ds-nav-link{position:relative;display:flex;flex-shrink:0;height:100%;min-height:44px;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--line, rgba(245, 247, 250, 0.26));background:var(--navy-deep, #10294f);text-decoration:none;font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;text-transform:uppercase}.ds-nav-brand{margin-right:8px;color:var(--paper, #f5f7fa);font-size:1rem;font-weight:700;line-height:1;letter-spacing:0.005em}.ds-ice{color:var(--ice, #6fe6ff)}.ds-nav-link{color:var(--fog, #b9c7e0);font-size:0.78rem;font-weight:600;line-height:1.2;letter-spacing:0.09em}.ds-nav-link:hover{color:var(--paper, #f5f7fa)}.ds-nav-link[aria-current]{border-color:var(--ice, #6fe6ff);box-shadow:inset 0 0 0 1px var(--ice, #6fe6ff);color:var(--paper, #f5f7fa)}.ds-flag{position:absolute;top:-11px;left:8px}.ds-nav-link:focus-visible,.ds-nav-brand:focus-visible{outline:2px solid var(--ice, #6fe6ff);outline-offset:2px}@media(min-width:40rem){.ds-nav{padding:0 16px}.ds-nav-link,.ds-nav-brand{padding:0 16px}.ds-nav-brand{font-size:1.125rem}}"
+    },
+    {
+      "name": "Metadata chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Square tags on navy and paper; a completed chip swaps its border to ice and carries a cross. The roadmap drawer's prerequisite chips are the one interactive use.",
+      "html": "<div class=\"ds-chips ds-chips-navy\"><span class=\"ds-chip\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/></svg>12 min</span><span class=\"ds-chip ds-chip-done\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" class=\"ds-ice\"><path d=\"M5 5l14 14\" stroke-width=\"2.6\"/><path d=\"M19 5L5 19\" stroke-width=\"2.6\"/></svg>Completed</span></div><div class=\"ds-chips ds-chips-paper\"><span class=\"ds-chip\">Qiskit Aer</span><span class=\"ds-chip\">1,024 shots</span></div>",
+      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:8px;padding:16px}.ds-chips-navy{background:var(--navy-deep, #10294f)}.ds-chips-paper{background:var(--paper, #f5f7fa)}.ds-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line-strong, rgba(245, 247, 250, 0.55));border-radius:0;color:var(--paper, #f5f7fa);font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;font-size:0.7rem;font-weight:600;line-height:1;letter-spacing:0.08em;text-transform:uppercase}.ds-chip-done{border-color:var(--ice, #6fe6ff)}.ds-ice{color:var(--ice, #6fe6ff)}.ds-chips-paper .ds-chip{border-color:var(--paper-3, #cdd7e6);color:var(--navy-ink, #0b1a33)}"
+    },
+    {
+      "name": "Punched reading window",
+      "kind": "card",
+      "refersTo": "window",
+      "description": "Paper surface for reading and results, opening with a perforation band and wearing a 4px track collar; padding belongs to the composition.",
+      "html": "<article class=\"ds-window\"><div class=\"ds-stripe\" aria-hidden=\"true\"></div><div class=\"ds-perf\" aria-hidden=\"true\"></div><div class=\"ds-window-body\"><div class=\"ds-window-head\"><h2 class=\"ds-window-title\">Qiskit results</h2><span class=\"ds-edge\">F03</span></div><p class=\"ds-window-copy\">Measured counts and exact probabilities describe different parts of the experiment.</p><p class=\"ds-window-muted\">noisy · aer_simulator · Qiskit 1.4 · 38 ms</p><p class=\"ds-window-error\">The Qiskit service isn't running. Start it with npm run backend.</p></div></article>",
+      "css": ".ds-perf{height:14px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='14'%3E%3Crect x='5' y='2' width='14' height='10' rx='2.2' fill='%230b1a33'/%3E%3C/svg%3E\");background-repeat:repeat-x;background-size:24px 14px}.ds-window{position:relative;background:var(--paper, #f5f7fa);color:var(--navy-ink, #0b1a33);border-radius:0;caret-color:var(--navy-ink, #0b1a33);font-family:var(--font-saira-semi, \"Saira Semi Condensed\"), system-ui, sans-serif;font-size:1rem;line-height:1.55}.ds-stripe{height:4px;background:var(--t-student, #7bdff2)}.ds-window-body{padding:16px}.ds-window-head{display:flex;align-items:flex-end;gap:12px}.ds-window-title{margin:0;font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;font-size:1.5rem;font-weight:700;line-height:0.95;letter-spacing:0.005em;text-transform:uppercase}.ds-edge{padding-bottom:4px;font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:#46587a}.ds-window-copy{margin:12px 0 0;max-width:68ch}.ds-window-muted{margin:12px 0 0;padding-bottom:8px;border-bottom:1px solid var(--paper-3, #cdd7e6);font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:0.75rem;color:#46587a}.ds-window-error{margin:12px 0 0;color:var(--bad-ink, #a52236)}"
+    },
+    {
+      "name": "Native dialog panel",
+      "kind": "custom",
+      "refersTo": "dialog",
+      "description": "Static open specimen of the native dialog: paper window on a near-navy scrim, perforation band, Title heading, 44px close keycap. Production uses showModal(), scroll lock and focus return.",
+      "html": "<div class=\"ds-dialog-stage\"><dialog open class=\"ds-dialog\" aria-labelledby=\"ds-dialog-title\"><div class=\"ds-perf\" aria-hidden=\"true\"></div><header class=\"ds-dialog-header\"><h2 class=\"ds-dialog-title\" id=\"ds-dialog-title\">Share circuit</h2><form method=\"dialog\"><button class=\"ds-dialog-close\" aria-label=\"Close dialog\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 6l12 12\"/><path d=\"M18 6L6 18\"/></svg></button></form></header><div class=\"ds-dialog-content\">Published circuits are re-run on the server so shared results are verified.</div></dialog></div>",
+      "css": ".ds-perf{height:14px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='14'%3E%3Crect x='5' y='2' width='14' height='10' rx='2.2' fill='%230b1a33'/%3E%3C/svg%3E\");background-repeat:repeat-x;background-size:24px 14px}.ds-dialog-stage{padding:12px;background:rgba(11,26,51,0.72)}.ds-dialog{position:relative;inset:auto;margin:0 auto;width:100%;max-width:36rem;max-height:min(92dvh,900px);overflow-y:auto;padding:0;border:0;border-radius:0;background:var(--paper, #f5f7fa);color:var(--navy-ink, #0b1a33);font-family:var(--font-saira-semi, \"Saira Semi Condensed\"), system-ui, sans-serif;font-size:1rem;line-height:1.55}.ds-dialog-header{display:flex;align-items:center;gap:12px;padding:16px 20px 0}.ds-dialog-title{margin:0 auto 0 0;font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;font-size:1.5rem;font-weight:700;line-height:0.95;letter-spacing:0.005em;text-transform:uppercase}.ds-dialog-close{display:flex;width:44px;height:44px;align-items:center;justify-content:center;padding:0;border:1px solid var(--navy-ink, #0b1a33);border-radius:0;background:transparent;color:var(--navy-ink, #0b1a33);cursor:pointer;transition:background-color 150ms,transform 150ms}.ds-dialog-close:hover{background:var(--paper-2, #e4eaf3)}.ds-dialog-close:active{transform:translateY(1px)}.ds-dialog-close:focus-visible{outline:2px solid var(--navy-ink, #0b1a33);outline-offset:2px}.ds-dialog-content{padding:12px 20px 20px}@media(min-width:40rem){.ds-dialog-stage{padding:24px}}@media(prefers-reduced-motion:reduce){.ds-dialog-close{transition-property:background-color,color}}"
+    },
+    {
+      "name": "Circuit strip with STEP ruler",
+      "kind": "custom",
+      "refersTo": "ruler",
+      "description": "Three frames of a Bell circuit on the 56px pitch with edge codes, and the STEP ruler above: one tick per gate, lit ice when passed, a 16px flag handle. The native range input is hidden but keeps keyboard control; this specimen is static.",
+      "html": "<div class=\"ds-strip\" role=\"region\" aria-label=\"Sample circuit strip, 2 wires, 2 gates\"><div class=\"ds-perf\" aria-hidden=\"true\"></div><div class=\"ds-ruler\"><svg width=\"236\" height=\"40\" aria-hidden=\"true\"><line x1=\"56\" x2=\"168\" y1=\"33\" y2=\"33\" stroke=\"var(--line-strong, rgba(245,247,250,0.55))\"/><line x1=\"56\" x2=\"56\" y1=\"24\" y2=\"33\" stroke=\"var(--ice, #6fe6ff)\" stroke-width=\"1.5\"/><line x1=\"84\" x2=\"84\" y1=\"24\" y2=\"33\" stroke=\"var(--ice, #6fe6ff)\" stroke-width=\"1.5\"/><line x1=\"140\" x2=\"140\" y1=\"28\" y2=\"33\" stroke=\"var(--line-strong, rgba(245,247,250,0.55))\" stroke-width=\"1.5\"/><text x=\"6\" y=\"35\" class=\"ds-ruler-text\">STEP</text><text x=\"182\" y=\"31\" class=\"ds-ruler-note\">After gate 1 of 2</text><g transform=\"translate(76,2)\"><svg width=\"16\" height=\"20\" viewBox=\"0 0 22 28\" aria-hidden=\"true\"><path d=\"M0 0h22v20l-11 8L0 20z\" fill=\"var(--ice, #6fe6ff)\"/><path d=\"M0 0h22v6H0z\" fill=\"var(--ice-deep, #2fb8d6)\"/></svg></g></svg><input class=\"ds-ruler-input\" type=\"range\" min=\"0\" max=\"2\" step=\"1\" value=\"1\" aria-label=\"Step through the circuit, one tick per gate\" aria-valuetext=\"After gate 1 of 2\"></div><svg width=\"236\" height=\"128\" role=\"img\" aria-label=\"Bell pair: H on q0, CX from q0 to q1\"><g class=\"ds-divider\"><line x1=\"56\" x2=\"56\" y1=\"8\" y2=\"122\"/><line x1=\"112\" x2=\"112\" y1=\"8\" y2=\"122\"/><line x1=\"168\" x2=\"168\" y1=\"8\" y2=\"122\"/><line x1=\"224\" x2=\"224\" y1=\"8\" y2=\"122\"/></g><text x=\"62\" y=\"16\" class=\"ds-edge\">F01</text><text x=\"118\" y=\"16\" class=\"ds-edge\">F02</text><text x=\"174\" y=\"16\" class=\"ds-edge\">F03</text><g transform=\"translate(77,2)\"><svg width=\"14\" height=\"18\" viewBox=\"0 0 22 28\" aria-hidden=\"true\"><path d=\"M0 0h22v20l-11 8L0 20z\" fill=\"var(--ice, #6fe6ff)\"/><path d=\"M0 0h22v6H0z\" fill=\"var(--ice-deep, #2fb8d6)\"/></svg></g><text x=\"10\" y=\"56\" class=\"ds-wire-label\">q0</text><text x=\"10\" y=\"112\" class=\"ds-wire-label\">q1</text><line x1=\"48\" x2=\"230\" y1=\"52\" y2=\"52\" class=\"ds-wire\"/><line x1=\"48\" x2=\"230\" y1=\"108\" y2=\"108\" class=\"ds-wire\"/><rect x=\"63\" y=\"33\" width=\"42\" height=\"38\" fill=\"var(--navy-ink, #0b1a33)\" stroke=\"var(--paper, #f5f7fa)\" stroke-width=\"1.5\"/><rect x=\"63\" y=\"33\" width=\"42\" height=\"3\" fill=\"#7bdff2\"/><text x=\"84\" y=\"57\" class=\"ds-gate\">H</text><g opacity=\"0.35\"><line x1=\"140\" x2=\"140\" y1=\"52\" y2=\"108\" stroke=\"var(--paper, #f5f7fa)\" stroke-width=\"2\"/><circle cx=\"140\" cy=\"52\" r=\"5\" fill=\"var(--paper, #f5f7fa)\"/><circle cx=\"140\" cy=\"108\" r=\"13\" fill=\"var(--navy-deep, #10294f)\" stroke=\"var(--paper, #f5f7fa)\" stroke-width=\"2\"/><line x1=\"127\" x2=\"153\" y1=\"108\" y2=\"108\" stroke=\"var(--paper, #f5f7fa)\" stroke-width=\"2\"/><line x1=\"140\" x2=\"140\" y1=\"95\" y2=\"121\" stroke=\"var(--paper, #f5f7fa)\" stroke-width=\"2\"/></g></svg><div class=\"ds-perf\" aria-hidden=\"true\"></div></div>",
+      "css": ".ds-perf{height:14px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='14'%3E%3Crect x='5' y='2' width='14' height='10' rx='2.2' fill='%230b1a33'/%3E%3C/svg%3E\");background-repeat:repeat-x;background-size:24px 14px}.ds-strip{position:relative;display:inline-block;overflow-x:auto;background:var(--navy-deep, #10294f);color:var(--paper, #f5f7fa)}.ds-strip:focus-visible{outline:2px solid var(--ice, #6fe6ff)}.ds-ruler{position:relative;height:40px;width:236px}.ds-ruler:has(input:focus-visible){outline:2px solid var(--ice, #6fe6ff)}.ds-ruler svg{position:absolute;inset:0}.ds-ruler-text{fill:var(--fog, #b9c7e0);font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:9px;letter-spacing:0.08em}.ds-ruler-note{fill:var(--fog, #b9c7e0);font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:11px}.ds-ruler-input{position:absolute;top:0;left:56px;width:112px;height:100%;opacity:0;pointer-events:none}.ds-divider line{stroke:rgba(245,247,250,0.12)}.ds-edge{fill:var(--fog, #b9c7e0);font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:9px;letter-spacing:0.08em}.ds-wire-label{fill:var(--paper, #f5f7fa);font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:12px}.ds-wire{stroke:rgba(245,247,250,0.55);stroke-width:1.5}.ds-gate{fill:var(--paper, #f5f7fa);font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:14px;font-weight:700;text-anchor:middle}"
+    },
+    {
+      "name": "Measured histogram and exact ticks",
+      "kind": "custom",
+      "refersTo": "histogram-paper",
+      "description": "Illustrative 1,024-shot fixture, not a live run: measured bars 60%/40%, exact ticks 50%/50%, graticule, mono axis, legend and the bracket scale bar counting shots. Production derives everything from the Qiskit result.",
+      "html": "<figure class=\"ds-histogram\"><div class=\"ds-hist-scroll\"><div class=\"ds-hist-body\"><div class=\"ds-hist-axis\" aria-hidden=\"true\"><span>100%</span><span>50%</span><span>0</span></div><div class=\"ds-hist-plot\" role=\"img\" aria-label=\"Illustrative histogram: 00 measured 60 percent, 11 measured 40 percent, exact probability 50 percent each\"><div class=\"ds-hist-col\"><span class=\"ds-hist-value ds-hist-hot\" style=\"bottom:calc(60% + 4px)\">60%</span><div class=\"ds-hist-bar\" style=\"height:60%\"></div><span class=\"ds-hist-tick\" style=\"bottom:50%\" title=\"exact 50.00%\"></span></div><div class=\"ds-hist-col\"><span class=\"ds-hist-value\" style=\"bottom:calc(50% + 4px)\">40%</span><div class=\"ds-hist-bar\" style=\"height:40%\"></div><span class=\"ds-hist-tick\" style=\"bottom:50%\" title=\"exact 50.00%\"></span></div><div class=\"ds-hist-col\"><span class=\"ds-hist-value\" style=\"bottom:4px\">0%</span><div class=\"ds-hist-zero\" aria-hidden=\"true\"></div></div></div></div><div class=\"ds-hist-labels\"><span class=\"ds-hist-hot\">00</span><span>11</span><span>01</span></div></div><figcaption class=\"ds-hist-caption\"><span><span class=\"ds-hist-swatch\" aria-hidden=\"true\"></span> measured</span><span><span class=\"ds-hist-exact\" aria-hidden=\"true\"></span> exact probability</span><span class=\"ds-hist-shots\" role=\"img\" aria-label=\"1,024 shots\"><span class=\"ds-hist-scale\" aria-hidden=\"true\"></span><span aria-hidden=\"true\">1,024 shots</span></span><span>bitstrings read q<sub>n−1</sub>…q<sub>0</sub></span><span>illustrative sample</span></figcaption></figure>",
+      "css": ".ds-histogram{display:flex;min-width:0;flex-direction:column;gap:8px;margin:0;padding:16px;background:var(--paper, #f5f7fa);color:#46587a;font-family:var(--font-saira-semi, \"Saira Semi Condensed\"), system-ui, sans-serif;line-height:1.55}.ds-hist-scroll{overflow-x:auto;padding-top:20px}.ds-hist-body{display:flex;gap:8px}.ds-hist-axis{display:flex;height:224px;flex-direction:column;justify-content:space-between;padding:2px 0;text-align:right;font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:0.65rem}.ds-hist-plot{display:flex;flex:1;align-items:flex-end;gap:4px;height:224px;padding-left:4px;border-left:1px solid var(--navy-ink, #0b1a33);border-bottom:1px solid var(--navy-ink, #0b1a33);background-image:linear-gradient(to right,rgba(11,26,51,0.12) 1px,transparent 1px),linear-gradient(to bottom,rgba(11,26,51,0.12) 1px,transparent 1px);background-size:10% 100%,100% 25%}.ds-hist-col{position:relative;display:flex;flex:1;min-width:20px;height:100%;flex-direction:column;align-items:center;justify-content:flex-end}.ds-hist-value{position:absolute;font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:0.68rem}.ds-hist-hot{font-weight:700}.ds-hist-bar{width:100%;max-width:56px;min-height:2px;background:var(--navy-ink, #0b1a33);transform-origin:bottom;animation:ds-rise 520ms cubic-bezier(0.16,1,0.3,1) both}.ds-hist-zero{width:100%;max-width:56px;height:3px;border:1px dashed #9aa9c4}.ds-hist-tick{position:absolute;left:0;right:0;margin:auto;height:3px;max-width:56px;background:var(--ice-deep, #2fb8d6);outline:1px solid var(--navy-ink, #0b1a33)}.ds-hist-labels{display:flex;gap:4px;padding-left:2.1rem;font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:0.7rem}.ds-hist-labels span{flex:1;min-width:20px;text-align:center;writing-mode:vertical-rl}.ds-hist-caption{display:flex;flex-wrap:wrap;align-items:center;column-gap:16px;row-gap:4px;font-size:0.75rem}.ds-hist-swatch{display:inline-block;width:10px;height:10px;background:var(--navy-ink, #0b1a33)}.ds-hist-exact{display:inline-block;width:16px;height:3px;background:var(--ice-deep, #2fb8d6);outline:1px solid var(--navy-ink, #0b1a33)}.ds-hist-shots{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums}.ds-hist-scale{display:inline-block;width:40px;height:8px;border-left:1px solid var(--navy-ink, #0b1a33);border-right:1px solid var(--navy-ink, #0b1a33);border-bottom:1px solid var(--navy-ink, #0b1a33)}@keyframes ds-rise{from{transform:scaleY(0)}to{transform:scaleY(1)}}@media(min-width:40rem){.ds-hist-labels span{writing-mode:horizontal-tb}}@media(prefers-reduced-motion:reduce){.ds-hist-bar{animation:none}}"
+    },
+    {
+      "name": "Telemetry readout line",
+      "kind": "custom",
+      "refersTo": "readout",
+      "description": "Readouts on a rail as one wrapped row: 16px ice icon, condensed tabular value in paper, label-small unit, optional mono note from 40rem. Sample values are illustrative.",
+      "html": "<section class=\"ds-tele-rail\" aria-label=\"Sample statistics\"><div class=\"ds-perf\" aria-hidden=\"true\"></div><ul class=\"ds-tele\"><li class=\"ds-tele-item\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" class=\"ds-ice\"><path d=\"M12 3l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6L3 10l6-1z\"/></svg><span class=\"ds-tele-value\">1,250</span><span class=\"ds-tele-unit\">XP</span><span class=\"ds-tele-note\">· LV 3 · 250 to next</span></li><li class=\"ds-tele-item\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" class=\"ds-ice\"><path d=\"M12 2c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-9z\"/></svg><span class=\"ds-tele-value\">4</span><span class=\"ds-tele-unit\">day streak</span></li><li class=\"ds-tele-item\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" class=\"ds-ice\"><path d=\"M9 3h6\"/><path d=\"M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2.2h12.4a1.5 1.5 0 0 0 1.3-2.2L14 9V3\"/><path d=\"M7 15h10\"/></svg><span class=\"ds-tele-value\">17</span><span class=\"ds-tele-unit\">circuits run</span><span class=\"ds-tele-note\">· Qiskit Aer</span></li></ul><div class=\"ds-perf\" aria-hidden=\"true\"></div></section>",
+      "css": ".ds-perf{height:14px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='14'%3E%3Crect x='5' y='2' width='14' height='10' rx='2.2' fill='%230b1a33'/%3E%3C/svg%3E\");background-repeat:repeat-x;background-size:24px 14px}.ds-tele-rail{background:var(--navy-deep, #10294f);color:var(--paper, #f5f7fa)}.ds-tele{display:flex;flex-wrap:wrap;align-items:center;column-gap:24px;row-gap:8px;margin:0;padding:8px 16px;list-style:none}.ds-tele-item{display:flex;align-items:center;gap:8px;font-family:var(--font-jetbrains, \"JetBrains Mono\"), ui-monospace, monospace;font-variant-numeric:tabular-nums;font-size:0.875rem;color:var(--fog, #b9c7e0)}.ds-ice{color:var(--ice, #6fe6ff)}.ds-tele-value{font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;font-size:1.25rem;font-weight:700;line-height:0.95;letter-spacing:0.005em;text-transform:uppercase;font-variant-numeric:tabular-nums;color:var(--paper, #f5f7fa)}.ds-tele-unit{font-family:var(--font-saira-cond, \"Saira Condensed\"), system-ui, sans-serif;font-size:0.68rem;font-weight:600;line-height:1.2;letter-spacing:0.11em;text-transform:uppercase}.ds-tele-note{display:none;font-size:0.75rem}@media(min-width:40rem){.ds-tele-note{display:inline}}"
+    },
+    {
+      "name": "Roadmap spine with connectors and branches",
+      "kind": "custom",
+      "refersTo": "spine-node",
+      "description": "Three topic frames on a spine: a done node, the selected node (frame-active, flag, lesson branch left and resource branch right on 28px hairline stubs) and a locked, punched node. Connector stubs are ice once travelled, hairline otherwise, dashed when the link is optional. Static specimen; production is keyboard-walkable with arrow keys.",
+      "html": "<ol class=\"ds-spine\" aria-label=\"Sample roadmap\"><li class=\"ds-spine-row\"><span></span><span></span><button class=\"ds-node\" type=\"button\"><span class=\"ds-code\">S01</span><span class=\"ds-node-body\"><span class=\"ds-node-title\">What is a qubit?</span><span class=\"ds-node-meta\"><span>Completed</span><span>8 min</span></span></span><svg class=\"ds-ice\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 5l14 14M19 5L5 19\"/></svg></button><span></span><span></span><span class=\"ds-stub ds-stub-lit\" aria-hidden=\"true\"></span></li><li class=\"ds-spine-row\"><a class=\"ds-branch\" href=\"#\"><svg class=\"ds-ice\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 6h7a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H3z\"/><path d=\"M21 6h-7a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h7z\"/></svg><span class=\"ds-kind\">Lesson</span><span class=\"ds-trunc\">Superposition and H</span></a><span class=\"ds-hstub\" aria-hidden=\"true\"></span><button class=\"ds-node ds-node-active\" type=\"button\" aria-pressed=\"true\"><svg class=\"ds-flag\" width=\"16\" height=\"20\" viewBox=\"0 0 22 28\" aria-hidden=\"true\"><path d=\"M0 0h22v20l-11 8L0 20z\" fill=\"var(--ice, #6fe6ff)\"/><path d=\"M0 0h22v6H0z\" fill=\"var(--ice-deep, #2fb8d6)\"/></svg><span class=\"ds-code\">S02</span><span class=\"ds-node-body\"><span class=\"ds-node-title\">Superposition</span><span class=\"ds-node-meta\"><span>Ready to learn</span><span>10 min</span></span></span><svg class=\"ds-ice\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 3h12v18l-6-4-6 4z\" fill=\"currentColor\"/></svg><span class=\"ds-avail\" role=\"img\" aria-label=\"Available\"></span></button><span class=\"ds-hstub\" aria-hidden=\"true\"></span><button class=\"ds-branch\" type=\"button\"><svg class=\"ds-ice\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"6\" width=\"13\" height=\"12\"/><path d=\"M16 10l5-3v10l-5-3z\"/></svg><span class=\"ds-kind\">Watch &amp; read</span><span class=\"ds-trunc\">3 free · 1 reviewed</span></button><span class=\"ds-stub ds-stub-dashed\" aria-hidden=\"true\"></span></li><li class=\"ds-spine-row\"><span></span><span></span><button class=\"ds-node ds-node-locked\" type=\"button\"><span class=\"ds-code\">S03</span><span class=\"ds-node-body\"><span class=\"ds-node-title\">Entangled pairs</span><span class=\"ds-node-meta\"><span>Prerequisites remaining</span><span>12 min</span></span></span><svg class=\"ds-lock\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"10\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/></svg></button><span></span><span></span></li></ol>",
+      "css": ".ds-spine{list-style:none;margin:0;padding:16px;background:var(--navy-deep,#10294f);color:var(--paper,#f5f7fa);font-family:'Saira Semi Condensed',system-ui,sans-serif;}.ds-spine-row{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(280px,440px) 28px minmax(0,1fr);align-items:center;gap:8px;padding-bottom:32px;}.ds-spine-row:last-child{padding-bottom:0;}.ds-stub{position:absolute;left:50%;bottom:0;height:32px;width:0;border-left:2px solid var(--line-strong,rgba(245,247,250,.55));}.ds-stub-lit{border-left-color:var(--ice,#6fe6ff);}.ds-stub-dashed{border-left-style:dashed;}.ds-hstub{display:block;height:1px;background:var(--line-strong,rgba(245,247,250,.55));}.ds-node{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:12px;border:1px solid var(--line,rgba(245,247,250,.26));background:var(--navy-deep,#10294f);color:var(--paper,#f5f7fa);text-align:left;font:inherit;cursor:pointer;transition:border-color .15s;}.ds-node:hover{border-color:var(--line-strong,rgba(245,247,250,.55));}.ds-node:focus-visible{outline:2px solid var(--ice,#6fe6ff);outline-offset:2px;}.ds-node-active{border-color:var(--ice,#6fe6ff);box-shadow:inset 0 0 0 1px var(--ice,#6fe6ff);}.ds-flag{position:absolute;top:-11px;right:12px;}.ds-node-locked{color:var(--fog,#b9c7e0);}.ds-node-locked::after{content:'';position:absolute;top:-1px;right:-1px;width:16px;height:16px;background:linear-gradient(225deg,var(--navy,#16366a) 0 50%,transparent 50%);}.ds-lock{opacity:.7;}.ds-code{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;font-size:.75rem;width:32px;flex-shrink:0;color:var(--fog,#b9c7e0);}.ds-node-body{display:flex;flex-direction:column;flex:1;min-width:0;}.ds-node-title{font-family:'Saira Condensed',system-ui,sans-serif;font-weight:700;font-size:1.125rem;line-height:1.25;text-transform:uppercase;letter-spacing:.005em;}.ds-node-meta{display:flex;gap:12px;margin-top:2px;font-family:'Saira Condensed',system-ui,sans-serif;font-weight:600;font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;line-height:1.2;color:var(--fog,#b9c7e0);}.ds-ice{color:var(--ice,#6fe6ff);flex-shrink:0;}.ds-avail{display:inline-block;width:14px;height:14px;border:1px solid currentColor;flex-shrink:0;}.ds-branch{display:flex;align-items:center;gap:8px;min-height:44px;max-width:100%;min-width:0;padding:8px 12px;border:1px solid var(--line,rgba(245,247,250,.26));background:var(--navy-deep,#10294f);color:var(--paper,#f5f7fa);font:inherit;font-size:.75rem;text-decoration:none;cursor:pointer;justify-self:end;transition:border-color .15s;}.ds-branch:hover{border-color:var(--line-strong,rgba(245,247,250,.55));}.ds-branch:focus-visible{outline:2px solid var(--ice,#6fe6ff);outline-offset:2px;}.ds-kind{font-family:'Saira Condensed',system-ui,sans-serif;font-weight:600;font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;color:var(--fog,#b9c7e0);flex-shrink:0;}.ds-trunc{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}"
+    },
+    {
+      "name": "Predict option buttons",
+      "kind": "button",
+      "refersTo": "option-paper",
+      "description": "Lettered answers inside a paper window, shown revealed: the correct option filled Secondary Paper with a near-navy inset ring and a cross, a wrong pick ringed in bad with a close icon, the rest faded. Letters name the options; colour only accompanies the mark.",
+      "html": "<div class=\"ds-predict\" role=\"group\" aria-label=\"Your prediction\"><button class=\"ds-opt ds-opt-answer\" type=\"button\" disabled aria-pressed=\"false\"><span class=\"ds-letter\">A</span><span class=\"ds-opt-text\">Always 00</span><svg class=\"ds-opt-ink\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 5l14 14M19 5L5 19\"/></svg></button><button class=\"ds-opt ds-opt-wrong\" type=\"button\" disabled aria-pressed=\"true\"><span class=\"ds-letter\">B</span><span class=\"ds-opt-text\">Always 11</span><svg class=\"ds-opt-bad\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></button><button class=\"ds-opt ds-opt-faded\" type=\"button\" disabled><span class=\"ds-letter\">C</span><span class=\"ds-opt-text\">Half 00, half 11</span></button><button class=\"ds-opt\" type=\"button\"><span class=\"ds-letter\">D</span><span class=\"ds-opt-text\">Unanswered option at rest</span></button></div>",
+      "css": ".ds-predict{display:flex;flex-direction:column;gap:8px;padding:20px;background:var(--paper,#f5f7fa);color:var(--navy-ink,#0b1a33);font-family:'Saira Semi Condensed',system-ui,sans-serif;}.ds-opt{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:12px 16px;border:1px solid var(--navy-ink,#0b1a33);background:transparent;color:inherit;font:inherit;font-size:1rem;line-height:1.375;text-align:left;cursor:pointer;transition:background-color .15s,color .15s,border-color .15s;}.ds-opt:not(:disabled):hover{background:var(--paper-2,#e4eaf3);}.ds-opt:focus-visible{outline:2px solid var(--navy-ink,#0b1a33);outline-offset:2px;}.ds-opt:disabled{cursor:default;}.ds-letter{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.75rem;color:#46587a;flex-shrink:0;}.ds-opt-text{flex:1;}.ds-opt-answer{background:var(--paper-2,#e4eaf3);box-shadow:inset 0 0 0 1px var(--navy-ink,#0b1a33);}.ds-opt-wrong{border-color:var(--bad,#ff7b7b);box-shadow:inset 0 0 0 1px var(--bad,#ff7b7b);}.ds-opt-faded{border-color:var(--paper-3,#cdd7e6);color:#46587a;}.ds-opt-ink{color:var(--navy-ink,#0b1a33);flex-shrink:0;}.ds-opt-bad{color:var(--bad,#ff7b7b);flex-shrink:0;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Select Rail · Navy Telemetry (lifted)",
+    "overview": "Quantum Quest is a strip of navy film stock. Every page runs as frames on a perforated rail: navigation is a row of framed links between sprocket bands, circuits are 56px frames with edge codes, the step-through is a ruler with a folded flag that snaps to gate pitch, a roadmap is a spine of topic frames joined by connector stubs, and anything meant to be read for more than a sentence is punched out as a white paper window. The stock itself is lifted navy with fine static grain painted into the body background, so the texture scrolls with the page rather than floating over it.\n\nOne ice ink does all the pointing: actions, the folded flag on the current page or step, active frame strokes, measured bars on navy, the connectors already travelled. Everything else that looks like a colour is content or identity, not state. Completion is a grease cross, availability is an outlined square, locked is a padlock and a punched corner, stale is a warning mark, skipped is a strike-through; the hue never carries the meaning on its own. Type follows the same split: condensed capitals stamp labels and headings, semi-condensed text reads, monospace reports bitstrings, codes and shot counts with tabular figures.\n\nThe bench is flat and square. There are no shadows, no glass, no decorative gradients and no rounded cards; depth comes from navy-to-paper contrast, hairlines, inset strokes and the punched geometry of the material. Source evidence: `src/app/globals.css`, `src/app/layout.tsx`, `src/components/ui/primitives.tsx`, `ui/Icon.tsx`, `NavBar.tsx`, `KidsRail.tsx`, `FlowSteps.tsx`, `ui/Dialog.tsx`, `lab/CircuitEditor.tsx`, `lab/Histogram.tsx`, `lab/Predict.tsx`, `lab/IdealVsMachine.tsx`, `lab/LessonReadout.tsx`, `roadmaps/RoadmapView.tsx`, the `src/qollab` bundle and the home, lab, lesson, progress, roadmaps and explorer routes.",
+    "keyCharacteristics": [
+      "Perforated navy rails (14px sprocket bands) and square 1px-hairline frames on a 56px circuit pitch.",
+      "Punched paper windows for reading, results, dialogs and the roadmap drawer.",
+      "One ice ink for actions, position and the path travelled; track collars and game pairs are the only other hues, each with a stated meaning.",
+      "State is a mark (cross, flag, square, lock, warning, punched corner, strike-through), never a hue.",
+      "Condensed capitals for labels and headings, semi-condensed reading text, monospaced telemetry."
+    ],
+    "rules": [
+      {
+        "name": "The One Ice Ink Rule",
+        "body": "Ice means act, here or passed. If a new surface needs a second accent, it is either a track collar, a labelled game pair or a feedback ink with a word next to it; never a new hue for interface state.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mark Before Hue Rule",
+        "body": "Every state has a shape: cross for done, flag for current or learning, outlined square for available, lock for locked, warning for stale, punched corner for unavailable, strike-through for skipped. Colour may accompany the mark; it never replaces it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Voices Rule",
+        "body": "Saira Condensed for anything stamped (headings, labels, keycaps, chips), Saira Semi Condensed for anything read, JetBrains Mono for anything measured or addressed (bitstrings, counts, codes, angles). Do not let a fourth face or a system fallback become the identity.",
+        "section": "typography"
+      },
+      {
+        "name": "The Edge Code Rule",
+        "body": "Edge codes are addresses in the perforation margin (F01, P03, C02), set in mono at 0.62rem in fog. They sit beside a heading, never above it as an eyebrow, never wrap, and never carry the only copy of an instruction.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Bench Rule",
+        "body": "Separate surfaces with contrast, hairlines and inset strokes. No shadows, glow, glass or blur on any surface; the one rounded, ringed element in the system is the community pin head.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the product name Quantum Quest and the exact footer credit, \"This effort is supported by Qollab & IonQ\", on a perforated rail in label-small fog.",
+      "Do build new surfaces from rails, frames and windows: perforation above and below a rail, 1px hairline frames on the 56px pitch, paper windows for anything read at length.",
+      "Do mark state with a shape (cross, flag, square, lock, warning, punched corner, strike-through) and a label; use ice only for actions, position and the path already travelled.",
+      "Do join sequential frames with connector stubs (2px vertical on a spine, 1px horizontal to a branch), dashed when the link is optional, and use a ghost frame for anything not yet real.",
+      "Do keep every control a real button, link or input at 44px minimum (56px for Explorer XL keycaps), with the 2px ice or near-navy focus outline visible.",
+      "Do show measured bars and exact ticks as separate encodings with a legend and the shots scale bar, and print backend and Qiskit version beside results.",
+      "Do honour reduced motion, the colour-blind pair swap, bigger-text mode, captions and the print stylesheet on every new surface.",
+      "Do carry `public/film-grain.png` with its provenance sidecar when the stock is reused."
+    ],
+    "donts": [
+      "Don't add rounded cards, shadows, glow, blur or glass; the bench is flat and square.",
+      "Don't introduce a new hue for interface state; collars, game pairs and feedback inks already have meanings.",
+      "Don't use emoji or font glyphs as icons; draw them on the 24px single-stroke grid.",
+      "Don't promote an edge code into a kicker or eyebrow above a heading.",
+      "Don't let system fallback fonts carry the display identity or set reading copy in condensed capitals.",
+      "Don't fabricate results; sample values in the sidecar are labelled illustrative and are not Qiskit runs.",
+      "Don't replace the native dialog with a styled generic overlay, or give the roadmap drawer a scrim it does not have."
+    ]
+  }
+}

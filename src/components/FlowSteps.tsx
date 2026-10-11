@@ -1,29 +1,28 @@
-const STEPS = [
-  { key: "learn", icon: "📘", label: "Learn" },
-  { key: "build", icon: "🧩", label: "Build" },
-  { key: "run", icon: "▶️", label: "Run" },
-  { key: "understand", icon: "💡", label: "Understand" },
-  { key: "share", icon: "🌍", label: "Share" },
-] as const;
+import Icon, { type IconName } from "@/components/ui/Icon";
+import { Flag } from "@/components/ui/primitives";
 
-export type FlowStep = (typeof STEPS)[number]["key"];
+const STEPS: { key: string; icon: IconName; label: string }[] = [
+  { key: "learn", icon: "learn", label: "Learn" },
+  { key: "build", icon: "chip", label: "Build" },
+  { key: "run", icon: "run", label: "Run" },
+  { key: "understand", icon: "tutor", label: "Understand" },
+  { key: "share", icon: "share", label: "Share" },
+];
 
-/** The platform's core loop, highlighted at the learner's current stage. */
+export type FlowStep = "learn" | "build" | "run" | "understand" | "share";
+
+/** The platform's loop as five frames on a short rail; a cross marks done, a flag marks now. */
 export default function FlowSteps({ current, done = [] }: { current: FlowStep; done?: FlowStep[] }) {
   return (
-    <ol className="flex flex-wrap items-center gap-1 text-xs sm:text-sm" aria-label="Learning flow">
-      {STEPS.map((s, i) => {
-        const isDone = done.includes(s.key);
+    <ol className="flex items-stretch" aria-label="Learning flow">
+      {STEPS.map((s) => {
+        const isDone = done.includes(s.key as FlowStep);
         const isCur = s.key === current;
         return (
-          <li key={s.key} className="flex items-center gap-1">
-            <span
-              aria-current={isCur ? "step" : undefined}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1 ${isCur ? "bg-accent font-semibold text-white" : isDone ? "bg-good/20 text-good" : "bg-white/5 text-muted"}`}
-            >
-              <span aria-hidden>{isDone && !isCur ? "✓" : s.icon}</span> {s.label}
-            </span>
-            {i < STEPS.length - 1 && <span className="text-muted" aria-hidden>→</span>}
+          <li key={s.key} className={`frame relative -ml-px flex min-h-9 items-center gap-1.5 px-2.5 ${isCur ? "frame-active text-paper" : isDone ? "text-paper" : "text-fog"}`} aria-current={isCur ? "step" : undefined}>
+            {isCur && <Flag className="absolute -top-2.5 left-1.5" width={12} />}
+            {isDone && !isCur ? <Icon name="cross" size={12} className="text-ice" title="done" /> : <Icon name={s.icon} size={13} />}
+            <span className="label-sm hidden sm:inline">{s.label}</span>
           </li>
         );
       })}

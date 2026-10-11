@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import LessonShell, { type StepApi } from "@/components/LessonShell";
+import Icon from "@/components/ui/Icon";
 
 function LightSwitch({ done, say }: StepApi) {
   const [on, setOn] = useState(false);
@@ -18,26 +19,31 @@ function LightSwitch({ done, say }: StepApi) {
   return (
     <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-12">
       <motion.div
-        animate={{ boxShadow: on ? "0 0 90px 30px var(--on)" : "0 0 0 0 transparent", background: on ? "var(--on)" : "var(--off)" }}
-        className="flex h-36 w-36 items-center justify-center rounded-full text-7xl"
+        animate={{ background: on ? "var(--on)" : "var(--off)" }}
+        className="flex h-36 w-36 items-center justify-center border-2 border-navy-ink text-7xl leading-none"
         aria-hidden
       >
         💡
       </motion.div>
       <button
+        type="button"
         onClick={flip}
         role="switch"
         aria-checked={on}
         aria-label="Light switch"
-        className={`flex h-44 w-24 flex-col rounded-3xl bg-[#dfe5ff] p-3 shadow-inner ${on ? "justify-start" : "justify-end"}`}
+        className={`flex h-44 w-24 flex-col border-2 border-navy-ink bg-paper-2 p-2 ${on ? "justify-start" : "justify-end"}`}
       >
-        <motion.span
-          layout
-          className="block h-1/2 w-full rounded-2xl shadow-lg"
-          style={{ background: on ? "var(--on)" : "var(--off)" }}
-        />
+        <motion.span layout className="block h-1/2 w-full border border-navy-ink" style={{ background: on ? "var(--on)" : "var(--off)" }} />
       </button>
-      <motion.div key={String(on)} initial={{ scale: 0.4 }} animate={{ scale: 1 }} className="text-9xl font-bold tabular-nums" style={{ color: on ? "var(--on)" : "var(--muted)" }}>
+      <motion.div
+        key={String(on)}
+        initial={{ scale: 0.6 }}
+        animate={{ scale: 1 }}
+        className="code grid h-36 w-28 place-items-center bg-navy-ink text-8xl font-bold"
+        style={{ color: on ? "var(--on)" : "var(--fog)" }}
+        role="img"
+        aria-label={`The bit is ${on ? 1 : 0}`}
+      >
         {on ? 1 : 0}
       </motion.div>
     </div>
@@ -81,11 +87,13 @@ function SortGame({ done, say }: StepApi) {
         {left.map((it, k) => (
           <motion.button
             layout
+            type="button"
             key={it.label}
             onClick={() => setHeld(k)}
-            className={`flex min-h-20 items-center gap-3 rounded-2xl bg-space-2 p-3 text-left text-lg ${held === k ? "ring-4 ring-on" : ""}`}
+            aria-pressed={held === k}
+            className={`flex min-h-20 items-center gap-3 border-2 bg-paper-2 p-3 text-left text-lg ${held === k ? "border-navy-ink" : "border-paper-3 hover:border-navy-ink"}`}
           >
-            <span className="text-4xl" aria-hidden>{it.icon}</span> {it.label}
+            <span className="text-4xl leading-none" aria-hidden>{it.icon}</span> {it.label}
           </motion.button>
         ))}
       </div>
@@ -93,12 +101,14 @@ function SortGame({ done, say }: StepApi) {
         {(["on", "off"] as const).map((b) => (
           <button
             key={b}
+            type="button"
             onClick={() => drop(b)}
-            className="flex min-h-36 flex-col items-center justify-start gap-2 rounded-3xl border-4 border-dashed p-3"
-            style={{ borderColor: b === "on" ? "var(--on)" : "var(--muted)", background: b === "on" ? "color-mix(in srgb, var(--on) 15%, transparent)" : "transparent" }}
+            className="flex min-h-36 flex-col items-center justify-start gap-2 border-4 border-dashed p-3"
+            style={{ borderColor: b === "on" ? "var(--on)" : "#46587a", background: b === "on" ? "color-mix(in srgb, var(--on) 15%, transparent)" : "transparent" }}
+            aria-label={`${b === "on" ? "ON = 1" : "OFF = 0"} bucket`}
           >
-            <span className="text-2xl font-bold">{b === "on" ? "ON = 1 ☀️" : "OFF = 0 🌙"}</span>
-            <span className="text-3xl">{buckets[b].join(" ")}</span>
+            <span className="display text-2xl">{b === "on" ? "ON = 1" : "OFF = 0"}</span>
+            <span className="text-3xl leading-none" aria-hidden>{buckets[b].join(" ")}</span>
           </button>
         ))}
       </div>
@@ -124,25 +134,29 @@ function SecretCode({ done, say }: StepApi) {
   return (
     <div className="flex flex-col items-center gap-5">
       <p className="text-xl">Match the secret code on the space door:</p>
-      <div className="flex gap-3 rounded-2xl bg-space-2 px-6 py-3 text-5xl font-bold tracking-widest text-on">{SECRET.join(" ")}</div>
+      <div className="code flex gap-3 bg-navy-ink px-6 py-3 text-5xl font-bold tracking-widest" style={{ color: "var(--on)" }} aria-label={`Secret code ${SECRET.join(" ")}`}>
+        {SECRET.join(" ")}
+      </div>
       <div className="flex gap-3">
         {bits.map((b, k) => (
           <motion.button
             key={k}
-            whileTap={{ scale: 0.9 }}
+            type="button"
+            whileTap={{ scale: 0.95 }}
             onClick={() => toggle(k)}
             aria-label={`Switch ${k + 1}: ${b ? "on" : "off"}`}
-            className="flex h-24 w-16 flex-col items-center justify-center rounded-2xl text-3xl font-bold sm:h-28 sm:w-20"
-            style={{ background: b ? "var(--on)" : "var(--off)", color: b ? "#1b2160" : "var(--ink)" }}
+            className="code flex h-24 w-16 flex-col items-center justify-center border-2 border-navy-ink text-3xl font-bold sm:h-28 sm:w-20"
+            style={{ background: b ? "var(--on)" : "var(--off)", color: b ? "var(--navy-ink)" : "var(--ink)" }}
           >
             {b}
-            <span className="text-sm">{b ? "ON" : "OFF"}</span>
+            <span className="label">{b ? "ON" : "OFF"}</span>
           </motion.button>
         ))}
       </div>
-      <motion.div animate={{ rotateY: won ? 80 : 0 }} style={{ transformOrigin: "left" }} className="text-7xl" aria-hidden>
+      <motion.div animate={{ rotateY: won ? 80 : 0 }} style={{ transformOrigin: "left" }} className="text-7xl leading-none" aria-hidden>
         🚪
       </motion.div>
+      {won && <p className="flex items-center gap-2 text-lg text-[#46587a]"><Icon name="unlock" size={18} /> Door unlocked</p>}
     </div>
   );
 }

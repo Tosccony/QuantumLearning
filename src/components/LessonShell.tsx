@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import Icon from "@/components/ui/Icon";
+import { EdgeCode, Flag, Mark } from "@/components/ui/primitives";
 import { EXPLORER_CIRCUITS } from "@/lib/curriculum";
 import { PLANETS } from "@/lib/levels";
 import { labLink } from "@/lib/quantum";
@@ -65,27 +67,38 @@ export default function LessonShell({ planetId, steps, quiz }: { planetId: numbe
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-4xl flex-col gap-5 px-4 py-5 sm:px-6">
-      <header className="flex items-center gap-3">
-        <Link href="/explorer" className="btn-ghost !min-h-12 !px-4 !py-2 !text-lg" aria-label="Back to the galaxy map">
-          ← Map
+      <header className="flex flex-wrap items-center gap-3">
+        <Link href="/explorer" className="keycap !px-3" aria-label="Back to the mission map">
+          <Icon name="back" size={20} />
+          <span className="hidden sm:inline">Map</span>
         </Link>
-        <div className="flex-1">
-          <p className="text-sm text-muted">Planet {planet.id} · {planet.concept}</p>
-          <h1 className="text-2xl font-bold sm:text-3xl" style={{ color: planet.color }}>{planet.name}</h1>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h1 className="display text-2xl sm:text-3xl" style={{ color: planet.color }}>{planet.name}</h1>
+            <EdgeCode>P{String(planet.id).padStart(2, "0")} · {planet.concept}</EdgeCode>
+          </div>
         </div>
         {EXPLORER_CIRCUITS[planetId] && (
           <Link
             href={`${labLink(EXPLORER_CIRCUITS[planetId])}&from=${encodeURIComponent(`Explorer: ${planet.name}`)}`}
-            className="hidden rounded-full bg-white/10 px-3 py-1 text-sm sm:block"
+            className="keycap hidden sm:inline-flex"
             title="See the real quantum circuit behind this game in the Lab"
           >
-            🔬 Real circuit
+            <Icon name="chip" size={18} />
+            Real circuit
           </Link>
         )}
-        <ol className="flex gap-1.5" aria-label={`Step ${pos + 1} of ${total}`}>
-          {Array.from({ length: total }, (_, k) => (
-            <li key={k} className={`h-3 w-3 rounded-full sm:h-4 sm:w-4 ${k < pos ? "bg-good" : k === pos ? "bg-on" : "bg-white/20"}`} />
-          ))}
+        <ol className="flex gap-1.5 pt-2" aria-label={`Step ${pos + 1} of ${total}`}>
+          {Array.from({ length: total }, (_, k) => {
+            const done = k < pos;
+            const current = k === pos;
+            return (
+              <li key={k} className={`frame relative grid h-6 w-8 place-items-center ${current ? "frame-active" : ""}`} aria-hidden>
+                {current && <Flag className="absolute -top-[9px] left-1" width={11} />}
+                {done && <Mark kind="done" size={13} />}
+              </li>
+            );
+          })}
         </ol>
       </header>
 
@@ -95,19 +108,22 @@ export default function LessonShell({ planetId, steps, quiz }: { planetId: numbe
         {phase === "steps" && (
           <motion.section
             key={i}
-            initial={{ opacity: 0, x: 40 }}
+            initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            className="card flex flex-col items-center gap-5"
+            exit={{ opacity: 0, x: -24 }}
+            transition={{ duration: 0.2 }}
+            className="window flex flex-col items-center gap-6 p-5 sm:p-8"
+            aria-label={`Step ${i + 1}`}
           >
             {steps[i].render({ done: () => setStepDone(true), say: setLine })}
-            <button className="btn-primary w-full sm:w-auto" disabled={!stepDone} onClick={next}>
-              {stepDone ? "Next ➜" : "Try it first! 👆"}
+            <button type="button" className="keycap-xl keycap-paper-primary w-full sm:w-auto" disabled={!stepDone} onClick={next}>
+              {stepDone ? "Next" : "Try it first"}
+              {stepDone && <Icon name="next" size={20} />}
             </button>
           </motion.section>
         )}
         {phase === "quiz" && (
-          <motion.section key="quiz" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
+          <motion.section key="quiz" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="window p-5 sm:p-8" aria-label="Quiz">
             <Quiz questions={quiz} onSay={setLine} onFinish={finishQuiz} />
           </motion.section>
         )}

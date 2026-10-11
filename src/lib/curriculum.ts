@@ -17,7 +17,7 @@ export const TRACKS: Track[] = [
   { id: "student", name: "Student", icon: "🎓", color: "#7bdff2", audience: "High school & first-year university", tagline: "States, gates, entanglement and your first algorithms, with just enough maths.", certificate: "Quantum Foundations" },
   { id: "developer", name: "Developer", icon: "💻", color: "#3ddc97", audience: "Programmers new to quantum", tagline: "Qiskit, transpilation, shots and noise, and building Grover, QFT and variational circuits.", certificate: "Quantum Software Developer" },
   { id: "researcher", name: "Researcher", icon: "🔬", color: "#b388ff", audience: "Graduate level", tagline: "Density matrices, noise and mitigation, error correction, phase estimation and advantage.", certificate: "Quantum Research Practitioner" },
-  { id: "concepts", name: "Concepts", icon: "🔓", color: "#ff9f1c", audience: "After the Student basics", tagline: "Hands-on deep dives: secret keys with BB84, the Bell test, and Shor's algorithm.", certificate: "Quantum Concepts" },
+  { id: "concepts", name: "Concepts", icon: "🔓", color: "#ff9e80", audience: "After the Student basics", tagline: "Hands-on deep dives: secret keys with BB84, the Bell test, and Shor's algorithm.", certificate: "Quantum Concepts" },
 ];
 
 export type Check = { q: string; options: string[]; answer: number; why: string };

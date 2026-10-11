@@ -105,6 +105,8 @@ Nothing. All code and content were written during the build window. Nothing was 
 - At runtime, the in-app tutor calls Claude (`claude-opus-5-5`) through the Anthropic API.
 - The team used Claude and ChatGPT as coding and writing assistants while building the app and its lessons.
 - OpenAI Codex helped build the learning roadmaps feature (`/roadmaps`).
+- On Oct 10, Claude Code (Claude Fable 5.1, using the Impeccable design skill) redesigned the whole user interface: the "Select Rail" visual system in `src/app/globals.css`, the shared components in `src/components/ui/`, and every route and screen, including the roadmaps, the Concepts track and the Predict → Run → Explain lesson steps. It also rebuilt the circuit editor's keyboard support, the dialogs' focus handling, and the responsive layouts. All lesson text, games, circuits and backend code are unchanged by that pass.
+- On Oct 10, OpenAI Codex continued that redesign using Impeccable: completed the Qiskit-backed circuit scrub, corrected histogram scaling, refined mobile controls and avatar drawings, hardened modal focus and pointer handling, and ran frontend and backend verification. The backend API and lesson content were preserved.
 - On Oct 10, Claude Code reviewed the project against the hackathon rules, added this disclosure, the MIT license and the attribution, and fixed the noise model so noisy runs no longer optimise away gates.
 - Between Oct 10 and Oct 11, at the team's direction, Claude Code built the Qollab version (the shared Qiskit engine, the lesson player and free-build Lab, Predict → Run → Explain, Ideal vs this machine, and the BB84, Bell test and Shor's algorithm lessons) and fixed review findings in the roadmaps feature.
 
