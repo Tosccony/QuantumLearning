@@ -107,7 +107,7 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
         {part.map((s, i) => (
           <section key={s.heading}>
             {first + i < 9 ? (
-              <h2 id={`lesson-sec-${first + i + 1}`} tabIndex={-1} aria-keyshortcuts={keys ? String(first + i + 1) : undefined} className="display scroll-mt-24 text-xl sm:text-2xl">{s.heading}{keys && <Kbd>{String(first + i + 1)}</Kbd>}</h2>
+              <h2 id={`lesson-sec-${first + i + 1}`} tabIndex={-1} aria-keyshortcuts={keys ? String(first + i + 1) : undefined} className="display scroll-mt-24 text-xl sm:text-2xl">{s.heading}{keys && <Kbd className="ml-2">{String(first + i + 1)}</Kbd>}</h2>
             ) : (
               <h2 className="display text-xl sm:text-2xl">{s.heading}</h2>
             )}

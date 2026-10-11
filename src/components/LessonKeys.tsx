@@ -39,8 +39,8 @@ export function useLessonKeys({ enabled, sections, onSection, onTutor }: { enabl
 export const focusById = (id: string) => document.getElementById(id)?.focus();
 
 /** A small non-interactive keycap; the heading's aria-keyshortcuts carries the meaning. */
-export function Kbd({ children }: { children: string }) {
-  return <kbd className="kbd" aria-hidden="true">{children}</kbd>;
+export function Kbd({ children, className = "" }: { children: string; className?: string }) {
+  return <kbd className={`kbd ${className}`} aria-hidden="true">{children}</kbd>;
 }
 
 export function KeysHint({ enabled, sections, tutor, onToggle }: { enabled: boolean; sections: number; tutor: string; onToggle: () => void }) {

@@ -185,7 +185,7 @@ export default function LessonPage() {
           <section key={s.heading} className={i > 0 ? "mt-7 border-t border-paper-3 pt-6" : ""}>
             <div className="flex items-baseline gap-3">
               {first + i < 9 ? (
-                <h2 id={`lesson-sec-${first + i + 1}`} tabIndex={-1} aria-keyshortcuts={keys ? String(first + i + 1) : undefined} className="display scroll-mt-24 text-xl sm:text-2xl">{s.heading}{keys && <Kbd>{String(first + i + 1)}</Kbd>}</h2>
+                <h2 id={`lesson-sec-${first + i + 1}`} tabIndex={-1} aria-keyshortcuts={keys ? String(first + i + 1) : undefined} className="display scroll-mt-24 text-xl sm:text-2xl">{s.heading}{keys && <Kbd className="ml-2">{String(first + i + 1)}</Kbd>}</h2>
               ) : (
                 <h2 className="display text-xl sm:text-2xl">{s.heading}</h2>
               )}
