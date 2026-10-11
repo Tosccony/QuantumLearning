@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import Icon from "@/components/ui/Icon";
 import { EdgeCode, Heading, Mark, Perf, Stripe } from "@/components/ui/primitives";
-import { topicCode } from "@/components/roadmaps/RoadmapView";
+import { topicCode } from "@/components/roadmaps/RoadmapSpine";
 import { TRACKS } from "@/lib/curriculum";
 import { roadmapTopics, topicStatus } from "@/lib/roadmaps";
 import { useProgress } from "@/lib/progress";

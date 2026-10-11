@@ -3,45 +3,13 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Icon from "@/components/ui/Icon";
-import { Flag, Heading, Mark, Notice, Perf, Stripe, Window, type MarkKind } from "@/components/ui/primitives";
-import { EXPLORER_CIRCUITS, moduleById, modulesOf, type Track, type TrackId } from "@/lib/curriculum";
+import { Heading, Mark, Notice, Perf, Stripe, Window } from "@/components/ui/primitives";
+import { LABELS, RoadmapLegend, RoadmapSpine, spineKey, topicCode, useEscape } from "@/components/roadmaps/RoadmapSpine";
+import { EXPLORER_CIRCUITS, moduleById, type Track } from "@/lib/curriculum";
 import { PLANETS } from "@/lib/levels";
 import { firstStartable, ROADMAP_STORAGE_KEY, roadmapTopics, sanitizePersonal, topicStatus, type Personal } from "@/lib/roadmaps";
 import { useProgress } from "@/lib/progress";
 import { trackProgress } from "@/lib/skills";
-
-const LABELS = { done: "Completed", available: "Ready to learn", locked: "Prerequisites remaining" } as const;
-const CODE: Record<TrackId, string> = { explorer: "E", student: "S", developer: "D", researcher: "R", concepts: "C" };
-
-/** Milestone notes between tiers, keyed by the index of the topic they follow. */
-const MILESTONES: Partial<Record<TrackId, Record<number, string>>> = {
-  explorer: {
-    2: "At this point you have played with bits, a quantum coin and a treasure that is in many places at once. The next planets are about two qubits acting together.",
-    4: "You can now run a gate machine. The last two planets look at algorithms and at the machines being built today.",
-  },
-  student: {
-    2: "At this point you can describe one qubit, run H twice and read a phase. Everything from here uses two or more qubits.",
-    4: "You have built entangled pairs and teleported a state. The last topic turns that into a first algorithm.",
-  },
-  developer: {
-    2: "At this point you can write a Qiskit circuit, transpile it and read noisy counts. The rest of the path is algorithms.",
-  },
-  researcher: {
-    2: "At this point you can read a density matrix and judge whether a code helps. The last three topics are estimation and variational methods.",
-  },
-  concepts: {
-    1: "Two experiments down: a key you can share and a correlation no instruction sheet explains. Shor's algorithm needs phase estimation from the Researcher path first.",
-  },
-};
-
-/** Edge code of any topic id (planet `e3` or module `s7`), in its own track's numbering. */
-export function topicCode(id: string): string {
-  if (id.startsWith("e")) return `E${id.slice(1).padStart(2, "0")}`;
-  const m = moduleById(id);
-  if (!m) return id.toUpperCase();
-  const i = modulesOf(m.track).findIndex((x) => x.id === id);
-  return `${CODE[m.track]}${String(i + 1).padStart(2, "0")}`;
-}
 
 // Only writes (strict) rethrow storage errors; reads treat them as an empty store.
 function readStore(strict = false): Personal {
@@ -106,25 +74,10 @@ export default function RoadmapView({ track }: { track: Track }) {
     [topics, query, onlySaved, personal],
   );
 
-  const selIdx = filtered.findIndex((n) => n.id === selected);
-  // With the drawer open the branch columns are narrow: the icon carries the label and the word stays for screen readers.
-  const branchLabel = open ? "sr-only 2xl:not-sr-only" : "";
   const pick = (id: string) => { setSelected(id); setOpen(true); setMessage(""); };
   const close = () => { setOpen(false); nodeRefs.current[selected]?.focus(); };
-  // Arrow keys walk the spine; Enter or Space (the button's own click) opens the drawer.
-  const onSpineKey = (e: React.KeyboardEvent, i: number) => {
-    if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "Home" && e.key !== "End") return;
-    e.preventDefault();
-    const j = e.key === "Home" ? 0 : e.key === "End" ? filtered.length - 1 : Math.min(filtered.length - 1, Math.max(0, i + (e.key === "ArrowDown" ? 1 : -1)));
-    nodeRefs.current[filtered[j].id]?.focus();
-  };
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, selected]);
+  const onSpineKey = (e: React.KeyboardEvent, i: number) => spineKey(e, i, filtered.map((n) => n.id), nodeRefs);
+  useEscape(open, close);
 
   async function share() {
     const url = new URL(window.location.href); url.search = ""; url.searchParams.set("topic", selected);
@@ -212,132 +165,38 @@ export default function RoadmapView({ track }: { track: Track }) {
           <section id="panel-roadmap" role="tabpanel" aria-labelledby="tab-roadmap" className="rail -mx-3 sm:-mx-4 lg:mx-0" aria-label="Learning path">
             <Perf />
             <div className="flex flex-col gap-4 px-3 py-4 sm:px-4">
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-fog print:hidden" aria-label="Legend">
-                <span className="label-sm">Marks</span>
-                <span className="flex items-center gap-1.5"><Mark kind="done" size={14} /> completed, verified by the lesson</span>
-                <span className="flex items-center gap-1.5"><Mark kind="available" size={14} /> ready</span>
-                <span className="flex items-center gap-1.5"><Mark kind="locked" size={14} /> prerequisites remaining</span>
-                <span className="flex items-center gap-1.5"><Flag width={11} /> selected</span>
-                <span className="flex items-center gap-1.5"><Icon name="bookmark-filled" size={13} className="text-ice" /> bookmarked</span>
-                <span className="flex items-center gap-1.5"><Icon name="flag" size={13} className="text-ice" /> learning</span>
-                <span className="flex items-center gap-1.5"><span className="line-through decoration-2">title</span> skipped</span>
-              </div>
+              <RoadmapLegend status personal />
 
               {view === "map" ? (
-                <ol className="roadmap-map mx-auto flex w-full max-w-[1100px] flex-col" style={{ zoom }} aria-label={`${track.name} topics in order`}>
-                  {filtered.map((n, i) => {
-                    const s = topicStatus(state, n);
-                    const p = personal[n.id] ?? {};
-                    const isSel = n.id === selected;
-                    const nextTopic = filtered[i + 1];
-                    const linked = !!nextTopic && nextTopic.requires.includes(n.id);
-                    // The path travelled lights up: every connector above the pressed node, plus completed links.
-                    const lit = i < selIdx || (s === "done" && !!nextTopic && topicStatus(state, nextTopic) !== "locked");
-                    const mark: MarkKind = s;
-                    const cross = n.requires.filter((r) => !topics.some((t) => t.id === r));
-                    const planet = n.source.kind === "planet" ? PLANETS.find((pl) => pl.id === n.source.id) : undefined;
-                    const mod = n.source.kind === "module" ? moduleById(n.source.id) : undefined;
-                    const circuit = mod?.circuit ?? (planet ? EXPLORER_CIRCUITS[planet.id] : undefined);
-                    const lessonBranch = (
-                      <Link href={n.lesson} className="frame flex min-h-11 max-w-full min-w-0 items-center gap-2 px-3 py-2 text-xs text-paper hover:border-[var(--line-strong)]" onClick={() => save(n.id, () => ({ started: true }))}>
-                        <Icon name={planet ? "rocket" : "learn"} size={14} className="shrink-0 text-ice" />
-                        <span className={`label-sm shrink-0 text-fog ${branchLabel}`}>{planet ? "Game" : "Lesson"}</span>
-                        <span className="min-w-0 truncate">{planet ? planet.name : mod?.title}</span>
-                      </Link>
-                    );
-                    const circuitBranch = circuit ? (
-                      <Link href={n.lab ?? `/lab?module=${n.id}`} className="frame flex min-h-11 max-w-full min-w-0 items-center gap-2 px-3 py-2 text-xs text-paper hover:border-[var(--line-strong)]">
-                        <Icon name="chip" size={14} className="shrink-0 text-ice" />
-                        <span className={`label-sm shrink-0 text-fog ${branchLabel}`}>Circuit</span>
-                        <span className="code min-w-0 truncate">{circuit.qubits}Q · {circuit.ops.length} gates</span>
-                      </Link>
-                    ) : null;
-                    const resourcesBranch = (
-                      <button type="button" onClick={() => pick(n.id)} className="frame flex min-h-11 max-w-full min-w-0 items-center gap-2 px-3 py-2 text-left text-xs text-paper hover:border-[var(--line-strong)]" aria-label={`${n.resources.length} resources for ${n.title}: open the topic`}>
-                        <Icon name="video" size={14} className="shrink-0 text-ice" />
-                        <span className={`label-sm shrink-0 text-fog ${branchLabel}`}>Watch &amp; read</span>
-                        <span className="min-w-0 truncate">{n.resources.length} free · {p.reviewed?.length ?? 0} reviewed</span>
-                      </button>
-                    );
-                    const rightBranches = <div className="flex min-w-0 flex-col gap-2">{circuitBranch}{resourcesBranch}</div>;
-                    const note = filtered.length === topics.length ? MILESTONES[track.id]?.[i] : undefined;
-                    return (
-                      <li key={n.id} className="relative">
-                        <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_28px_minmax(280px,440px)_28px_minmax(0,1fr)] lg:items-center">
-                          <div className="hidden min-w-0 lg:flex lg:justify-end">{lessonBranch}</div>
-                          <span className="hidden h-px bg-[var(--line-strong)] lg:block" aria-hidden />
-                          <button
-                            type="button"
-                            ref={(el) => { nodeRefs.current[n.id] = el; }}
-                            onClick={() => pick(n.id)}
-                            onKeyDown={(e) => onSpineKey(e, i)}
-                            aria-pressed={isSel}
-                            aria-expanded={isSel && open}
-                            aria-controls="topic-drawer"
-                            aria-label={`${topicCode(n.id)} ${n.title}: ${LABELS[s]}${p.started && s !== "done" ? ", learning" : ""}${p.skipped && s !== "done" ? ", skipped" : ""}${p.bookmarked ? ", bookmarked" : ""}`}
-                            className={`frame relative flex min-h-[64px] w-full items-center gap-3 px-3 py-3 text-left transition-colors ${isSel ? "frame-active" : "hover:border-[var(--line-strong)]"} ${s === "locked" ? "punched text-fog" : "text-paper"}`}
-                          >
-                            {isSel && <Flag className="absolute -top-[11px] right-3" width={16} />}
-                            <span className="code w-8 shrink-0 text-xs text-fog">{topicCode(n.id)}</span>
-                            <span className="min-w-0 flex-1">
-                              <span className={`display block text-lg leading-tight ${p.skipped && s !== "done" ? "line-through decoration-2" : ""}`}>{n.title}</span>
-                              <span className="label-sm mt-0.5 flex flex-wrap gap-x-3 text-fog">
-                                <span>{LABELS[s]}</span>
-                                {p.started && s !== "done" && <span className="flex items-center gap-1 text-ice"><Icon name="flag" size={11} /> learning</span>}
-                                {n.minutes ? <span>{n.minutes} min</span> : null}
-                                {cross.map((r) => <span key={r} className="code normal-case tracking-normal">needs {topicCode(r)}</span>)}
-                              </span>
-                            </span>
-                            {p.bookmarked && <Icon name="bookmark-filled" size={14} className="shrink-0 text-ice" title="Bookmarked" />}
-                            <Mark kind={mark} className="shrink-0" />
-                          </button>
-                          <span className="hidden h-px bg-[var(--line-strong)] lg:block" aria-hidden />
-                          <div className="hidden min-w-0 lg:flex">{rightBranches}</div>
-                          <div className="ml-6 grid grid-cols-3 gap-2 lg:hidden">
-                            <Link href={n.lesson} className="frame flex min-h-10 items-center justify-center gap-1.5 px-2 text-[0.72rem] text-paper" onClick={() => save(n.id, () => ({ started: true }))} aria-label={`${planet ? "Play" : "Lesson"}: ${planet ? planet.name : mod?.title}`}>
-                              <Icon name={planet ? "rocket" : "learn"} size={13} className="shrink-0 text-ice" /> {planet ? "Play" : "Lesson"}
-                            </Link>
-                            {circuit ? (
-                              <Link href={n.lab ?? `/lab?module=${n.id}`} className="frame code flex min-h-10 items-center justify-center gap-1.5 px-2 text-[0.72rem] text-paper" aria-label={`Open the ${circuit.qubits}-qubit circuit in the Lab`}>
-                                <Icon name="chip" size={13} className="shrink-0 text-ice" /> {circuit.qubits}Q · {circuit.ops.length}
-                              </Link>
-                            ) : <span className="frame frame-ghost flex min-h-10 items-center justify-center text-[0.72rem] text-fog" aria-hidden>game</span>}
-                            <button type="button" onClick={() => pick(n.id)} className="frame flex min-h-10 items-center justify-center gap-1.5 px-2 text-[0.72rem] text-paper" aria-label={`${n.resources.length} resources for ${n.title}: open the topic`}>
-                              <Icon name="video" size={13} className="shrink-0 text-ice" /> {n.resources.length} free
-                            </button>
-                          </div>
-                        </div>
-                        {i < filtered.length - 1 && (
-                          <>
-                            <span className={`mx-auto block h-8 w-0 border-l-2 ${lit ? "border-ice" : "border-[var(--line-strong)]"} ${linked ? "" : "border-dashed"}`} aria-hidden />
-                            {note && (
-                              <>
-                                <p className="frame frame-ghost mx-auto flex w-full max-w-[460px] items-start gap-2 px-3 py-2 text-sm leading-relaxed text-fog">
-                                  <Icon name="info" size={14} className="mt-1 shrink-0 text-ice" />
-                                  <span>{note}</span>
-                                </p>
-                                <span className={`mx-auto block h-8 w-0 border-l-2 ${lit ? "border-ice" : "border-[var(--line-strong)]"}`} aria-hidden />
-                              </>
-                            )}
-                          </>
-                        )}
-                      </li>
-                    );
-                  })}
-                  {filtered.length === topics.length && (
-                    <li className="flex flex-col items-center">
-                      <span className={`block h-8 w-0 border-l-2 ${done === topics.length ? "border-ice" : "border-[var(--line-strong)]"}`} aria-hidden />
-                      <Link href="/progress" className={`frame flex w-full max-w-[460px] items-center gap-3 px-3 py-3 text-paper hover:border-[var(--line-strong)] ${done === topics.length ? "frame-active" : "frame-ghost"}`}>
-                        <Icon name="badge" size={20} className="shrink-0 text-ice" />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex flex-wrap items-baseline gap-x-3"><span className="display text-lg leading-tight">{track.certificate}</span><span className="label-sm text-fog">destination</span></span>
-                          <span className="text-xs text-fog">Earned by completing every {track.id === "explorer" ? "planet game" : "lesson"} on this path.</span>
-                        </span>
-                        {done === topics.length ? <Mark kind="done" /> : <span className="code text-xs text-fog">{done}/{topics.length}</span>}
-                      </Link>
-                    </li>
+                <RoadmapSpine
+                  track={track}
+                  topics={topics}
+                  filtered={filtered}
+                  selected={selected}
+                  open={open}
+                  zoom={zoom}
+                  nodeRefs={nodeRefs}
+                  onPick={pick}
+                  status={(n) => topicStatus(state, n)}
+                  personal={personal}
+                  complete={done === topics.length}
+                  lessonEntry={(n, className, children, label) => (
+                    <Link href={n.lesson} className={className} onClick={() => save(n.id, () => ({ started: true }))} aria-label={label}>{children}</Link>
                   )}
-                </ol>
+                  labEntry={(n, className, children, label) => (
+                    <Link href={n.lab ?? `/lab?module=${n.id}`} className={className} aria-label={label}>{children}</Link>
+                  )}
+                  end={
+                    <Link href="/progress" className={`frame flex w-full max-w-[460px] items-center gap-3 px-3 py-3 text-paper hover:border-[var(--line-strong)] ${done === topics.length ? "frame-active" : "frame-ghost"}`}>
+                      <Icon name="badge" size={20} className="shrink-0 text-ice" />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-baseline gap-x-3"><span className="display text-lg leading-tight">{track.certificate}</span><span className="label-sm text-fog">destination</span></span>
+                        <span className="text-xs text-fog">Earned by completing every {track.id === "explorer" ? "planet game" : "lesson"} on this path.</span>
+                      </span>
+                      {done === topics.length ? <Mark kind="done" /> : <span className="code text-xs text-fog">{done}/{topics.length}</span>}
+                    </Link>
+                  }
+                />
               ) : (
                 <table className="w-full border-collapse text-sm" aria-label={`${track.name} topics as a list`}>
                   <thead>
