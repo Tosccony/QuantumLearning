@@ -10,7 +10,7 @@
 - Resource review tracking is separate from assessed lesson completion and XP.
 - Share links preserve the selected topic without sharing private notes/progress.
 - Browser print / save as PDF, mobile layout and keyboard-accessible controls.
-- Existing XP, streaks, certificates, community and lab tutor remain linked.
+- Existing XP, streaks, certificates and lab tutor remain linked.
 
 Notes/bookmarks/resource reviews use `quantum-quest-roadmaps-v1` in localStorage.
 Existing lesson progress retains its original storage and completion semantics.
@@ -30,7 +30,7 @@ This release does not claim full roadmap.sh parity.
    recommendations. The current tutor is available inside the linked lab.
 4. Add authentication and a persistent learner database for device sync,
    server-verifiable certificates and user profiles.
-5. Build a custom roadmap editor, versioning, forks and community publishing,
+5. Build a custom roadmap editor, versioning and sharing,
    including ownership, moderation and sharing permissions.
 6. Add teacher/team memberships, assignments, progress reports and skill gaps.
 

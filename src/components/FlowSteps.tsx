@@ -20,7 +20,7 @@ export default function FlowSteps({ current, done = [] }: { current: FlowStep; d
         return (
           <li key={s.key} className={`frame relative -ml-px flex min-h-9 items-center gap-1.5 px-2.5 ${isCur ? "frame-active text-paper" : isDone ? "text-paper" : "text-fog"}`} aria-current={isCur ? "step" : undefined}>
             {isCur && <Flag className="absolute -top-2.5 left-1.5" width={12} />}
-            {isDone && !isCur ? <Icon name="cross" size={12} className="text-ice" title="done" /> : <Icon name={s.icon} size={13} />}
+            {isDone ? <Icon name="cross" size={12} className="text-ice" title="done" /> : <Icon name={s.icon} size={13} />}
             <span className="label-sm hidden sm:inline">{s.label}</span>
           </li>
         );

@@ -25,17 +25,16 @@ Success for this build: a judge runs the flagship demo on the first try, sees th
 
 ## Positioning
 
-The mechanism nobody nearby can truthfully copy: **every number on screen comes back from Qiskit, including the kids' games**, and the **AI tutor is grounded in those actual run results** (counts, Bloch vectors, purity, transpiled depth), not in generic textbook text. Step-through Bloch traces after each gate are computed by Qiskit for each circuit prefix. Published community circuits are re-run on the server at publish time, so shared results are always verified.
+The mechanism nobody nearby can truthfully copy: **every number on screen comes back from Qiskit, including the kids' games**, and the **AI tutor is grounded in those actual run results** (counts, Bloch vectors, purity, transpiled depth), not in generic textbook text. Step-through Bloch traces after each gate are computed by Qiskit for each circuit prefix.
 
 Submission theme: **Quantum Unlocked** (teach a hard topic through an interactive demo). **Confirmed: the home page leads with quantum error correction, the 3-qubit bit-flip code with noise, as the flagship runnable demo.** The coin-flip games are not the lead.
 
 ## Operating Context
 
 - Judges reach the app from the Qollab project page and a 2–3 minute demo video recorded in Chrome. Browser targets: Chrome, Edge, Brave, Opera, Firefox 153+. Safari is not a supported target for the Qollab side.
-- The web app (Next.js) talks to a FastAPI Qiskit service on port 8000 via `/api/qiskit/*`. If the service is down, the Lab, lessons' Run buttons and the community are unavailable and the UI must say so plainly (the message tells the user to run `npm run backend`).
+- The web app (Next.js) talks to a FastAPI Qiskit service on port 8000 via `/api/qiskit/*`. If the service is down, the Lab and lessons' Run buttons are unavailable and the UI must say so plainly (the message tells the user to run `npm run backend`).
 - The Claude tutor streams from `/api/tutor` when `ANTHROPIC_API_KEY` is set; otherwise a deterministic offline explainer built from the same Qiskit results answers. The offline state is normal, not an error.
 - Learner progress (name, XP, streak, badges, module completion, lab runs, projects, stars, settings) lives in `localStorage` per device. Certificates are issued from that state and are not server-verifiable.
-- Community projects live in SQLite on the server: list (sort by stars or new, text search), view, star, fork into the Lab, publish (server re-runs the circuit).
 - The Grown-ups dashboard is gated by a multiplication question, has Parent and Teacher tabs, prints, and downloads CSV.
 - Kids' settings: voice narration (Web Speech), colour-blind palette (blue/orange pairs instead of pink/green, and colour names in game copy follow it), bigger text. Captions are always on.
 
@@ -45,13 +44,12 @@ Routes to preserve, with their content and behaviour:
 
 - `/` home
 - `/learn` track catalogue; `/tracks/[track]` module list for student, developer, researcher; `/learn/[module]` lesson (sections, runnable read-only circuit, "what to look for", try-it list, check question, tutor, next/certificate)
-- `/lab` circuit builder: 1–8 qubits, 19 palette gates (single, rotation with angle input accepting `pi/2`-style expressions, multi-qubit incl. CCX and multi-controlled Z), click or drag placement, move/delete, load examples from any module, `?c=` encoded circuits, `?module=`, `?fork=`, draft autosave, shots 100–10000, noise model with three sliders, step-through slider, results tabs (histogram with exact-probability ticks, Bloch spheres per qubit with purity, statevector table with phase dials, Qiskit tab with Python/OpenQASM/text diagram and transpile stats), share dialog that publishes to the community
-- `/community`, `/community/[id]` (star, fork, copy link, results, tutor)
+- `/lab` circuit builder: 1–8 qubits, 19 palette gates (single, rotation with angle input accepting `pi/2`-style expressions, multi-qubit incl. CCX and multi-controlled Z), click or drag placement, move/delete, load examples from any module, `?c=` encoded circuits, `?module=`, draft autosave, shots 100–10000, noise model with three sliders, step-through slider, results tabs (histogram with exact-probability ticks, Bloch spheres per qubit with purity, statevector table with phase dials, Qiskit tab with Python/OpenQASM/text diagram and transpile stats)
 - `/progress` (stats, skill tree with in-track prerequisites and cross-track bridges, certificates), `/certificate/[track]` (printable)
 - `/explorer` galaxy map (welcome/name entry, HUD, avatar editor, settings, badge collection), `/planet/[id]` seven games in sequence with quiz and reward, `/grownups`
 - `/api/tutor` (Claude streaming) and the `/api/qiskit/*` rewrite
 
-Terminology in use: tracks, modules, skills, planets, badges, XP, rank/level, streak, certificate, Lab, shots, noise model, step-through, fork, star, publish.
+Terminology in use: tracks, modules, skills, planets, badges, XP, rank/level, streak, certificate, Lab, shots, noise model, step-through.
 
 Technical constraints: Next.js 15 App Router, React 19, Tailwind CSS 4, Framer Motion, Three.js (one 3D fridge model), JetBrains Mono for code. Every interactive element must be a real button, link or input with a label; everything must work keyboard-only; `prefers-reduced-motion` is respected. No new dependency without a reason and an MIT-compatible licence. Backend API shape is not to change.
 
@@ -60,7 +58,7 @@ Known open items, not to be invented around: no accounts (Supabase planned), no 
 ## Brand Commitments
 
 - **Binding: the product name "Quantum Quest".**
-- Not binding (confirmed): the Qubit the Robot mascot and its drawing, the planet and badge names, and the five-step "Learn → Build → Run → Understand → Share" framing may be reworked or replaced, as long as the underlying games, lessons and functions survive.
+- Not binding (confirmed): the Qubit the Robot mascot and its drawing, the planet and badge names, and the four-step "Learn → Build → Run → Understand" framing may be reworked or replaced, as long as the underlying games, lessons and functions survive.
 - Required text, exact: `This effort is supported by Qollab & IonQ` in the app footer, the README and the Qollab page.
 - Required files untouched in substance: `LICENSE` (MIT), `HACKATHON.md`, the README's Disclosure section (attribution and AI disclosure).
 
@@ -69,7 +67,6 @@ Known open items, not to be invented around: no accounts (Supabase planned), no 
 - 18 written lesson modules with circuits, observe notes, try-it lists and check questions in `src/lib/curriculum.ts`.
 - Seven Explorer games in `src/levels/`, five of which run real circuits (coin, treasure, twins, gate machine, door race).
 - Real Qiskit results for every run: counts, probabilities, statevector, Bloch vectors, purity, entanglement flag, diagram, QASM, transpile stats, elapsed ms, Qiskit version.
-- Community projects seeded in the backend SQLite store (`backend/main.py` `init_db`).
 - No testimonials, customers, press, benchmarks or pricing exist. Do not fabricate any. Google Willow and Microsoft Majorana facts in Planet 7 are the only external claims, already in the content.
 
 ## Product Principles
