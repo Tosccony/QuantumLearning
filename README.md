@@ -9,7 +9,7 @@
 | | |
 |---|---|
 | **Run it on Qollab** | [qollab.xyz/u/kverhulp/quantum-quest](https://qollab.xyz/u/kverhulp/quantum-quest#run) |
-| **Demo video (3 min)** | [Watch the demo](https://github.com/Tosccony/QuantumLearning/blob/main/docs/qq_full_demo.mp4) |
+| **Demo video (3 min)** | [Watch on YouTube](https://youtu.be/_3IxI_BCKkw) |
 | **Web app** | Runs locally; see [Run it](#run-it) |
 | **Source** | https://github.com/Tosccony/QuantumLearning (MIT) |
 
