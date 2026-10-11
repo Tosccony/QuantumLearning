@@ -24,7 +24,7 @@ The Qollab project opens on **Judge Start: Break the Code**, the 3-qubit bit-fli
 
 Every case is one circuit and one job, so it also runs on IonQ's simulators (press **Stop** and **Run** between jobs). The result-proof panel prints the backend, the Qiskit version, the transpiled depth and CX count, and how far the sampled counts are from the exact distribution. It keeps the exact statevector numbers separate from the sampled, possibly noisy, counts. On the IBM and IonQ noise models the syndrome drops below 100% of shots, and the panel says when the most common syndrome isn't the ideal one.
 
-All 21 lessons are one click away under **Browse all 21 lessons**, and **Build your own circuit** opens the free Lab.
+All 21 lessons are one click away under **Browse all 21 lessons →** (the Learn page), and **Build your own circuit →** opens the free Lab.
 
 ## How it fits together
 
@@ -70,6 +70,7 @@ All 21 lessons (Student, Developer, Researcher and Concepts) and the Lab run on 
 - **Results**: a histogram of the shot counts with exact probabilities overlaid, interactive per-qubit Bloch spheres (reduced states with purity), a statevector table, and step-through Bloch vectors after each gate. The Qiskit tab shows Python code, OpenQASM, a text diagram and transpiled depth/CX counts.
 - **AI tutor**: beginner, intermediate and advanced explanations from Claude, grounded in the actual run results. Without an API key it falls back to a deterministic explainer built from those same results.
 - **Break the Code** (on Qollab's start screen and in the error-correction lesson): inject no error, one X error on any data qubit, or two, then read the syndrome, the correction, the logical outcome and the run's provenance from one run.
+- **Learning paths**: Roadmaps lay out each track's lessons in prerequisite order, with credited videos and readings, on Qollab as well as in the web app. The web app also keeps your notes, bookmarks and progress.
 - **Course modules**: 21 lessons. Each has a runnable circuit, "what to look for" notes, experiments to try and a check question, and eight start with a prediction.
 - **Community** (`/community`): publish circuits, then search, star and fork them. Publishing re-runs the circuit on the server, so shared results are always verified.
 - **Progress**: XP, streaks, a skill tree with cross-track links, and printable certificates for each track.
@@ -93,7 +94,7 @@ All 21 lessons (Student, Developer, Researcher and Concepts) also run on qollab.
 
 1. Open the project on Qollab and go to the **Code** tab.
 2. Press **Run Project**, then **Run**, and pick a simulator in **Select QPU**.
-3. The project opens on **Judge Start: Break the Code** (see [Judge it in three minutes](#judge-it-in-three-minutes)). For the lessons, press **Browse all 21 lessons**, pick one, edit its circuit if you like, and press **▶ Run**.
+3. The project opens on **Judge Start: Break the Code** (see [Judge it in three minutes](#judge-it-in-three-minutes)). For the lessons, open **Learn** (or press **Browse all 21 lessons →**), pick a track and a lesson, edit its circuit if you like, and press **▶ Run**.
 
 IonQ simulators accept one job per Run. For another job, press **Stop** and **Run** again, or pick a local simulator.
 

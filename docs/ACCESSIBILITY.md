@@ -24,7 +24,7 @@ The Qollab player was scanned in a local harness that bundles `src/qollab/Player
 
 Checked with scripted key presses in Chromium, plus the editor's own key map:
 
-- **Judge Start (Qollab):** with Tab, Enter and Space only, from a fresh page load: pick an error, make a prediction, press Run and read the proof. The first Tab lands on "Judge start", and the result is announced through a live region ("Syndrome 10. q0 recovered.").
+- **Judge Start (Qollab):** with Tab, Enter and Space only, from a fresh page load: pick an error, make a prediction, press Run and read the proof. The first Tab lands on the "Quantum Quest" brand button in the Main navigation, and the result is announced through a live region ("Syndrome 10. q0 recovered.").
 - **Tab order on pages with the tutor:** the tutor used to scroll its log into view on mount, which moved Chromium's Tab starting point to the tutor. It now scrolls only its own log, so the first Tab lands on the page header on `/lab`, `/learn/*` and the Qollab player.
 - **Circuit editor:** focus the strip, then use the arrow keys to move, Enter to place or select, Delete to remove, `[` and `]` to move a gate, and Esc to cancel (see the comment in `src/components/lab/CircuitEditor.tsx`).
 - **Dialogs** use the native `<dialog>` element, so focus stays inside them and Escape closes them.
