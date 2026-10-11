@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Markdown from "@/components/Markdown";
+import BreakTheCode from "@/components/lab/BreakTheCode";
 import CircuitEditor, { layout, toCircuit, type EOp } from "@/components/lab/CircuitEditor";
 import IdealVsMachine from "@/components/lab/IdealVsMachine";
 import LessonReadout from "@/components/lab/LessonReadout";
@@ -8,8 +9,8 @@ import ResultsPanel from "@/components/lab/ResultsPanel";
 import Tutor from "@/components/lab/Tutor";
 import Icon from "@/components/ui/Icon";
 import { EdgeCode, Flag, Heading, Notice, Perf, Stripe, Window } from "@/components/ui/primitives";
+import { codeCircuit, INJECTIONS } from "@/lib/breakTheCode";
 import { MODULES, TRACKS, modulesOf, type Module } from "@/lib/curriculum";
-import { onesRate } from "@/lib/explain";
 import { runCircuit, type Circuit, type RunResult } from "@/lib/quantum";
 import Lab from "./Lab";
 
@@ -18,15 +19,18 @@ const LETTERS = ["A", "B", "C", "D", "E", "F"];
 // Concepts first, right under the Lab: the hard topics are what judges and curious learners look for.
 const LESSON_TRACKS = [...TRACKS.filter((t) => t.id === "concepts"), ...TRACKS.filter((t) => t.id !== "explorer" && t.id !== "concepts")];
 
-/** Quantum Quest's lessons on Qollab: every run goes to the simulator picked in "Select QPU". */
+/** Quantum Quest's lessons on Qollab: every run goes to the simulator picked in "Select QPU". Opens on Judge Start. */
 export default function Player({ backendName }: { backendName: string }) {
-  const [id, setId] = useState(MODULES[0].id);
-  const m = MODULES.find((x) => x.id === id)!;
+  // null = Judge Start (Break the Code), else a lesson id.
+  const [id, setId] = useState<string | null>(null);
+  const [browse, setBrowse] = useState(false);
+  const m = id ? MODULES.find((x) => x.id === id)! : null;
   const isIonQ = /ionq/i.test(backendName);
   // `n` re-keys the Lab, so opening it from a lesson starts fresh with that lesson's circuit.
   const [lab, setLab] = useState<{ start: Circuit; n: number } | null>(null);
   const openLab = (start: Circuit) => setLab((l) => ({ start, n: (l?.n ?? 0) + 1 }));
-  const chip = (active: boolean) => `chip min-h-9 transition-colors ${active ? "border-ice bg-ice text-navy-ink" : "hover:bg-[rgba(111,230,255,0.12)]"}`;
+  const open = (next: string | null) => { setLab(null); setId(next); };
+  const chip = (active: boolean) => `chip min-h-11 transition-colors ${active ? "border-ice bg-ice text-navy-ink" : "hover:bg-[rgba(111,230,255,0.12)]"}`;
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-3 py-4 sm:px-4">
       <header className="rail -mx-3 sm:-mx-4">
@@ -44,39 +48,74 @@ export default function Player({ backendName }: { backendName: string }) {
       </header>
 
       <nav aria-label="Lessons" className="flex flex-col gap-2">
-        <div className="grid grid-cols-[4.5rem_minmax(0,1fr)] items-start gap-2">
-          <EdgeCode className="pt-2.5">LAB</EdgeCode>
-          <div className="flex flex-wrap gap-1.5">
-            <button type="button" onClick={() => { if (!lab) openLab({ qubits: 2, ops: [] }); }} aria-current={lab ? "page" : undefined} className={chip(!!lab)}>
-              <Icon name="lab" size={12} /> Build your own circuit
-            </button>
-          </div>
+        <div className="flex flex-wrap gap-1.5">
+          <button type="button" onClick={() => open(null)} aria-current={!lab && !m ? "page" : undefined} className={chip(!lab && !m)}>
+            <Icon name="flag" size={12} /> Judge start: Break the code
+          </button>
+          <button type="button" onClick={() => { if (!lab) openLab({ qubits: 2, ops: [] }); }} aria-current={lab ? "page" : undefined} className={chip(!!lab)}>
+            <Icon name="lab" size={12} /> Build your own circuit
+          </button>
+          <button type="button" onClick={() => setBrowse((b) => !b)} aria-expanded={browse} aria-controls="all-lessons" className={chip(false)}>
+            <Icon name="list" size={12} /> {browse ? "Hide lessons" : "Browse all 21 lessons"}
+            {!browse && !lab && m && <span className="code normal-case tracking-normal text-fog">· {m.title}</span>}
+          </button>
         </div>
-        {LESSON_TRACKS.map((t) => (
-          <div key={t.id} className="grid grid-cols-[4.5rem_minmax(0,1fr)] items-start gap-2">
-            <span className="flex items-center gap-1.5 pt-2.5"><Stripe track={t.id} className="!h-3 !w-1" /><EdgeCode>{t.id.slice(0, 3)}</EdgeCode></span>
-            <div className="flex flex-wrap gap-1.5">
-              {modulesOf(t.id).map((x, i) => (
-                <button key={x.id} type="button" onClick={() => { setLab(null); setId(x.id); }} aria-current={!lab && x.id === id ? "page" : undefined} className={chip(!lab && x.id === id)}>
-                  <span className="code normal-case tracking-normal opacity-80">{String(i + 1).padStart(2, "0")}</span> {x.title}
-                </button>
-              ))}
-            </div>
+        {browse && (
+          <div id="all-lessons" className="flex flex-col gap-2">
+            {LESSON_TRACKS.map((t) => (
+              <div key={t.id} className="grid grid-cols-[4.5rem_minmax(0,1fr)] items-start gap-2">
+                <span className="flex items-center gap-1.5 pt-2.5"><Stripe track={t.id} className="!h-3 !w-1" /><EdgeCode>{t.id.slice(0, 3)}</EdgeCode></span>
+                <div className="flex flex-wrap gap-1.5">
+                  {modulesOf(t.id).map((x, i) => (
+                    <button key={x.id} type="button" onClick={() => open(x.id)} aria-current={!lab && x.id === id ? "page" : undefined} className={chip(!lab && x.id === id)}>
+                      <span className="code normal-case tracking-normal opacity-80">{String(i + 1).padStart(2, "0")}</span> {x.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </nav>
 
-      {lab ? <Lab key={lab.n} start={lab.start} isIonQ={isIonQ} /> : <Lesson key={m.id} m={m} isIonQ={isIonQ} onOpenLab={openLab} />}
+      {lab ? <Lab key={lab.n} start={lab.start} isIonQ={isIonQ} /> : m ? <Lesson key={m.id} m={m} isIonQ={isIonQ} onOpenLab={openLab} /> : <JudgeStart isIonQ={isIonQ} onOpenLab={openLab} onLesson={() => open("r3")} />}
 
       <footer className="rail -mx-3 sm:-mx-4">
         <Perf />
         <div className="flex flex-col items-center gap-1 px-4 py-3 text-center text-xs text-fog">
-          <p>Kids&apos; Explorer games, community sharing and the AI tutor live in the full web app: <a className="text-ice hover:text-paper" href={REPO}>{REPO}</a>. MIT licensed.</p>
+          <p>Kids&apos; Explorer games, community sharing and the AI tutor live in the full web app: <a className="text-ice underline underline-offset-4 hover:text-paper" href={REPO}>{REPO}</a>. MIT licensed.</p>
           <p className="label-sm">This effort is supported by Qollab &amp; IonQ</p>
         </div>
         <Perf />
       </footer>
     </div>
+  );
+}
+
+const PATH = ["Pick a simulator in Select QPU", "Run the code with X on q1: syndrome 11, q0 restored", "Move the error, or inject two", "Ask the explainer what happened"];
+
+/** The first screen judges see: the hardest topic, live, in one run. */
+function JudgeStart({ isIonQ, onOpenLab, onLesson }: { isIonQ: boolean; onOpenLab: (c: Circuit) => void; onLesson: () => void }) {
+  const [ctx, setCtx] = useState<{ c: Circuit; r: RunResult | null }>(() => ({ c: codeCircuit(INJECTIONS[2]), r: null }));
+  return (
+    <article className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="flex min-w-0 flex-col gap-5">
+        <BreakTheCode isIonQ={isIonQ} onOpenLab={onOpenLab} onChange={(c, r) => setCtx({ c, r })} />
+        <p className="text-sm text-fog">
+          The full lesson, with the maths, a prediction and a check question:{" "}
+          <button type="button" className="text-ice underline underline-offset-4 hover:text-paper" onClick={onLesson}>Error correction: the 3-qubit bit-flip code</button>.
+        </p>
+      </div>
+      <aside className="flex flex-col gap-4 lg:sticky lg:top-4 lg:self-start">
+        <Window as="section" className="p-4" aria-label="Three-minute judging path">
+          <p className="label-sm flex items-center gap-2 text-[#46587a]"><Icon name="clock" size={14} /> Three-minute path</p>
+          <ol className="mt-2 flex flex-col gap-1.5 text-sm leading-snug">
+            {PATH.map((s, i) => <li key={s} className="flex gap-2"><span className="code text-xs text-[#46587a]">{i + 1}</span>{s}</li>)}
+          </ol>
+        </Window>
+        <Tutor compact offline circuit={ctx.c} result={ctx.r} extra="Break the Code: the 3-qubit bit-flip code with X errors injected after encoding. Ancillas q3, q4 hold the syndrome; q0 is the decoded data qubit." />
+      </aside>
+    </article>
   );
 }
 
@@ -172,7 +211,7 @@ function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLa
           <Perf />
         </section>
 
-        {m.compare && <CodeVsBare circuit={m.compare} isIonQ={isIonQ} />}
+        {m.id === "r3" && <BreakTheCode isIonQ={isIonQ} onOpenLab={onOpenLab} />}
 
         <Window as="section" className="flex flex-col gap-4 p-5 sm:p-6" aria-label="Check your understanding">
           <Perf className="-mx-5 -mt-5 sm:-mx-6 sm:-mt-6" />
@@ -210,63 +249,5 @@ function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLa
         <Tutor compact offline circuit={circuit} result={result} extra={`Lesson: ${m.title}. What to look for: ${m.observe}`} />
       </aside>
     </article>
-  );
-}
-
-function CodeVsBare({ circuit, isIonQ }: { circuit: Circuit; isIonQ: boolean }) {
-  const [r, setR] = useState<RunResult | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const bare = r ? onesRate(r.counts, 0) : 0;
-  const coded = r ? onesRate(r.counts, 1) : 0;
-  const pc = (x: number) => `${(x * 100).toFixed(1)}%`;
-  const se = r ? Math.sqrt((bare * (1 - bare) + coded * (1 - coded)) / r.shots) : 0;
-
-  async function run() {
-    setBusy(true);
-    setError(null);
-    try {
-      setR(await runCircuit(circuit, { shots: 1024 }));
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <section className="rail -mx-3 sm:-mx-4" aria-label="Bare qubit versus protected qubit">
-      <Perf />
-      <div className="flex flex-col gap-3 px-3 py-4 sm:px-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="mr-auto flex items-center gap-3">
-            <Icon name="noise" size={18} className="text-ice" />
-            <h3 className="display text-xl sm:text-2xl">Does the code help on this machine?</h3>
-          </div>
-          <button type="button" className="keycap-primary" onClick={run} disabled={busy} aria-busy={busy}><Icon name="run" size={14} /> {busy ? "Running…" : "Run bare vs protected"}</button>
-        </div>
-        <p className="max-w-prose text-sm text-fog">One circuit holds a bare qubit and a qubit protected by the 3-qubit code, both storing 0. Any 1 we read is an error. The bare qubit can only be misread. The protected one can be misread too, plus whatever its 15 extra gates add, minus whatever the code catches.</p>
-        {isIonQ && <Notice tone="warn">IonQ simulators take one job per Run. If you already ran the lesson circuit, press Stop and Run before this comparison.</Notice>}
-        {error && <Notice tone="bad" role="alert">{error}</Notice>}
-        {r && (
-          <div className="frame flex flex-col gap-2 px-3 py-3 text-sm strike" role="status">
-            <p className="flex flex-wrap gap-x-6 gap-y-1">
-              <span><span className="label-sm text-fog">Bare qubit error</span> <b className="display num text-xl">{pc(bare)}</b></span>
-              <span><span className="label-sm text-fog">Protected qubit error</span> <b className="display num text-xl">{pc(coded)}</b></span>
-            </p>
-            <p className="leading-relaxed">
-              {bare === 0 && coded === 0
-                ? "No errors at all: this is a perfect machine. Pick an IBM or IonQ simulator on your next Run."
-                : Math.abs(coded - bare) <= 2 * se
-                  ? "Too close to call: the difference is within shot-to-shot wobble. Run again to check."
-                  : coded < bare
-                    ? "The protected qubit came out ahead. On this test that can only mean q1 reads out more reliably than q0, because the bare qubit's only possible error is a misread."
-                    : "The code lost: its own gates added more errors than it can fix. Error correction pays off only once gates are good enough (below the fault-tolerance threshold) and the stored qubit actually suffers errors while it waits."}
-            </p>
-          </div>
-        )}
-      </div>
-      <Perf />
-    </section>
   );
 }
