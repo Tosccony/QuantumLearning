@@ -17,7 +17,7 @@ export const TRACKS: Track[] = [
   { id: "student", name: "Student", icon: "🎓", color: "#7bdff2", audience: "High school & first-year university", tagline: "States, gates, entanglement and your first algorithms, with just enough maths.", certificate: "Quantum Foundations" },
   { id: "developer", name: "Developer", icon: "💻", color: "#3ddc97", audience: "Programmers new to quantum", tagline: "Qiskit, transpilation, shots and noise, and building Grover, QFT and variational circuits.", certificate: "Quantum Software Developer" },
   { id: "researcher", name: "Researcher", icon: "🔬", color: "#b388ff", audience: "Graduate level", tagline: "Density matrices, noise and mitigation, error correction, phase estimation and advantage.", certificate: "Quantum Research Practitioner" },
-  { id: "concepts", name: "Concepts", icon: "🔓", color: "#ff9e80", audience: "After the Student basics", tagline: "Hands-on deep dives: secret keys with BB84, the Bell test, and Shor's algorithm.", certificate: "Quantum Concepts" },
+  { id: "concepts", name: "Concepts", icon: "🔓", color: "#ff9e80", audience: "After the Student basics", tagline: "Hands-on deep dives: Wiesner's quantum money, the Bell test, and Shor's algorithm.", certificate: "Quantum Concepts" },
 ];
 
 export type Check = { q: string; options: string[]; answer: number; why: string };
@@ -36,7 +36,11 @@ export type Module = {
   summary: string;
   skill: string;
   requires: string[];
-  sections: { heading: string; body: string }[];
+  sections: { heading: string; body: string; demo?: "qm-angle" | "qm-lock" | "qm-multi"; predictHere?: boolean; checkHere?: boolean }[];
+  /** Set to false to hide the generic "The circuit" run panel, when a lesson's own inline demos already cover running it. */
+  circuitPanel?: boolean;
+  /** An extra note shown in the sidebar, under the tutor. */
+  sidebarNote?: { heading: string; body: string };
   circuit: Circuit;
   observe: string; // what to look for after running
   tryIt: string[];
@@ -175,36 +179,44 @@ export const MODULES: Module[] = [
   },
 
   {
-    id: "s7", track: "concepts", title: "Quantum key distribution: BB84", minutes: 12, skill: "Quantum cryptography", requires: ["s3"],
-    summary: "Alice and Bob build a shared secret key from single qubits. Measuring in the wrong basis disturbs a state, so an eavesdropper leaves errors they can detect.",
+    id: "s7", track: "concepts", title: "Quantum money: Wiesner's uncopiable cash", minutes: 12, skill: "Quantum cryptography", requires: ["s3"],
+    summary: "A banknote made of qubits: a secret rotation locks each one, so forging it without the key leaves behind qubits that measure randomly instead of matching the bill.",
     sections: [
-      { heading: "Why quantum helps with secrets", body: "To encrypt messages, two people first need a shared secret key: a string of random bits nobody else knows. Sent over an ordinary channel, those bits can be copied without leaving a trace. Qubits are different. An unknown quantum state can't be copied (the **no-cloning theorem**), and measuring it in the wrong basis changes it. BB84, proposed by Charles Bennett and Gilles Brassard in 1984, turns that fragility into a burglar alarm." },
-      { heading: "The protocol", body: "1. For each qubit, Alice picks a random bit and a random basis: **Z** (|0⟩, |1⟩) or **X** (|+⟩, |−⟩).\n2. Bob picks his own random basis for each qubit and measures in it.\n3. Over a public channel they compare **bases, never bits**, and keep only the rounds where the bases matched. This step is called sifting.\n4. When the bases match, Bob's bit always equals Alice's. When they don't, Bob gets a coin flip, so those rounds are thrown away." },
-      { heading: "This circuit", body: "Each qubit is one round, with the random choices written into the circuit. Alice uses `X` to send a 1 and `H` to switch to the X basis. Bob measuring in the X basis is an `H` just before measurement.\n\n- q0: Alice sends 0 in Z, Bob measures Z. Kept.\n- q1: Alice sends 1 in Z, Bob measures X. Thrown away.\n- q2: Alice sends 1 in X, Bob measures X. Kept.\n- q3: Alice sends 0 in X, Bob measures Z. Thrown away.\n- q4: Alice sends 1 in Z, Bob measures Z. Kept.\n- q5: Alice sends 0 in X, Bob measures X. Kept.\n\nq6 is Eve's notebook. She isn't listening yet, so it always reads 0. The shared key is q0, q2, q4, q5 = **0, 1, 1, 0**." },
-      { heading: "Catching Eve", body: "Eve can't copy the qubits, so to learn anything she has to measure them, and she doesn't know Alice's bases. Whenever she guesses the wrong basis, she knocks the qubit into the other basis, and Bob's result turns into a coin flip even though his basis matched Alice's. Over many rounds that's a 25% error rate in the sifted key. Alice and Bob publicly compare a random sample of key bits; if too many disagree, they know someone listened, throw the key away and start again. In the circuit, a `CX` from a key qubit into q6 plays Eve: it records the qubit's Z value, which disturbs it exactly like a Z-basis measurement." },
+      { heading: "Qubits as rotations", demo: "qm-angle", body: "A qubit's state can be pictured as an arrow on a sphere, the Bloch sphere. Measuring it always gives a plain 0 or 1, but where the arrow points sets the odds. In this lesson we only rotate the arrow around one axis (an Ry rotation), so it moves around a circle through the north and south poles. Pointing straight up (north, 0°), the qubit measures 0 every time; pointing straight down (south, 180°), it measures 1 every time. In between, the result is random: rotated by an angle θ, the qubit gives 1 with probability sin²(θ/2). At 90° or 270° the arrow points sideways and each outcome has a 50% chance. That in-between state is a superposition: not \"both 0 and 1 at once\", but a definite state whose measurement outcome is genuinely random." },
+      { heading: "Locking a qubit with a key", demo: "qm-lock", predictHere: true, body: "Two rotations around the same axis add up: Ry(a) followed by Ry(b) is the same as Ry(a + b). So a rotation can be undone by rotating back by the same angle, and that gives us a key. Lock a qubit with a one-bit key: if the key bit is 1, rotate it by 90°, into a 50/50 state; if it's 0, leave it alone. To unlock it, apply the opposite rotation (−90°) only where the key bit is 1. If the guessed key bit is wrong (rotating a qubit that was never locked, or not rotating one that was), the qubit is left pointing sideways and measures randomly. Only a matching key, either two rotations that cancel or no rotation at all, leaves the qubit in a predictable state that reveals the bill's value." },
+      { heading: "Scaling up to a banknote", demo: "qm-multi", body: "A real banknote uses many qubits, each with its own key bit, so guessing the whole key becomes hopeless. A wrong key gives different results every time you try it, because the qubits it fails to unlock come out at random. One trick still leaks information: guessing a key of all 0s reveals every qubit that was never rotated, because those give the same answer every time. So the bank must keep the results of a check secret, and a careful bank re-locks the bill with a fresh key after each verification. Wiesner's deeper point is that a counterfeiter can't simply copy the qubits (the no-cloning theorem): measuring them without the key scrambles the rotated ones, so a forged bill fails the bank's check. Stephen Wiesner wrote this idea down around 1970 (published in 1983 as \"Conjugate Coding\"), and it became the starting point for quantum cryptography, including the BB84 key-distribution protocol." },
+      { heading: "References", checkHere: true, body: "- [Programming your first quantum circuits: rotations](https://qollab.xyz/learn/programming-your-first-quantum-circuits/rotations)\n- [Quantum money, Communications of the ACM](https://cacm.acm.org/research/quantum-money/)" },
     ],
+    circuitPanel: false,
+    sidebarNote: {
+      heading: "🔢 Why guessing all 0s still gets 3/4 right",
+      body: "Half the bits are unrotated, so a 0 guess reveals them for sure (50%). The other half are rotated, so a 0 guess never cancels the lock — each one is a coin flip. Half of that remaining half lands on the correct value purely by chance, which is half of 50%, or another 25%. 50% + 25% = **75%** correct on average — although revealed, you can't tell which bits were stable or luckily landed on the correct value from a single check, so you never know which 75% to trust.",
+    },
     circuit: {
-      qubits: 7,
+      qubits: 6,
       ops: [
-        g("x", [1]), g("x", [2]), g("h", [2]), g("h", [3]), g("x", [4]), g("h", [5]), // Alice
-        g("h", [1]), g("h", [2]), g("h", [5]), // Bob
+        g("x", [0]), g("x", [2]), g("x", [4]), // set: bill values 1,0,1,0,1,0 on q0..q5
+        g("barrier", [0, 1, 2, 3, 4, 5]),
+        g("ry", [0], [], [PI / 2]), g("ry", [1], [], [PI / 2]), g("ry", [4], [], [PI / 2]), g("ry", [5], [], [PI / 2]), // lock: key bit 1 on q0, q1, q4, q5 (q2, q3 have key bit 0)
+        g("barrier", [0, 1, 2, 3, 4, 5]),
+        g("ry", [0], [], [-PI / 2]), g("ry", [1], [], [-PI / 2]), // unlock: the bank's correct guess of 1 on q0, q1 (the thief guesses 0 everywhere else)
       ],
     },
-    observe: "Read each bitstring right to left (q0 first). q0, q2, q4 and q5 never change: they hold the key 0, 1, 1, 0. Only q1 and q3 flip, because those rounds used different bases and get thrown away. q6, Eve's notebook, stays 0.",
+    observe: "Read each bitstring right to left. q0 and q1, the bank's own check, always read 1 then 0 — exactly the bill values, recovered every time. q2 and q3, the thief's lucky guesses, are just as steady. q4 and q5 bounce between 0 and 1 from shot to shot: their real key bit was 1, and the thief's guess of 0 never cancels it.",
     tryIt: [
-      "Let Eve listen to round q2: add a CX with q2 as control and q6 as target, after Alice's H and before Bob's H. How often is q2 wrong now?",
-      "Move Eve to round q4 instead, a Z-basis round. Does the key change? Why do Alice and Bob need to check many bits, not just one?",
+      "Give the thief the correct key on q4 and q5 too (add a matching Ry(−π/2) on each). Do they turn deterministic?",
+      "Add an X on q3 to flip that bill bit to 1. Does the thief's all-zero guess still reveal it?",
     ],
-    check: { q: "Why can't Eve just copy each qubit and measure her copy later?", options: ["Unknown quantum states can't be copied (no-cloning)", "Qubits travel faster than light", "Alice encrypts each qubit first", "Bob always measures before Eve can"], answer: 0, why: "The no-cloning theorem rules out a perfect copy of an unknown state. Eve has to measure the original, and measuring in the wrong basis disturbs it, which Alice and Bob can detect." },
+    check: { q: "Why does a thief who always guesses a key bit of 0 sometimes recover the true bill value?", options: ["Whenever the real key bit is also 0, the qubit was never rotated, so the guess matches by luck", "Zero is always the most likely measurement outcome", "Ry(π/2) always returns |0⟩", "The bank never uses a key bit of 0"], answer: 0, why: "A key bit of 0 means no lock was ever applied. Guessing 0 only 'works' because there's nothing to unlock — not because the thief learned anything about the key in advance." },
     predict: {
-      q: "Rounds q1 and q3 used different bases for Alice and Bob. What will Bob read on those qubits?",
-      options: ["Always Alice's bit", "Always the opposite of Alice's bit", "A random 0 or 1, 50/50", "Always 0"],
+      q: "Below, lock the qubit with key bit 1, then always guess key bit 0 when unlocking. What will repeated attempts show?",
+      options: ["Always 0", "The same bit every time, revealing the bill's value", "A 50/50 coin flip that never settles", "Always 1"],
       answer: 2,
       feedback: [
-        "Only matching bases guarantee that. A Z-basis state measured in the X basis, or the reverse, gives a coin flip.",
-        "There's no systematic flip. With mismatched bases the result is completely random, so it carries no information about Alice's bit.",
-        "Right. A Z-basis state measured in the X basis, or the reverse, is a perfect coin flip. That's why these rounds are thrown away during sifting.",
-        "Nothing forces 0. q1 starts as |1⟩ and q3 as |+⟩, and measured in the other basis each gives 0 or 1 with equal odds.",
+        "There's nothing forcing 0. The unresolved rotation leaves a genuine 50/50 superposition, not a fixed outcome.",
+        "That's what happens when your guess happens to match the real key. Here the key is 1 and the guess is 0, so the lock is never undone.",
+        "Right. The lock rotation is never undone, so the qubit sits at exactly the point where measurement is a coin flip, try after try.",
+        "There's nothing forcing 1 either — an un-cancelled Ry(π/2) gives equal odds of 0 and 1.",
       ],
     },
   },

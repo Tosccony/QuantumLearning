@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { codeCircuit, DEFAULT_INJECTION, expected, explainProof, INJECTIONS, readProof, START } from "@/lib/breakTheCode";
 import { MODULES, moduleById, R3_CORRECT, R3_ENCODE, R3_ERROR, TRACKS } from "@/lib/curriculum";
+import { angleCircuit, banknoteCircuit, correctProb, exactCorrectDist, lockCircuit, p1 } from "@/lib/quantumMoney";
 import { firstStartable, roadmapTopics, sanitizePersonal, topicStatus } from "@/lib/roadmaps";
 import type { State } from "@/lib/progress";
 import { planetStatus, trackProgress } from "@/lib/skills";
@@ -89,11 +90,59 @@ assert.match(explainProof(DEFAULT_INJECTION, fake, "advanced"), /Z₀Z₁[\s\S]*
 assert.match(explainProof(INJECTIONS[4], fake, "beginner"), /syndrome reads 01/);
 assert.equal(readProof({ ...fake, bloch: [[START[0], 0, -START[2]]] } as RunResult).recovered, false);
 
+// The s7 lesson: a 6-qubit banknote with barriers between the phases, three demos, and the predict/check placed inline.
+const s7 = moduleById("s7")!;
+assert.equal(s7.track, "concepts");
+assert.equal(s7.circuit.qubits, 6);
+assert.equal(s7.circuit.ops.filter((o) => o.gate === "barrier").length, 2);
+assert.deepEqual(s7.sections.map((s) => s.demo), ["qm-angle", "qm-lock", "qm-multi", undefined]);
+assert.equal(s7.circuitPanel, false);
+assert.ok(s7.sections.some((s) => s.predictHere) && s7.sections.some((s) => s.checkHere) && s7.sidebarNote);
+
+// Quantum money demos: structure of each generated circuit.
+const PI = Math.PI;
+const opsOf = (c: ReturnType<typeof banknoteCircuit>, gate: string, params?: number[]) =>
+  c.ops.filter((o) => o.gate === gate && (!params || o.params?.[0] === params[0])).map((o) => o.targets[0]);
+const barrierAt = (c: ReturnType<typeof banknoteCircuit>) => c.ops.flatMap((o, i) => (o.gate === "barrier" ? [i] : []));
+const bill = [1, 0, 1, 1, 0, 0, 1, 0], key = [1, 0, 0, 1, 1, 0, 1, 0], guess = [0, 0, 1, 1, 0, 1, 0, 0];
+const bn = banknoteCircuit(bill, key, guess);
+assert.equal(bn.qubits, 8);
+assert.deepEqual(opsOf(bn, "x"), [0, 2, 3, 6]); // X exactly where a bill bit is 1
+assert.deepEqual(opsOf(bn, "ry", [PI / 2]), [0, 3, 4, 6]); // Ry(π/2) where a key bit is 1
+assert.deepEqual(opsOf(bn, "ry", [-PI / 2]), [2, 3, 5]); // Ry(−π/2) where a guessed bit is 1
+assert.equal(bn.ops.filter((o) => o.gate === "ry").length, 7);
+const bars = barrierAt(bn);
+assert.equal(bars.length, 2); // set | lock | unlock
+assert.ok(bn.ops.slice(0, bars[0]).every((o) => o.gate === "x"));
+assert.ok(bn.ops.slice(bars[0] + 1, bars[1]).every((o) => o.gate === "ry" && o.params![0] === PI / 2));
+assert.ok(bn.ops.slice(bars[1] + 1).every((o) => o.gate === "ry" && o.params![0] === -PI / 2));
+assert.deepEqual(bn.ops[bars[0]].targets, [0, 1, 2, 3, 4, 5, 6, 7]); // a barrier spans every qubit
+const lk = lockCircuit(1, 1, 0);
+assert.equal(lk.qubits, 1);
+assert.deepEqual(lk.ops.map((o) => o.gate), ["x", "barrier", "ry", "barrier"]);
+assert.deepEqual(lockCircuit(0, 0, 1).ops.map((o) => o.gate), ["barrier", "barrier", "ry"]);
+assert.deepEqual(angleCircuit(90).ops.map((o) => [o.gate, o.params]), [["ry", [PI / 2]]]);
+assert.ok(Math.abs(p1(0)) < 1e-12 && Math.abs(p1(90) - 0.5) < 1e-12 && Math.abs(p1(180) - 1) < 1e-12 && Math.abs(p1(270) - 0.5) < 1e-12);
+assert.ok(Math.abs(p1(60) - 0.25) < 1e-12);
+// A matching key bit is always right; a mismatch is a coin flip.
+assert.equal(correctProb(key, guess, 2), 0.5);
+assert.equal(correctProb(key, guess, 3), 1);
+const dist = exactCorrectDist(key, guess);
+assert.equal(dist.length, 9);
+assert.ok(Math.abs(dist.reduce((a, b) => a + b, 0) - 1) < 1e-12);
+assert.deepEqual(exactCorrectDist([1, 0], [1, 0]), [0, 0, 1]); // right key: always all correct
+assert.deepEqual(exactCorrectDist([1], [0]), [0.5, 0.5]);
+// Circuits for backend/check_lessons.py: the right key, and the same bill with qubit 4's guess flipped.
+const rightKey = banknoteCircuit(bill, key, key);
+const wrongKey = banknoteCircuit(bill, key, key.map((b, i) => (i === 4 ? 1 - b : b)));
+
 // Every lesson circuit and Break the Code case, for backend/check_lessons.py to run through the real engine.
 mkdirSync("dist", { recursive: true });
 writeFileSync("dist/lessons.json", JSON.stringify(Object.fromEntries([
   ...MODULES.map((m) => [m.id, m.circuit]),
   ...INJECTIONS.map((i) => [`btc-${i.id}`, codeCircuit(i)]),
+  ["qm-right", rightKey],
+  ["qm-wrong", wrongKey],
 ])));
 
 // Concepts IDs retain their original prefixes, and prerequisites cross tracks.

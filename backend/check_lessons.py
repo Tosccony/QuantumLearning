@@ -24,10 +24,37 @@ def main(path):
     lessons = json.loads(Path(path).read_text())
     counts = {lid: engine.run(AerSimulator(), {**c, "shots": 4000, "seed": 7})["counts"] for lid, c in lessons.items()}
 
-    # BB84: kept rounds q0, q2, q4, q5 carry the key 0, 1, 1, 0; mismatched q1, q3 are coin flips; Eve's q6 stays 0.
+    # Quantum money: q0, q1 (bank's own check) and q2, q3 (thief's lucky all-0 guess) come back deterministic;
+    # q4, q5 (thief's all-0 guess against a real key of 1) are coin flips.
     c = counts["s7"]
-    assert [ones(c, q) for q in (0, 2, 4, 5, 6)] == [0, 1, 1, 0, 0], c
-    assert all(0.4 < ones(c, q) < 0.6 for q in (1, 3)), c
+    assert [ones(c, q) for q in (0, 1, 2, 3)] == [1, 0, 1, 0], c
+    assert all(0.4 < ones(c, q) < 0.6 for q in (4, 5)), c
+
+    # A generated banknote (quantumMoney.ts, via check.ts): bill = X before the first barrier, lock = Ry(+pi/2), guess = Ry(-pi/2).
+    # With the right key every qubit reads its bill bit; with one wrong key bit that qubit is 50/50.
+    def phases(circuit):
+        bill, lock, guess, phase = set(), set(), set(), 0
+        for op in circuit["ops"]:
+            if op["gate"] == "barrier":
+                phase += 1
+            else:
+                (bill, lock, guess)[phase].add(op["targets"][0])
+        return bill, lock, guess
+
+    bill, lock, guess = phases(lessons["qm-right"])
+    assert lock == guess and len(bill) > 0, (bill, lock, guess)
+    c = counts["qm-right"]
+    n = lessons["qm-right"]["qubits"]
+    assert all(ones(c, q) == (1 if q in bill else 0) for q in range(n)), c
+    bill, lock, guess = phases(lessons["qm-wrong"])
+    wrong = sorted(lock ^ guess)
+    assert len(wrong) == 1, (lock, guess)
+    c = counts["qm-wrong"]
+    for q in range(n):
+        if q in wrong:
+            assert 0.45 < ones(c, q) < 0.55, (q, c)
+        else:
+            assert ones(c, q) == (1 if q in bill else 0), (q, c)
 
     # Bell test: E ≈ +0.71, +0.71, +0.71, -0.71, so S ≈ 2.83 (classical limit 2).
     c = counts["s8"]
