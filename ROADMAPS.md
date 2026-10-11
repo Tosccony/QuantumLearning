@@ -30,8 +30,8 @@ This release does not claim full roadmap.sh parity.
    recommendations. The current tutor is available inside the linked lab.
 4. Add authentication and a persistent learner database for device sync,
    server-verifiable certificates and user profiles.
-5. Build a custom roadmap editor, versioning and sharing,
-   including ownership, moderation and sharing permissions.
+5. Build a custom roadmap editor with versioning, ownership,
+   moderation and sharing permissions.
 6. Add teacher/team memberships, assignments, progress reports and skill gaps.
 
 No new credentials or services are needed for this release. Later account and
