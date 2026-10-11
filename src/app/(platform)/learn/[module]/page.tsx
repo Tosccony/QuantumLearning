@@ -33,6 +33,7 @@ export default function LessonPage() {
   const [picked, setPicked] = useState<number | null>(null);
   const [guess, setGuess] = useState<number | null>(null);
   const [asked, setAsked] = useState(false);
+  const [codeRan, setCodeRan] = useState(false); // Break the Code was run on this page
   const [earned, setEarned] = useState(0);
   const ops = useMemo(() => (m ? layout(m.circuit) : []), [m]);
 
@@ -67,8 +68,9 @@ export default function LessonPage() {
     completeModule(m!.id, k === m!.check.answer);
   }
 
-  const flow: FlowStep = picked !== null ? "share" : asked ? "understand" : result ? "understand" : "run";
-  const flowDone: FlowStep[] = ["learn", "build", ...(result ? (["run"] as FlowStep[]) : []), ...(asked || picked !== null ? (["understand"] as FlowStep[]) : [])];
+  const ran = !!result || codeRan;
+  const flow: FlowStep = picked !== null ? "share" : ran || asked ? "understand" : "run";
+  const flowDone: FlowStep[] = ["learn", "build", ...(ran ? (["run"] as FlowStep[]) : []), ...(asked || picked !== null ? (["understand"] as FlowStep[]) : [])];
   const correct = picked !== null && picked === m.check.answer;
 
   return (
@@ -167,7 +169,7 @@ export default function LessonPage() {
           <Perf />
         </section>
 
-        {m.id === "r3" && <BreakTheCode noise={DEMO_NOISE} />}
+        {m.extra === "breakTheCode" && <BreakTheCode noise={DEMO_NOISE} onRun={() => { recordRun(); setCodeRan(true); }} />}
 
         <Window as="section" className="flex flex-col gap-4 p-5 sm:p-6" aria-label="Check your understanding">
           <Perf className="-mx-5 -mt-5 sm:-mx-6 sm:-mt-6" />

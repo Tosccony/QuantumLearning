@@ -9,7 +9,7 @@ import ResultsPanel from "@/components/lab/ResultsPanel";
 import Tutor from "@/components/lab/Tutor";
 import Icon from "@/components/ui/Icon";
 import { EdgeCode, Flag, Heading, Notice, Perf, Stripe, Window } from "@/components/ui/primitives";
-import { codeCircuit, INJECTIONS } from "@/lib/breakTheCode";
+import { codeCircuit, DEFAULT_INJECTION, explainProof, type Injection } from "@/lib/breakTheCode";
 import { MODULES, TRACKS, modulesOf, type Module } from "@/lib/curriculum";
 import { runCircuit, type Circuit, type RunResult } from "@/lib/quantum";
 import Lab from "./Lab";
@@ -96,11 +96,11 @@ const PATH = ["Pick a simulator in Select QPU", "Run the code with X on q1: synd
 
 /** The first screen judges see: the hardest topic, live, in one run. */
 function JudgeStart({ isIonQ, onOpenLab, onLesson }: { isIonQ: boolean; onOpenLab: (c: Circuit) => void; onLesson: () => void }) {
-  const [ctx, setCtx] = useState<{ c: Circuit; r: RunResult | null }>(() => ({ c: codeCircuit(INJECTIONS[2]), r: null }));
+  const [ctx, setCtx] = useState<{ c: Circuit; r: RunResult | null; inj: Injection }>(() => ({ c: codeCircuit(DEFAULT_INJECTION), r: null, inj: DEFAULT_INJECTION }));
   return (
     <article className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-5">
-        <BreakTheCode isIonQ={isIonQ} onOpenLab={onOpenLab} onChange={(c, r) => setCtx({ c, r })} />
+        <BreakTheCode isIonQ={isIonQ} onOpenLab={onOpenLab} onChange={(c, r, inj) => setCtx({ c, r, inj })} />
         <p className="text-sm text-fog">
           The full lesson, with the maths, a prediction and a check question:{" "}
           <button type="button" className="text-ice underline underline-offset-4 hover:text-paper" onClick={onLesson}>Error correction: the 3-qubit bit-flip code</button>.
@@ -113,7 +113,7 @@ function JudgeStart({ isIonQ, onOpenLab, onLesson }: { isIonQ: boolean; onOpenLa
             {PATH.map((s, i) => <li key={s} className="flex gap-2"><span className="code text-xs text-[#46587a]">{i + 1}</span>{s}</li>)}
           </ol>
         </Window>
-        <Tutor compact offline circuit={ctx.c} result={ctx.r} extra="Break the Code: the 3-qubit bit-flip code with X errors injected after encoding. Ancillas q3, q4 hold the syndrome; q0 is the decoded data qubit." />
+        <Tutor compact offline circuit={ctx.c} result={ctx.r} offlineText={(level) => (ctx.r ? explainProof(ctx.inj, ctx.r, level) : "Pick an error to inject, predict, and run. I'll explain the syndrome and the correction from the real Qiskit results.")} extra="Break the Code: the 3-qubit bit-flip code with X errors injected after encoding. Ancillas q3, q4 hold the syndrome; q0 is the decoded data qubit." />
       </aside>
     </article>
   );
@@ -211,7 +211,7 @@ function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLa
           <Perf />
         </section>
 
-        {m.id === "r3" && <BreakTheCode isIonQ={isIonQ} onOpenLab={onOpenLab} />}
+        {m.extra === "breakTheCode" && <BreakTheCode isIonQ={isIonQ} onOpenLab={onOpenLab} headingLevel={3} />}
 
         <Window as="section" className="flex flex-col gap-4 p-5 sm:p-6" aria-label="Check your understanding">
           <Perf className="-mx-5 -mt-5 sm:-mx-6 sm:-mt-6" />

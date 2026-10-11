@@ -18,7 +18,7 @@ const QUICK = [
 const LEVELS: Level[] = ["beginner", "intermediate", "advanced"];
 
 /** The tutor hangs beside the bench: a navy frame whose replies are punched white windows. */
-export default function Tutor({ circuit, result, extra = "", compact, offline }: { circuit: Circuit; result: RunResult | null; extra?: string; compact?: boolean; offline?: boolean }) {
+export default function Tutor({ circuit, result, extra = "", compact, offline, offlineText }: { circuit: Circuit; result: RunResult | null; extra?: string; compact?: boolean; offline?: boolean; offlineText?: (level: Level) => string }) {
   const [level, setLevel] = useState<Level>("beginner");
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -29,8 +29,13 @@ export default function Tutor({ circuit, result, extra = "", compact, offline }:
   // Scroll the log itself: scrollIntoView would also scroll the page and, on mount, move the keyboard's Tab starting point here.
   useEffect(() => {
     const el = log.current;
-    if (el && msgs.length) el.scrollTop = el.scrollHeight;
+    if (!el || !msgs.length) return;
+    // A height-bounded log scrolls itself; an unbounded one (non-compact, below lg) needs the page to reveal the new message.
+    if (el.scrollHeight > el.clientHeight) el.scrollTop = el.scrollHeight;
+    else el.lastElementChild?.scrollIntoView({ block: "nearest" });
   }, [msgs]);
+
+  const fallback = () => offlineText?.(level) ?? offlineExplain(circuit, result, level);
 
   async function ask(text: string) {
     if (!text.trim() || busy) return;
@@ -38,7 +43,7 @@ export default function Tutor({ circuit, result, extra = "", compact, offline }:
     setMsgs(history);
     setInput("");
     // Offline (e.g. on Qollab, where POST is blocked): answer from the run results without calling Claude.
-    if (offline) return setMsgs([...history, { role: "assistant", content: offlineExplain(circuit, result, level), offline: true }]);
+    if (offline) return setMsgs([...history, { role: "assistant", content: fallback(), offline: true }]);
     setBusy(true);
     try {
       const res = await fetch("/api/tutor", {
@@ -49,7 +54,7 @@ export default function Tutor({ circuit, result, extra = "", compact, offline }:
       if (!res.ok || !res.body) {
         const info = await res.json().catch(() => ({}));
         setOfflineReason(info.reason ?? "tutor unavailable");
-        setMsgs([...history, { role: "assistant", content: offlineExplain(circuit, result, level), offline: true }]);
+        setMsgs([...history, { role: "assistant", content: fallback(), offline: true }]);
         return;
       }
       setOfflineReason(null);
@@ -64,7 +69,7 @@ export default function Tutor({ circuit, result, extra = "", compact, offline }:
         setMsgs([...history, { role: "assistant", content: acc }]);
       }
     } catch {
-      setMsgs([...history, { role: "assistant", content: offlineExplain(circuit, result, level), offline: true }]);
+      setMsgs([...history, { role: "assistant", content: fallback(), offline: true }]);
     } finally {
       setBusy(false);
     }

@@ -1,4 +1,4 @@
-import { g, groverCircuit, type Circuit } from "./quantum";
+import { g, groverCircuit, type Circuit, type Op } from "./quantum";
 
 export type TrackId = "explorer" | "student" | "developer" | "researcher" | "concepts";
 
@@ -43,9 +43,22 @@ export type Module = {
   check: Check;
   predict?: Predict;
   readout?: Readout;
+  /** An extra interactive section the lesson page renders after the circuit. */
+  extra?: "breakTheCode";
 };
 
 const PI = Math.PI;
+
+// r3's circuit in named parts, so Break the Code can swap the error without slicing by position.
+export const R3_ENCODE: Op[] = [g("ry", [0], [], [0.8]), g("cx", [1], [0]), g("cx", [2], [0])];
+export const R3_ERROR: Op[] = [g("x", [1])]; // the injected error
+export const R3_CORRECT: Op[] = [
+  g("cx", [3], [0]), g("cx", [3], [1]), g("cx", [4], [1]), g("cx", [4], [2]),
+  g("ccx", [1], [3, 4]),
+  g("x", [4]), g("ccx", [0], [3, 4]), g("x", [4]),
+  g("x", [3]), g("ccx", [2], [3, 4]), g("x", [3]),
+  g("cx", [2], [0]), g("cx", [1], [0]),
+];
 
 export const MODULES: Module[] = [
   // ------------------------------------------------------------------ Student
@@ -354,7 +367,7 @@ export const MODULES: Module[] = [
     check: { q: "Zero-noise extrapolation primarily trades…", options: ["More circuit executions for lower bias", "More qubits for lower noise", "Deeper circuits for fewer shots", "Nothing; it is free"], answer: 0, why: "ZNE runs extra noise-amplified circuits (and more shots) to reduce bias in the estimated expectation value." },
   },
   {
-    id: "r3", track: "researcher", title: "Error correction: the 3-qubit bit-flip code", minutes: 15, skill: "Error correction", requires: ["r2"],
+    id: "r3", extra: "breakTheCode", track: "researcher", title: "Error correction: the 3-qubit bit-flip code", minutes: 15, skill: "Error correction", requires: ["r2"],
     summary: "Encode one logical qubit in three, measure parities with ancillas without learning the data, and correct any single X error.",
     sections: [
       { heading: "Encoding and syndromes", body: "α|0⟩+β|1⟩ ↦ α|000⟩+β|111⟩. The stabilisers Z₀Z₁ and Z₁Z₂ are measured into two ancillas. The syndrome (s₀, s₁) identifies which qubit flipped, and it reveals nothing about α or β." },
@@ -363,15 +376,7 @@ export const MODULES: Module[] = [
     ],
     circuit: {
       qubits: 5,
-      ops: [
-        g("ry", [0], [], [0.8]), g("cx", [1], [0]), g("cx", [2], [0]),
-        g("x", [1]), // the error
-        g("cx", [3], [0]), g("cx", [3], [1]), g("cx", [4], [1]), g("cx", [4], [2]),
-        g("ccx", [1], [3, 4]),
-        g("x", [4]), g("ccx", [0], [3, 4]), g("x", [4]),
-        g("x", [3]), g("ccx", [2], [3, 4]), g("x", [3]),
-        g("cx", [2], [0]), g("cx", [1], [0]),
-      ],
+      ops: [...R3_ENCODE, ...R3_ERROR, ...R3_CORRECT],
     },
     observe: "q0's Bloch vector returns to ≈ (0.717, 0, 0.697) even though an X error hit the codeword. Ancillas q3, q4 always read 11, the syndrome for 'q1 flipped'.",
     tryIt: ["Move the injected X to q0 or q2. Which syndrome appears?", "Inject two X errors. Does the code still recover?"],

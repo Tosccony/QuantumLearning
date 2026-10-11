@@ -24,7 +24,11 @@ export function labContext(c: Circuit, r: RunResult | null, extra = ""): string 
   return parts.join("\n\n");
 }
 
-const pct = (x: number) => `${(x * 100).toFixed(x < 0.1 ? 1 : 0)}%`;
+/** Qiskit bitstrings are little-endian: qubit q is the character q from the right. */
+export const bitOf = (k: string, q: number) => k[k.length - 1 - q];
+
+export const pct = (x: number, digits = 1) => `${(x * 100).toFixed(digits)}%`;
+const pctAuto = (x: number) => pct(x, x < 0.1 ? 1 : 0);
 
 /** Total-variation distance between sampled counts and the exact distribution: 0 = identical, 1 = disjoint. */
 export function tvd(r: Pick<RunResult, "counts" | "probabilities">): number {
@@ -54,7 +58,7 @@ export function onesRate(counts: Record<string, number>, q: number): number {
   let shots = 0;
   for (const [k, v] of Object.entries(counts)) {
     shots += v;
-    if (k[k.length - 1 - q] === "1") ones += v;
+    if (bitOf(k, q) === "1") ones += v;
   }
   return shots ? ones / shots : 0;
 }
@@ -65,7 +69,7 @@ export function pairCorrelation(counts: Record<string, number>, a: number, b: nu
   let score = 0;
   for (const [k, v] of Object.entries(counts)) {
     shots += v;
-    score += k[k.length - 1 - a] === k[k.length - 1 - b] ? v : -v;
+    score += bitOf(k, a) === bitOf(k, b) ? v : -v;
   }
   return shots ? score / shots : 0;
 }
@@ -80,7 +84,7 @@ export function bellScore(counts: Record<string, number>): { E: number[]; S: num
 export function registerCounts(counts: Record<string, number>, qubits: number[]): Record<number, number> {
   const out: Record<number, number> = {};
   for (const [k, v] of Object.entries(counts)) {
-    const y = qubits.reduce((acc, q, i) => acc + (k[k.length - 1 - q] === "1" ? 1 << i : 0), 0);
+    const y = qubits.reduce((acc, q, i) => acc + (bitOf(k, q) === "1" ? 1 << i : 0), 0);
     out[y] = (out[y] ?? 0) + v;
   }
   return out;
@@ -140,8 +144,8 @@ export function offlineExplain(c: Circuit, r: RunResult | null, level: Level): s
   if (level === "beginner") {
     out.push(`Your circuit uses ${used.map((g) => `\`${GATES[g]?.label ?? g}\``).join(", ")} on ${c.qubits} qubit${c.qubits > 1 ? "s" : ""}.`);
     if (idealCertain && allSame) out.push(`Every single shot gave **${probs[0][0]}**. The circuit sends the qubits to one definite answer${hasH ? ". The superposition in the middle was undone by interference, a bit like waves cancelling out" : ""}.`);
-    else if (idealCertain) out.push(`A perfect machine would give **${probs[0][0]}** on every shot${hasH ? ", because interference cancels every other answer" : ""}. This run gave it on ${pct((r.counts[probs[0][0]] ?? 0) / shots)} of shots, and the rest comes from noise in the machine.`);
-    else out.push(`Results are spread over ${probs.length} answers. The most likely is **${probs[0][0]}** (${pct(probs[0][1])}). Each run is like a fresh coin toss with these odds.${noisy ? " Some of the spread comes from noise in the machine, not just quantum randomness." : ""}`);
+    else if (idealCertain) out.push(`A perfect machine would give **${probs[0][0]}** on every shot${hasH ? ", because interference cancels every other answer" : ""}. This run gave it on ${pctAuto((r.counts[probs[0][0]] ?? 0) / shots)} of shots, and the rest comes from noise in the machine.`);
+    else out.push(`Results are spread over ${probs.length} answers. The most likely is **${probs[0][0]}** (${pctAuto(probs[0][1])}). Each run is like a fresh coin toss with these odds.${noisy ? " Some of the spread comes from noise in the machine, not just quantum randomness." : ""}`);
     if (r.entangled) out.push("The qubits are **entangled**: their answers are linked, so looking at one tells you about the other. That's why the Bloch arrows shrank toward the centre.");
     out.push(idealCertain ? "**Try:** remove one gate and predict what changes before you run it." : "**Try:** run it again. The counts wobble but stay close to the yellow lines, which are the exact odds.");
   } else if (level === "intermediate") {
