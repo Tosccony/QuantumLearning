@@ -12,7 +12,7 @@ import { certificate, moduleStatus, planetStatus, trackProgress, type SkillStatu
 type Node = { id: string; track: TrackId; row: number; label: string; href: string; status: SkillStatus; requires: string[] };
 
 // Cross-track links that show how the tracks build on each other.
-const BRIDGES: [string, string][] = [["e7", "s1"], ["s4", "r1"], ["s6", "d4"], ["d5", "r4"], ["d6", "r5"], ["s2", "d1"], ["s3", "s7"], ["s4", "s8"], ["r4", "r7"]];
+const BRIDGES: [string, string][] = [["e7", "s1"], ["s4", "r1"], ["s6", "d4"], ["d5", "r4"], ["d6", "r5"], ["s2", "d1"], ["s1", "s7"], ["s4", "s8"], ["r4", "r7"]];
 
 function nodes(s: State): Node[] {
   const out: Node[] = PLANETS.map((p, i) => ({

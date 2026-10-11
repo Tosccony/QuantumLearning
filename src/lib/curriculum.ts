@@ -179,7 +179,7 @@ export const MODULES: Module[] = [
   },
 
   {
-    id: "s7", track: "concepts", title: "Quantum money: Wiesner's uncopiable cash", minutes: 12, skill: "Quantum cryptography", requires: ["s3"],
+    id: "s7", track: "concepts", title: "Quantum money: Wiesner's uncopiable cash", minutes: 12, skill: "Quantum cryptography", requires: ["s1"],
     summary: "A banknote made of qubits: a secret rotation locks each one, so forging it without the key leaves behind qubits that measure randomly instead of matching the bill.",
     sections: [
       { heading: "Qubits as rotations", demo: "qm-angle", body: "A qubit's state can be pictured as an arrow on a sphere, the Bloch sphere. Measuring it always gives a plain 0 or 1, but where the arrow points sets the odds. In this lesson we only rotate the arrow around one axis (an Ry rotation), so it moves around a circle through the north and south poles. Pointing straight up (north, 0°), the qubit measures 0 every time; pointing straight down (south, 180°), it measures 1 every time. In between, the result is random: rotated by an angle θ, the qubit gives 1 with probability sin²(θ/2). At 90° or 270° the arrow points sideways and each outcome has a 50% chance. That in-between state is a superposition: not \"both 0 and 1 at once\", but a definite state whose measurement outcome is genuinely random." },

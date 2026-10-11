@@ -10,7 +10,7 @@
 |---|---|
 | **Run it on Qollab** | TODO(team): Qollab project link |
 | **Demo video (2–3 min)** | TODO(team): public video link |
-| **Web app** | TODO(team): deployed link, or delete this row and point to [Run it](#run-it) |
+| **Web app** | Runs locally; see [Run it](#run-it) |
 | **Source** | https://github.com/Tosccony/QuantumLearning (MIT) |
 
 ## Judge it in three minutes
@@ -136,7 +136,8 @@ Nothing. All code and content were written during the build window. Nothing was 
 - On Oct 10, Claude Code (Claude Fable 5.1, using the Impeccable design skill) redesigned the whole user interface: the "Select Rail" visual system in `src/app/globals.css`, the shared components in `src/components/ui/`, and every route and screen, including the roadmaps, the Concepts track and the Predict → Run → Explain lesson steps. It also rebuilt the circuit editor's keyboard support, the dialogs' focus handling, and the responsive layouts. All lesson text, games, circuits and backend code are unchanged by that pass.
 - On Oct 10, OpenAI Codex continued that redesign using Impeccable: completed the Qiskit-backed circuit scrub, corrected histogram scaling, refined mobile controls and avatar drawings, hardened modal focus and pointer handling, and ran frontend and backend verification. The backend API and lesson content were preserved.
 - On Oct 10, Claude Code reviewed the project against the hackathon rules, added this disclosure, the MIT license and the attribution, and fixed the noise model so noisy runs no longer optimise away gates.
-- Between Oct 10 and Oct 11, at the team's direction, Claude Code built the Qollab version (the shared Qiskit engine, the lesson player and free-build Lab, Predict → Run → Explain, Ideal vs this machine, and the BB84, Bell test and Shor's algorithm lessons) and fixed review findings in the roadmaps feature.
+- Between Oct 10 and Oct 11, at the team's direction, Claude Code built the Qollab version (the shared Qiskit engine, the lesson player and free-build Lab, Predict → Run → Explain, Ideal vs this machine, and the BB84 (since replaced by the team's quantum money lesson), Bell test and Shor's algorithm lessons) and fixed review findings in the roadmaps feature.
+- On Oct 11, Claude Code integrated the team's branches: it fixed review findings in the Select Rail redesign and Judge Start, rebuilt the Qollab player's navigation and read-only roadmaps in that design, and ported the team-written quantum money lesson into it (correcting the wording of its first sections for accuracy).
 
 - On Oct 11, at the team's direction, Claude Code built Judge Start and Break the Code (the injected-error challenge and its result-proof panel), replaced the bare-vs-protected comparison with it, fixed the tutor stealing the first Tab stop, wrote the three-minute judging path above and recorded the accessibility checks in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 
