@@ -5,6 +5,7 @@ import { notFound, useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import FlowSteps, { type FlowStep } from "@/components/FlowSteps";
 import Markdown from "@/components/Markdown";
+import BreakTheCode from "@/components/lab/BreakTheCode";
 import CircuitEditor, { layout } from "@/components/lab/CircuitEditor";
 import IdealVsMachine from "@/components/lab/IdealVsMachine";
 import LessonReadout from "@/components/lab/LessonReadout";
@@ -13,6 +14,7 @@ import ResultsPanel from "@/components/lab/ResultsPanel";
 import Tutor from "@/components/lab/Tutor";
 import Icon from "@/components/ui/Icon";
 import { EdgeCode, Heading, Notice, Perf, Stripe, Window } from "@/components/ui/primitives";
+import { DEMO_NOISE } from "@/lib/breakTheCode";
 import { moduleById, modulesOf, TRACKS } from "@/lib/curriculum";
 import { useProgress } from "@/lib/progress";
 import { runCircuit, type RunResult } from "@/lib/quantum";
@@ -164,6 +166,8 @@ export default function LessonPage() {
           </div>
           <Perf />
         </section>
+
+        {m.id === "r3" && <BreakTheCode noise={DEMO_NOISE} />}
 
         <Window as="section" className="flex flex-col gap-4 p-5 sm:p-6" aria-label="Check your understanding">
           <Perf className="-mx-5 -mt-5 sm:-mx-6 sm:-mt-6" />

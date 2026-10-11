@@ -7,15 +7,15 @@ import CircuitEditor, { CELL, LEFT, layout } from "@/components/lab/CircuitEdito
 import Histogram, { ScaleBar } from "@/components/lab/Histogram";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import { EdgeCode, Flag, Notice, Perf, Stripe, TRACK_VAR } from "@/components/ui/primitives";
+import { DEMO_NOISE } from "@/lib/breakTheCode";
 import { listProjects, type Project } from "@/lib/community";
 import { moduleById, modulesOf, TRACKS, type TrackId } from "@/lib/curriculum";
 import { useProgress } from "@/lib/progress";
-import { runCircuit, type Noise, type RunResult } from "@/lib/quantum";
+import { runCircuit, type RunResult } from "@/lib/quantum";
 import { nextModule, trackProgress } from "@/lib/skills";
 import { useCircuitPrefix } from "@/lib/useCircuitPrefix";
 
 const DEMO = moduleById("r3")!;
-const DEMO_NOISE: Noise = { p1: 0.01, p2: 0.05, readout: 0.03 };
 const SHOTS = 1024;
 
 /** Column groups of the bit-flip code strip, in layout() columns. */

@@ -47,9 +47,9 @@ export function EdgeCode({ children, className = "" }: { children: ReactNode; cl
 export function Readout({ label, value, sub, className = "" }: { label: ReactNode; value: ReactNode; sub?: ReactNode; className?: string }) {
   return (
     <div className={`flex flex-col gap-0.5 ${className}`}>
-      <span className="label-sm opacity-80">{label}</span>
+      <span className="label-sm text-fog">{label}</span>
       <span className="display num text-2xl leading-none">{value}</span>
-      {sub && <span className="text-xs opacity-80">{sub}</span>}
+      {sub && <span className="text-xs text-fog">{sub}</span>}
     </div>
   );
 }
