@@ -106,7 +106,7 @@ export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean
           <Perf />
         </section>
       </div>
-      <aside className="lg:sticky lg:top-4 lg:self-start">
+      <aside className="lg:sticky lg:top-20 lg:self-start">
         <Tutor compact offline circuit={circuit} result={result} extra="Free-build Lab on Qollab." />
       </aside>
     </article>

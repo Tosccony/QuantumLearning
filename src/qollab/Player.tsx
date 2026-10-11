@@ -38,7 +38,8 @@ export default function Player({ backendName }: { backendName: string }) {
     // Skip the first mount: scrolling or focusing then could move the host page inside Qollab's iframe.
     if (first.current) { first.current = false; return; }
     window.scrollTo(0, 0);
-    main.current?.querySelector<HTMLElement>("h1")?.focus();
+    const h = main.current?.querySelector<HTMLElement>("h1");
+    if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); }
   }, [view]);
 
   const section: Section =
@@ -48,7 +49,7 @@ export default function Player({ backendName }: { backendName: string }) {
     : "learn";
   const go = (s: Section) => {
     if (s === "lab") { if (view.name !== "lab") openLab({ qubits: 2, ops: [] }); }
-    else setView(s === "start" ? { name: "start" } : s === "learn" ? { name: "learn" } : { name: "roadmaps" });
+    else if (view.name !== s) setView(s === "start" ? { name: "start" } : s === "learn" ? { name: "learn" } : { name: "roadmaps" }); // the active nav item is a no-op, so it does not re-scroll
   };
 
   let body;

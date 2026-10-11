@@ -182,7 +182,7 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
           <button type="button" className="keycap-primary w-fit" onClick={next.onClick}>Next: {next.title} <Icon name="next" size={14} /></button>
         )}
       </div>
-      <aside className="lg:sticky lg:top-4 lg:self-start">
+      <aside className="lg:sticky lg:top-20 lg:self-start">
         <Tutor compact offline circuit={circuit} result={result} extra={`Lesson: ${m.title}. What to look for: ${m.observe}`} />
         {m.sidebarNote && <SidebarNote note={m.sidebarNote} />}
       </aside>
