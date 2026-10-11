@@ -24,10 +24,11 @@ def main(path):
     lessons = json.loads(Path(path).read_text())
     counts = {lid: engine.run(AerSimulator(), {**c, "shots": 4000, "seed": 7})["counts"] for lid, c in lessons.items()}
 
-    # BB84: kept rounds q0, q2, q4, q5 carry the key 0, 1, 1, 0; mismatched q1, q3 are coin flips; Eve's q6 stays 0.
+    # Quantum money: q0, q1 (bank's own check) and q2, q3 (thief's lucky all-0 guess) come back deterministic;
+    # q4, q5 (thief's all-0 guess against a real key of 1) are coin flips.
     c = counts["s7"]
-    assert [ones(c, q) for q in (0, 2, 4, 5, 6)] == [0, 1, 1, 0, 0], c
-    assert all(0.4 < ones(c, q) < 0.6 for q in (1, 3)), c
+    assert [ones(c, q) for q in (0, 1, 2, 3)] == [1, 0, 1, 0], c
+    assert all(0.4 < ones(c, q) < 0.6 for q in (4, 5)), c
 
     # Bell test: E ≈ +0.71, +0.71, +0.71, -0.71, so S ≈ 2.83 (classical limit 2).
     c = counts["s8"]

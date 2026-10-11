@@ -29,9 +29,11 @@ export default function Markdown({ text }: { text: string }) {
 }
 
 function inline(s: string) {
-  return s.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((part, k) =>
-    part.startsWith("`") && part.endsWith("`") ? <code key={k}>{part.slice(1, -1)}</code>
-    : part.startsWith("**") && part.endsWith("**") ? <strong key={k}>{part.slice(2, -2)}</strong>
-    : <Fragment key={k}>{part}</Fragment>,
-  );
+  return s.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g).map((part, k) => {
+    const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
+    return part.startsWith("`") && part.endsWith("`") ? <code key={k}>{part.slice(1, -1)}</code>
+      : part.startsWith("**") && part.endsWith("**") ? <strong key={k}>{part.slice(2, -2)}</strong>
+      : link ? <a key={k} href={link[2]} target="_blank" rel="noreferrer" className="underline">{link[1]}</a>
+      : <Fragment key={k}>{part}</Fragment>;
+  });
 }

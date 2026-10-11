@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import FlowSteps, { type FlowStep } from "@/components/FlowSteps";
 import Markdown from "@/components/Markdown";
 import CircuitEditor, { layout } from "@/components/lab/CircuitEditor";
 import IdealVsMachine from "@/components/lab/IdealVsMachine";
 import LessonReadout from "@/components/lab/LessonReadout";
 import Predict from "@/components/lab/Predict";
+import QuantumMoneyDemo from "@/components/lab/QuantumMoneyDemo";
 import ResultsPanel from "@/components/lab/ResultsPanel";
 import Tutor from "@/components/lab/Tutor";
 import { moduleById, modulesOf, TRACKS } from "@/lib/curriculum";
@@ -62,6 +63,39 @@ export default function LessonPage() {
   const flow: FlowStep = picked !== null ? "share" : asked ? "understand" : result ? "understand" : "run";
   const flowDone: FlowStep[] = ["learn", "build", ...(result ? (["run"] as FlowStep[]) : []), ...(asked || picked !== null ? (["understand"] as FlowStep[]) : [])];
 
+  const circuitPanel = m.circuitPanel !== false;
+  const predictRevealed = circuitPanel ? !!result : guess !== null;
+  const predictBlock = m.predict && <Predict p={m.predict} picked={guess} onPick={setGuess} revealed={predictRevealed} />;
+  const predictInline = m.sections.some((s) => s.predictHere);
+  const checkInline = m.sections.some((s) => s.checkHere);
+
+  const checkBlock = (
+    <section className="panel flex flex-col gap-3 p-4" aria-label="Check your understanding">
+      <h2 className="text-lg font-semibold">✅ Check your understanding</h2>
+      <p>{m.check.q}</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {m.check.options.map((o, k) => {
+          const st = picked === null ? "hover:bg-white/10" : k === m.check.answer ? "ring-2 ring-good" : k === picked ? "ring-2 ring-bad" : "opacity-50";
+          return (
+            <button key={k} onClick={() => answer(k)} className={`rounded-xl bg-white/5 p-3 text-left text-sm ${st}`} disabled={picked !== null}>
+              {o}
+            </button>
+          );
+        })}
+      </div>
+      {picked !== null && (
+        <div className="flex flex-col gap-3">
+          <p className={picked === m.check.answer ? "text-good" : "text-on"}>{picked === m.check.answer ? "Correct! " : "Not quite. "}{m.check.why}</p>
+          <p className="text-sm text-muted">Module complete: +{earned} XP and the “{m.skill}” skill unlocked.</p>
+          <div className="flex flex-wrap gap-2">
+            <Link href={`/lab?module=${m.id}`} className="pbtn-ghost">🌍 Remix it in the Lab and share</Link>
+            {next ? <Link href={`/learn/${next.id}`} className="pbtn-primary">Next: {next.title} →</Link> : <Link href={`/certificate/${m.track}`} className="pbtn-primary">🏅 Claim your certificate</Link>}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+
   return (
     <article className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
       <div className="flex min-w-0 flex-col gap-6">
@@ -83,65 +117,55 @@ export default function LessonPage() {
         </header>
 
         {m.sections.map((s) => (
-          <section key={s.heading}>
-            <h2 className="mb-1 text-xl font-semibold">{s.heading}</h2>
-            <Markdown text={s.body} />
-          </section>
+          <Fragment key={s.heading}>
+            {s.predictHere && predictBlock}
+            {s.checkHere && checkBlock}
+            <section>
+              <h2 className="mb-1 text-xl font-semibold">{s.heading}</h2>
+              <Markdown text={s.body} />
+              {s.demo && <QuantumMoneyDemo kind={s.demo} />}
+            </section>
+          </Fragment>
         ))}
 
-        {m.predict && <Predict p={m.predict} picked={guess} onPick={setGuess} revealed={!!result} />}
+        {!predictInline && predictBlock}
 
-        <section className="panel flex flex-col gap-4 p-4" aria-label="Lesson circuit">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="mr-auto text-lg font-semibold">🧩 The circuit</h2>
-            <Link href={`/lab?module=${m.id}`} className="pbtn-ghost">Open in Lab to modify →</Link>
-            <button className="pbtn-primary" onClick={run} disabled={running || (!!m.predict && guess === null)}>{running ? "Running on Qiskit…" : m.predict && guess === null ? "Predict first ↑" : result ? "▶ Run again" : "▶ Run on Qiskit"}</button>
-          </div>
-          <p role="status" className="sr-only">{running ? "Running…" : result ? "Results ready." : ""}</p>
-          <CircuitEditor qubits={m.circuit.qubits} ops={ops} readOnly />
-          {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
-          {result && (
-            <>
-              <p className="rounded-xl bg-accent/15 p-3 text-sm"><b>What to look for:</b> {m.observe}</p>
-              <IdealVsMachine result={result} hint="Turn on noise in the Lab to see how a real device drifts." />
-              {m.readout && <LessonReadout readout={m.readout} result={result} />}
-              <ResultsPanel result={result} circuit={m.circuit} />
-            </>
-          )}
-          <div className="text-sm">
-            <p className="font-semibold">Try it yourself in the Lab</p>
-            <ul className="mt-1 list-disc pl-5 text-muted">{m.tryIt.map((t) => <li key={t}>{t}</li>)}</ul>
-          </div>
-        </section>
-
-        <section className="panel flex flex-col gap-3 p-4" aria-label="Check your understanding">
-          <h2 className="text-lg font-semibold">✅ Check your understanding</h2>
-          <p>{m.check.q}</p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {m.check.options.map((o, k) => {
-              const st = picked === null ? "hover:bg-white/10" : k === m.check.answer ? "ring-2 ring-good" : k === picked ? "ring-2 ring-bad" : "opacity-50";
-              return (
-                <button key={k} onClick={() => answer(k)} className={`rounded-xl bg-white/5 p-3 text-left text-sm ${st}`} disabled={picked !== null}>
-                  {o}
-                </button>
-              );
-            })}
-          </div>
-          {picked !== null && (
-            <div className="flex flex-col gap-3">
-              <p className={picked === m.check.answer ? "text-good" : "text-on"}>{picked === m.check.answer ? "Correct! " : "Not quite. "}{m.check.why}</p>
-              <p className="text-sm text-muted">Module complete: +{earned} XP and the “{m.skill}” skill unlocked.</p>
-              <div className="flex flex-wrap gap-2">
-                <Link href={`/lab?module=${m.id}`} className="pbtn-ghost">🌍 Remix it in the Lab and share</Link>
-                {next ? <Link href={`/learn/${next.id}`} className="pbtn-primary">Next: {next.title} →</Link> : <Link href={`/certificate/${m.track}`} className="pbtn-primary">🏅 Claim your certificate</Link>}
-              </div>
+        {circuitPanel && (
+          <section className="panel flex flex-col gap-4 p-4" aria-label="Lesson circuit">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="mr-auto text-lg font-semibold">🧩 The circuit</h2>
+              <Link href={`/lab?module=${m.id}`} className="pbtn-ghost">Open in Lab to modify →</Link>
+              <button className="pbtn-primary" onClick={run} disabled={running || (!!m.predict && guess === null)}>{running ? "Running on Qiskit…" : m.predict && guess === null ? "Predict first ↑" : result ? "▶ Run again" : "▶ Run on Qiskit"}</button>
             </div>
-          )}
-        </section>
+            <p role="status" className="sr-only">{running ? "Running…" : result ? "Results ready." : ""}</p>
+            <CircuitEditor qubits={m.circuit.qubits} ops={ops} readOnly />
+            {error && <p role="alert" className="rounded-xl bg-bad/15 p-3 text-sm text-bad">{error}</p>}
+            {result && (
+              <>
+                <p className="rounded-xl bg-accent/15 p-3 text-sm"><b>What to look for:</b> {m.observe}</p>
+                <IdealVsMachine result={result} hint="Turn on noise in the Lab to see how a real device drifts." />
+                {m.readout && <LessonReadout readout={m.readout} result={result} />}
+                <ResultsPanel result={result} circuit={m.circuit} />
+              </>
+            )}
+            <div className="text-sm">
+              <p className="font-semibold">Try it yourself in the Lab</p>
+              <ul className="mt-1 list-disc pl-5 text-muted">{m.tryIt.map((t) => <li key={t}>{t}</li>)}</ul>
+            </div>
+          </section>
+        )}
+
+        {!checkInline && checkBlock}
       </div>
 
-      <aside className="lg:sticky lg:top-20 lg:self-start" onClickCapture={() => setAsked(true)}>
+      <aside className="flex flex-col gap-4 lg:sticky lg:top-20 lg:self-start" onClickCapture={() => setAsked(true)}>
         <Tutor compact circuit={m.circuit} result={result} extra={`Lesson: ${m.title} (${track.name} track). Summary: ${m.summary}. What the learner should observe: ${m.observe}`} />
+        {m.sidebarNote && (
+          <section className="panel p-4" aria-label={m.sidebarNote.heading}>
+            <h2 className="mb-1 text-base font-semibold">{m.sidebarNote.heading}</h2>
+            <Markdown text={m.sidebarNote.body} />
+          </section>
+        )}
       </aside>
     </article>
   );

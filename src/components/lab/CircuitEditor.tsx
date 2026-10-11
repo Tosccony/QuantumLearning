@@ -14,18 +14,17 @@ const span = (o: Op) => {
   return [Math.min(...qs), Math.max(...qs)] as const;
 };
 
-/** Lay a plain op list out into columns (greedy, ops never visually overlap). */
+/** Lay a plain op list out into columns (greedy, ops never visually overlap). A barrier spanning
+ * every qubit it names forces everything after it onto a later column, drawing a break in the diagram. */
 export function layout(c: Circuit): EOp[] {
   const free = Array(c.qubits).fill(0);
-  return c.ops
-    .filter((o) => o.gate !== "barrier")
-    .map((o) => {
-      const [lo, hi] = span(o);
-      let col = 0;
-      for (let q = lo; q <= hi; q++) col = Math.max(col, free[q]);
-      for (let q = lo; q <= hi; q++) free[q] = col + 1;
-      return { ...o, col, id: newId() };
-    });
+  return c.ops.map((o) => {
+    const [lo, hi] = span(o);
+    let col = 0;
+    for (let q = lo; q <= hi; q++) col = Math.max(col, free[q]);
+    for (let q = lo; q <= hi; q++) free[q] = col + 1;
+    return { ...o, col, id: newId() };
+  });
 }
 
 export function toCircuit(qubits: number, ops: EOp[]): Circuit {
@@ -221,11 +220,14 @@ export default function CircuitEditor({ qubits, ops, onChange, readOnly, stepInd
           {pending?.picked.map((q) => <circle key={q} cx={x(pending.col)} cy={y(q)} r={8} fill="none" stroke="var(--on)" strokeWidth={2} strokeDasharray="3 2" />)}
 
           {order.map((o, idx) => {
-            const gi = GATES[o.gate];
             const faded = stepIndex !== null && idx > stepIndex;
-            const isSel = o.id === selected;
             const [lo, hi] = span(o);
             const cx = x(o.col);
+            if (o.gate === "barrier") {
+              return <line key={o.id} x1={cx} x2={cx} y1={y(lo) - 16} y2={y(hi) + 16} stroke="#ffffff45" strokeWidth={1.5} strokeDasharray="5 4" opacity={faded ? 0.25 : 1} aria-hidden="true" />;
+            }
+            const gi = GATES[o.gate];
+            const isSel = o.id === selected;
             const color = gi?.color ?? "#888";
             const cs = o.controls ?? [];
             const dot = (q: number, k: string) => <circle key={k} cx={cx} cy={y(q)} r={6} fill={color} />;
