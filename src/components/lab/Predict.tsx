@@ -41,12 +41,12 @@ export default function Predict({ p, picked, onPick, revealed }: { p: PredictDat
               disabled={answered}
               onClick={() => onPick(k)}
               className={`flex min-h-11 w-full items-center gap-3 border px-4 py-3 text-left text-base leading-snug transition-colors disabled:pointer-events-none ${tone}`}
-              aria-label={answered ? `${LETTERS[k]}. ${o}${revealed && isAnswer ? " (what Qiskit found)" : isPick ? " (your prediction)" : ""}` : undefined}
+              aria-label={answered ? `${LETTERS[k]}. ${o}${revealed && isAnswer ? " (what Qiskit found)" : isPick ? (revealed ? " (your prediction, incorrect)" : " (your prediction)") : ""}` : undefined}
             >
               <span className="code shrink-0 text-xs text-[#46587a]">{LETTERS[k]}</span>
               <span className="flex-1">{o}</span>
               {revealed && answered && isAnswer && <Icon name="check" size={16} className="shrink-0 text-navy-ink" title="What Qiskit found" />}
-              {revealed && answered && isPick && !isAnswer && <Icon name="close" size={16} className="shrink-0 text-bad" title="Your prediction" />}
+              {revealed && answered && isPick && !isAnswer && <Icon name="close" size={16} className="shrink-0 text-bad" title="Your prediction, incorrect" />}
               {!revealed && isPick && <Icon name="flag" size={16} className="shrink-0 text-navy-ink" title="Your prediction" />}
             </button>
           );
