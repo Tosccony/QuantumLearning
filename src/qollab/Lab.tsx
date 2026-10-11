@@ -61,7 +61,7 @@ export default function Lab({ start, isIonQ }: { start: Circuit; isIonQ: boolean
       <div className="flex min-w-0 flex-col gap-5">
         <p role="status" className="sr-only">{running ? "Running…" : result ? "Results ready." : ""}</p>
         <header className="flex flex-col gap-2">
-          <Heading as="h2" code="FREE BUILD · UP TO 8 WIRES">Lab: build your own circuit</Heading>
+          <Heading as="h1" code="FREE BUILD · UP TO 8 WIRES">Lab: build your own circuit</Heading>
           <p className="max-w-prose text-fog">
             Pick a gate from the palette and place it on the wires, then run on the simulator you chose in Select QPU. To compare machines, press Stop, then Run, and pick another simulator. Qollab starts fresh on every Run, so start again from the same lesson&apos;s circuit if you want to repeat a comparison.
           </p>

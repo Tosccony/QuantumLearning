@@ -18,8 +18,8 @@ type Props = {
   onChange?: (c: Circuit, r: RunResult | null, inj: Injection) => void;
   /** Called after each successful run (the web lesson page counts it toward progress). */
   onRun?: () => void;
-  /** Heading level of the section title: 2 on the Judge Start page, 3 inside a lesson that already has an h2 title. */
-  headingLevel?: 2 | 3;
+  /** Heading level of the section title: 1 when it is the page title (Qollab's start screen), 2 by default, 3 inside a section that already has an h2. */
+  headingLevel?: 1 | 2 | 3;
 };
 
 /** Break the Code: inject X errors into the 3-qubit bit-flip code and read the proof back from one run. */
@@ -32,7 +32,7 @@ export default function BreakTheCode({ isIonQ, noise, onOpenLab, onChange, onRun
   const [error, setError] = useState<string | null>(null);
   const circuit = useMemo(() => codeCircuit(inj), [inj]);
   const ops = useMemo(() => layout(circuit), [circuit]);
-  const H = `h${headingLevel}` as "h2" | "h3";
+  const H = `h${headingLevel}` as "h1" | "h2" | "h3";
   const done = run ? 4 : guess !== null ? 2 : 1;
 
   // Any input change makes a shown proof stale: clear it, as a new injection does.
