@@ -226,8 +226,8 @@ function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLa
                 <button key={k} type="button" onClick={() => setPicked(k)} disabled={picked !== null} className={`flex min-h-11 w-full items-center gap-3 border px-4 py-3 text-left text-base leading-snug transition-colors disabled:pointer-events-none ${tone}`}>
                   <span className="code shrink-0 text-xs text-[#46587a]">{LETTERS[k]}</span>
                   <span className="flex-1">{o}</span>
-                  {picked !== null && isAnswer && <Icon name="cross" size={16} className="shrink-0 text-navy-ink" title="Correct answer" />}
-                  {picked !== null && isPick && !isAnswer && <Icon name="close" size={16} className="shrink-0 text-bad" title="Your answer" />}
+                  {picked !== null && isAnswer && <Icon name="check" size={16} className="shrink-0 text-navy-ink" title="Correct answer" />}
+                  {picked !== null && isPick && !isAnswer && <Icon name="close" size={16} className="shrink-0 text-bad" title="Your answer, incorrect" />}
                 </button>
               );
             })}
@@ -235,7 +235,7 @@ function Lesson({ m, isIonQ, onOpenLab }: { m: Module; isIonQ: boolean; onOpenLa
           {picked !== null && (
             <div className="flex items-start gap-3 border-t border-paper-3 pt-4 strike" role="status">
               <span className={`flex h-9 w-9 shrink-0 items-center justify-center border ${correct ? "border-navy-ink bg-navy-ink text-ice" : "border-bad text-bad"}`} aria-hidden>
-                <Icon name={correct ? "cross" : "close"} size={18} />
+                <Icon name={correct ? "check" : "close"} size={18} />
               </span>
               <div className="min-w-0">
                 <p className="display text-lg">{correct ? "Correct" : "Not quite"}</p>

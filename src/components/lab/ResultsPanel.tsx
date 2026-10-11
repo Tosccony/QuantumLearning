@@ -122,7 +122,7 @@ export default function ResultsPanel({
             <pre className="max-h-80 overflow-auto border border-paper-3 bg-navy-ink p-3 code text-xs leading-relaxed text-paper">
               {code === "python" ? toQiskitPython(circuit) : code === "qasm" ? result.qasm : result.diagram}
             </pre>
-            <p className="text-xs text-[#46587a]">Transpiled to the basis {`{${result.transpiled.basis.join(", ")}}`} with optimization level 1, like an IBM-style device. Everything here ran on the Qiskit Aer simulator.</p>
+            <p className="text-xs text-[#46587a]">Depth and CX counts come from transpiling this circuit to {`{${result.transpiled.basis.join(", ")}}`} with optimization level 1, like an IBM-style device. The shots themselves ran on {result.backend}.</p>
           </div>
         )}
       </div>

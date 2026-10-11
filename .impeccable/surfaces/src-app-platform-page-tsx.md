@@ -26,5 +26,5 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 ## Citations
 
 - Per-track stripe colours (Explorer, Student, Developer, Researcher) are the one departure from the single ice ink. Source: the written brief the user approved before the build ("The four tracks each get one stripe colour, used only as a collar stripe on their frames"), approved in chat on 2026-10-10. Gate-family stripes in the editor are earned by the preserved colour-blind palette truth in PRODUCT.md.
-- Seed key 5f0b3e75: printed by `impeccable concept-seed --scope direction --mode persuade` on 2026-10-10; the user locked the lead card of round 4 (re-rolls 1–3 steered: sci-fi, cutting bench in navy, lifted navy) on decision page key 36c4b267 (`.impeccable/questions/36c4b267.log`). Telemetry ping sent with `--kind assigned --from 5f0b3e75`.
+- Seed key 5f0b3e75: printed by `impeccable concept-seed --scope direction --mode persuade` on 2026-10-10; the user locked the lead card of round 4 (re-rolls 1–3 steered: sci-fi, cutting bench in navy, lifted navy) on decision page key 36c4b267. Telemetry ping sent with `--kind assigned --from 5f0b3e75`.
 - The step-through scrub lives on the strip as a ruler (one tick per gate) in `CircuitEditor` via the `scrub` prop; the Lab and the home demo both use it.

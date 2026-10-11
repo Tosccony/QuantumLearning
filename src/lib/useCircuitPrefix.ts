@@ -23,7 +23,8 @@ export function useCircuitPrefix(circuit: Circuit, result: RunResult | null, ste
   const current = response?.request === request ? response : null;
   return {
     circuit: prefix,
-    result: request ? current?.result ?? null : result,
+    // While a new prefix runs, keep showing the last one so results do not unmount between steps.
+    result: request ? (current ?? response)?.result ?? null : result,
     loading: !!request && !current,
     error: request ? current?.error ?? null : null,
   };

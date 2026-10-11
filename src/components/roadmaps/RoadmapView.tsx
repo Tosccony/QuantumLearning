@@ -455,7 +455,7 @@ export default function RoadmapView({ track }: { track: Track }) {
             <button type="button" aria-label={personal[topic.id]?.bookmarked ? "Remove bookmark" : "Bookmark this topic"} aria-pressed={!!personal[topic.id]?.bookmarked} className="keycap-paper !min-w-11 !px-0 print:hidden" onClick={() => save(topic.id, (c) => ({ bookmarked: !c.bookmarked }))}>
               <Icon name={personal[topic.id]?.bookmarked ? "bookmark-filled" : "bookmark"} size={16} />
             </button>
-            <button type="button" aria-label="Close topic" className="keycap-paper !min-w-11 !px-0 lg:hidden print:hidden" onClick={close}><Icon name="close" size={16} /></button>
+            <button type="button" aria-label="Close topic" className="keycap-paper !min-w-11 !px-0 print:hidden" onClick={close}><Icon name="close" size={16} /></button>
           </div>
 
           <p className="leading-relaxed">{topic.summary}</p>

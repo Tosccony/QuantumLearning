@@ -1,5 +1,8 @@
 @import "../app/globals.css";
 
+/* The bundle does not ship film-grain.png, and an absolute /path would point at qollab.xyz. */
+body { background-image: none; }
+
 /* Next's font loader defines these in the web app; on Qollab the faces come from the link in index.html, with system fallbacks. */
 :root {
   --font-saira-cond: "Saira Condensed", "Arial Narrow", system-ui, sans-serif;

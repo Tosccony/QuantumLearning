@@ -45,7 +45,7 @@ export default function Predict({ p, picked, onPick, revealed }: { p: PredictDat
             >
               <span className="code shrink-0 text-xs text-[#46587a]">{LETTERS[k]}</span>
               <span className="flex-1">{o}</span>
-              {revealed && answered && isAnswer && <Icon name="cross" size={16} className="shrink-0 text-navy-ink" title="What Qiskit found" />}
+              {revealed && answered && isAnswer && <Icon name="check" size={16} className="shrink-0 text-navy-ink" title="What Qiskit found" />}
               {revealed && answered && isPick && !isAnswer && <Icon name="close" size={16} className="shrink-0 text-bad" title="Your prediction" />}
               {!revealed && isPick && <Icon name="flag" size={16} className="shrink-0 text-navy-ink" title="Your prediction" />}
             </button>
@@ -66,7 +66,7 @@ export default function Predict({ p, picked, onPick, revealed }: { p: PredictDat
       {revealed && answered && (
         <div className="flex items-start gap-3 border-t border-paper-3 pt-4 strike" role="status">
           <span className={`flex h-9 w-9 shrink-0 items-center justify-center border ${correct ? "border-navy-ink bg-navy-ink text-ice" : "border-navy-ink text-navy-ink"}`} aria-hidden>
-            <Icon name={correct ? "cross" : picked === SKIPPED ? "eye" : "info"} size={18} />
+            <Icon name={correct ? "check" : picked === SKIPPED ? "eye" : "info"} size={18} />
           </span>
           <div className="min-w-0">
             <p className="display text-lg">{picked === SKIPPED ? `The answer: ${p.options[p.answer]}` : correct ? "You called it" : "Surprised?"}</p>

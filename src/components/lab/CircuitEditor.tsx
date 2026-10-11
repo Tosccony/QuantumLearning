@@ -165,7 +165,7 @@ export default function CircuitEditor({ qubits, ops, onChange, readOnly, stepInd
   }
 
   function onKey(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (readOnly) return;
+    if (readOnly || (e.target as HTMLElement).closest("input, select, textarea, button[data-own-keys]")) return;
     const { q, col } = cursor;
     switch (e.key) {
       case "ArrowUp": e.preventDefault(); setCursor({ q: Math.max(0, q - 1), col }); break;
