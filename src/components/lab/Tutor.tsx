@@ -24,10 +24,12 @@ export default function Tutor({ circuit, result, extra = "", compact, offline }:
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [offlineReason, setOfflineReason] = useState<string | null>(null);
-  const end = useRef<HTMLDivElement>(null);
+  const log = useRef<HTMLDivElement>(null);
 
+  // Scroll the log itself: scrollIntoView would also scroll the page and, on mount, move the keyboard's Tab starting point here.
   useEffect(() => {
-    end.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const el = log.current;
+    if (el && msgs.length) el.scrollTop = el.scrollHeight;
   }, [msgs]);
 
   async function ask(text: string) {
@@ -82,7 +84,7 @@ export default function Tutor({ circuit, result, extra = "", compact, offline }:
         </div>
       </header>
 
-      <div className="window flex-1 space-y-3 overflow-y-auto p-3 text-sm" aria-live="polite">
+      <div ref={log} className="window flex-1 space-y-3 overflow-y-auto p-3 text-sm" aria-live="polite">
         {msgs.length === 0 && (
           <p className="text-[#46587a]">
             {offline
@@ -100,7 +102,6 @@ export default function Tutor({ circuit, result, extra = "", compact, offline }:
             </div>
           ),
         )}
-        <div ref={end} />
       </div>
 
       {offlineReason && (
