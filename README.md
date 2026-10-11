@@ -70,7 +70,7 @@ All 21 lessons (Student, Developer, Researcher and Concepts) and the Lab run on 
 - **AI tutor**: beginner, intermediate and advanced explanations from Claude, grounded in the actual run results. Without an API key it falls back to a deterministic explainer built from those same results.
 - **Break the Code** (on Qollab's start screen and in the error-correction lesson): inject no error, one X error on any data qubit, or two, then read the syndrome, the correction, the logical outcome and the run's provenance from one run.
 - **Learning paths**: Roadmaps lay out each track's lessons in prerequisite order, with credited videos and readings, on Qollab as well as in the web app. The web app also keeps your notes, bookmarks and progress.
-- **Course modules**: 21 lessons. Each has a runnable circuit, "what to look for" notes, experiments to try and a check question, and eight start with a prediction.
+- **Course modules**: 21 lessons. Each has a runnable circuit, "what to look for" notes, experiments to try and a check question, and eight start with a prediction. Keyboard shortcuts (1–N for sections, T for the tutor) can be turned off; see [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 - **Progress**: XP, streaks, a skill tree with cross-track links, and printable certificates for each track.
 
 ## Run it

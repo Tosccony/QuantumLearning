@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Markdown from "@/components/Markdown";
+import { Kbd } from "@/components/LessonKeys";
 import Icon from "@/components/ui/Icon";
 import { EdgeCode, Perf } from "@/components/ui/primitives";
 import { labContext, offlineExplain, type Level } from "@/lib/explain";
@@ -18,7 +19,7 @@ const QUICK = [
 const LEVELS: Level[] = ["beginner", "intermediate", "advanced"];
 
 /** The tutor hangs beside the bench: a navy frame whose replies are punched white windows. */
-export default function Tutor({ circuit, result, extra = "", compact, offline, offlineText }: { circuit: Circuit; result: RunResult | null; extra?: string; compact?: boolean; offline?: boolean; offlineText?: (level: Level) => string }) {
+export default function Tutor({ circuit, result, extra = "", compact, offline, offlineText, shortcut }: { circuit: Circuit; result: RunResult | null; extra?: string; compact?: boolean; offline?: boolean; offlineText?: (level: Level) => string; shortcut?: boolean }) {
   const [level, setLevel] = useState<Level>("beginner");
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -79,7 +80,7 @@ export default function Tutor({ circuit, result, extra = "", compact, offline, o
     <section className={`frame flex flex-col ${compact ? "max-h-[560px]" : "h-full min-h-[440px]"}`} aria-label={offline ? "Explainer" : "Tutor"}>
       <Perf />
       <header className="flex flex-wrap items-center gap-2 border-b border-[var(--line)] px-3 py-2">
-        <h2 className="display mr-auto flex items-center gap-2 text-lg"><Icon name="tutor" size={18} className="text-ice" /> {offline ? "Explainer" : "Tutor"}</h2>
+        <h2 id={shortcut ? "lesson-tutor" : undefined} tabIndex={shortcut ? -1 : undefined} aria-keyshortcuts={shortcut ? "T" : undefined} className="display mr-auto flex scroll-mt-24 items-center gap-2 text-lg"><Icon name="tutor" size={18} className="text-ice" /> {offline ? "Explainer" : "Tutor"}{shortcut && <Kbd>T</Kbd>}</h2>
         <div className="flex" role="group" aria-label="Explanation level">
           {LEVELS.map((l) => (
             <button key={l} type="button" aria-pressed={level === l} onClick={() => setLevel(l)} className={`-ml-px min-h-11 border px-2.5 label-sm ${level === l ? "border-ice bg-ice text-navy-ink" : "border-[var(--line-strong)] text-fog hover:text-paper"}`}>

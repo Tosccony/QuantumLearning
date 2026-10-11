@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { notFound, useParams, useRouter } from "next/navigation";
-import { Fragment, useMemo, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import FlowSteps, { type FlowStep } from "@/components/FlowSteps";
+import { focusById, Kbd, KeysHint, useLessonKeys } from "@/components/LessonKeys";
 import Markdown from "@/components/Markdown";
 import BreakTheCode from "@/components/lab/BreakTheCode";
 import CircuitEditor, { layout } from "@/components/lab/CircuitEditor";
@@ -39,6 +40,21 @@ export default function LessonPage() {
   const [codeRan, setCodeRan] = useState(false); // Break the Code was run on this page
   const [earned, setEarned] = useState(0);
   const ops = useMemo(() => (m ? layout(m.circuit) : []), [m]);
+  const [keys, setKeys] = useState(true);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("qq-lesson-keys") === "off") setKeys(false);
+    } catch {}
+  }, []);
+  const nSections = Math.min(m?.sections.length ?? 0, 9);
+  useLessonKeys({ enabled: keys, sections: nSections, onSection: (i) => focusById(`lesson-sec-${i + 1}`), onTutor: () => focusById("lesson-tutor") });
+  const toggleKeys = () => {
+    setKeys(!keys);
+    try {
+      if (keys) localStorage.setItem("qq-lesson-keys", "off");
+      else localStorage.removeItem("qq-lesson-keys");
+    } catch {}
+  };
 
   if (!m) notFound();
   if (!ready) return null;
@@ -159,6 +175,7 @@ export default function LessonPage() {
   const copy: ReactNode[] = [];
   const single = !m.sections.some((s) => s.demo || s.predictHere || s.checkHere);
   let part: typeof m.sections = [];
+  let first = 0; // index in m.sections of part[0]
   const flush = () => {
     if (!part.length) return;
     copy.push(
@@ -167,7 +184,11 @@ export default function LessonPage() {
         {part.map((s, i) => (
           <section key={s.heading} className={i > 0 ? "mt-7 border-t border-paper-3 pt-6" : ""}>
             <div className="flex items-baseline gap-3">
-              <h2 className="display text-xl sm:text-2xl">{s.heading}</h2>
+              {first + i < 9 ? (
+                <h2 id={`lesson-sec-${first + i + 1}`} tabIndex={-1} aria-keyshortcuts={keys ? String(first + i + 1) : undefined} className="display scroll-mt-24 text-xl sm:text-2xl">{s.heading}{keys && <Kbd>{String(first + i + 1)}</Kbd>}</h2>
+              ) : (
+                <h2 className="display text-xl sm:text-2xl">{s.heading}</h2>
+              )}
             </div>
             <Markdown text={s.body} />
           </section>
@@ -176,7 +197,8 @@ export default function LessonPage() {
     );
     part = [];
   };
-  for (const s of m.sections) {
+  for (const [n, s] of m.sections.entries()) {
+    if (!part.length) first = n;
     part.push(s);
     if (!s.demo && !s.predictHere && !s.checkHere) continue;
     flush();
@@ -218,6 +240,7 @@ export default function LessonPage() {
             </Notice>
           )}
           <FlowSteps current={flow} done={flowDone} />
+          <KeysHint enabled={keys} sections={nSections} tutor="tutor" onToggle={toggleKeys} />
         </header>
 
         {copy}
@@ -280,7 +303,7 @@ export default function LessonPage() {
       </div>
 
       <div className="lg:sticky lg:top-24 lg:self-start" onClickCapture={() => setAsked(true)}>
-        <Tutor compact circuit={m.circuit} result={result} extra={`Lesson: ${m.title} (${track.name} track). Summary: ${m.summary}. What the learner should observe: ${m.observe}`} />
+        <Tutor compact shortcut={keys} circuit={m.circuit} result={result} extra={`Lesson: ${m.title} (${track.name} track). Summary: ${m.summary}. What the learner should observe: ${m.observe}`} />
         {m.sidebarNote && <SidebarNote note={m.sidebarNote} />}
       </div>
     </article>

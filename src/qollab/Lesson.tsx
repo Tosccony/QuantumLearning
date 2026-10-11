@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { focusById, Kbd, KeysHint, useLessonKeys } from "@/components/LessonKeys";
 import Markdown from "@/components/Markdown";
 import BreakTheCode from "@/components/lab/BreakTheCode";
 import CircuitEditor, { layout, toCircuit, type EOp } from "@/components/lab/CircuitEditor";
@@ -33,6 +34,10 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
   const [guess, setGuess] = useState<number | null>(null);
   const track = TRACKS.find((t) => t.id === m.track)!;
   const correct = picked === m.check.answer;
+  // In memory only: the Qollab player must not touch browser storage.
+  const [keys, setKeys] = useState(true);
+  const nSections = Math.min(m.sections.length, 9);
+  useLessonKeys({ enabled: keys, sections: nSections, onSection: (i) => focusById(`lesson-sec-${i + 1}`), onTutor: () => focusById("lesson-tutor") });
 
   async function run() {
     setRunning(true);
@@ -93,14 +98,19 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
   // window; those blocks follow (prediction, then demo, then check), and the copy resumes in a new window.
   const copy: ReactNode[] = [];
   let part: typeof m.sections = [];
+  let first = 0; // index in m.sections of part[0]
   const flush = () => {
     if (!part.length) return;
     copy.push(
       <Window key={`copy-${copy.length}`} as="div" className="flex flex-col gap-5 p-5 sm:p-6">
         <Perf className="-mx-5 -mt-5 sm:-mx-6 sm:-mt-6" />
-        {part.map((s) => (
+        {part.map((s, i) => (
           <section key={s.heading}>
-            <h2 className="display text-xl sm:text-2xl">{s.heading}</h2>
+            {first + i < 9 ? (
+              <h2 id={`lesson-sec-${first + i + 1}`} tabIndex={-1} aria-keyshortcuts={keys ? String(first + i + 1) : undefined} className="display scroll-mt-24 text-xl sm:text-2xl">{s.heading}{keys && <Kbd>{String(first + i + 1)}</Kbd>}</h2>
+            ) : (
+              <h2 className="display text-xl sm:text-2xl">{s.heading}</h2>
+            )}
             <Markdown text={s.body} />
           </section>
         ))}
@@ -108,7 +118,8 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
     );
     part = [];
   };
-  for (const s of m.sections) {
+  for (const [n, s] of m.sections.entries()) {
+    if (!part.length) first = n;
     part.push(s);
     if (!s.demo && !s.predictHere && !s.checkHere) continue;
     flush();
@@ -128,6 +139,7 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
           </button>
           <Heading as="h1" code={`${track.name.toUpperCase()} · ${m.minutes} MIN`}>{m.title}</Heading>
           <p className="max-w-prose text-fog">{m.summary}</p>
+          <KeysHint enabled={keys} sections={nSections} tutor="explainer" onToggle={() => setKeys(!keys)} />
         </header>
 
         {copy}
@@ -183,7 +195,7 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
         )}
       </div>
       <aside className="lg:sticky lg:top-20 lg:self-start">
-        <Tutor compact offline circuit={circuit} result={result} extra={`Lesson: ${m.title}. What to look for: ${m.observe}`} />
+        <Tutor compact offline shortcut={keys} circuit={circuit} result={result} extra={`Lesson: ${m.title}. What to look for: ${m.observe}`} />
         {m.sidebarNote && <SidebarNote note={m.sidebarNote} />}
       </aside>
     </article>

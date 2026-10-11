@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { codeCircuit, DEFAULT_INJECTION, expected, explainProof, INJECTIONS, readProof, START } from "@/lib/breakTheCode";
+import { lessonKey } from "@/components/LessonKeys";
 import { MODULES, moduleById, R3_CORRECT, R3_ENCODE, R3_ERROR, TRACKS } from "@/lib/curriculum";
 import { angleCircuit, banknoteCircuit, correctProb, exactCorrectDist, lockCircuit, p1 } from "@/lib/quantumMoney";
 import { firstStartable, roadmapTopics, sanitizePersonal, topicStatus } from "@/lib/roadmaps";
@@ -203,5 +204,17 @@ assert.deepEqual(sanitizePersonal({ s1: { reviewed: ["a", 2] } }), { s1: { revie
 const poisoned = sanitizePersonal(JSON.parse('{"__proto__":{"bookmarked":true},"s1":{"started":true}}'));
 assert.deepEqual(poisoned, { s1: { started: true } });
 assert.equal(Object.getPrototypeOf(poisoned), Object.prototype);
+
+// Lesson keyboard shortcuts
+const k = (key: string, o: Partial<Parameters<typeof lessonKey>[0]> = {}) => ({ key, ctrlKey: false, altKey: false, metaKey: false, repeat: false, defaultPrevented: false, ...o });
+assert.equal(lessonKey(k("1"), false, 4), 0);
+assert.equal(lessonKey(k("4"), false, 4), 3);
+assert.equal(lessonKey(k("5"), false, 4), null);
+assert.equal(lessonKey(k("0"), false, 4), null);
+assert.equal(lessonKey(k("t"), false, 4), "tutor");
+assert.equal(lessonKey(k("T"), false, 4), "tutor");
+assert.equal(lessonKey(k("x"), false, 4), null);
+for (const o of [{ ctrlKey: true }, { altKey: true }, { metaKey: true }, { repeat: true }, { defaultPrevented: true }]) assert.equal(lessonKey(k("1", o), false, 4), null);
+assert.equal(lessonKey(k("1"), true, 4), null);
 
 console.log("js: all checks passed");
