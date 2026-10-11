@@ -132,7 +132,7 @@ Tick these off as they're done. Status is as of Oct 11, 12:30 ET. Only items som
 - [ ] Merge the open redesign PR (#3) and these judge-facing changes into `main`
 
 **Qollab**
-- [x] Qollab project format confirmed (`npm run qollab:build` → `dist/qollab.zip`: `main.js`, `main.css`, `index.html`, `quantum/engine.py`, `requirements.txt`)
+- [x] Qollab project format confirmed (verified on qollab.xyz, Oct 10, built-in simulator; `npm run qollab:build` → `dist/qollab.zip`: `index.html`, `main.js`, `main.css`, `requirements.txt`, `README.md`, `LICENSE`, `quantum/__init__.py`, `quantum/engine.py`, `docs/images/judge-start.png`)
 - [ ] Upload the `RELEASE=1` zip and publish on qollab.xyz, MIT-licensed
 - [ ] On the uploaded project, Judge Start runs on the **free local simulator**: X on q1 gives syndrome 11 and "Recovered"; two errors give 01 and "Logical flip"
 - [ ] The same on an **IonQ simulator** (one job per Run: press Stop and Run between cases)
