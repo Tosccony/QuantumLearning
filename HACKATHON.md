@@ -118,26 +118,35 @@ These apply to the code that runs **on Qollab**:
 
 ## 7. Submission checklist
 
-Tick these off as they're done. Status is as of the Oct 10 review.
+Tick these off as they're done. Status is as of Oct 11, 12:30 ET. Only items someone has verified are ticked.
 
 **Repo (GitHub)**
 - [x] Public, dependencies listed, builds cleanly (`npm run build`, lint and type-check all pass)
 - [x] No secrets found in the code
 - [x] `LICENSE` file (MIT) added
-- [ ] README *Disclosure* section: drafted, but the team must fill in the two `TODO(team)` lines (pre-window work, other AI tools)
-- [ ] README *How to run* checked on a clean machine
+- [x] README *Disclosure* section filled in (pre-window work, starter template, every AI tool used)
 - [x] Attribution line in the README and the app footer
-- [ ] Git history shows work spread across the window, not one big commit
+- [ ] Git history shows work spread across the window, not one big commit (team to judge: `main` has 51 commits, the first at Oct 10, 12:13 ET, and that first commit is large)
+- [ ] README top table: fill the three `TODO(team)` links (Qollab project, demo video, web app). `RELEASE=1 npm run qollab:build` refuses to build until they're filled.
+- [ ] README *How to run* checked on a clean machine
+- [ ] Merge the open redesign PR (#3) and these judge-facing changes into `main`
 
 **Qollab**
-- [ ] Qollab project format confirmed
-- [ ] Qiskit project published on qollab.xyz, MIT-licensed
-- [ ] **Run** works on the free local simulator and on IonQ's simulator
-- [ ] Project page covers what it does, the problem, how to run it, a link to this repo, and the attribution
+- [x] Qollab project format confirmed (`npm run qollab:build` → `dist/qollab.zip`: `main.js`, `main.css`, `index.html`, `quantum/engine.py`, `requirements.txt`)
+- [ ] Upload the `RELEASE=1` zip and publish on qollab.xyz, MIT-licensed
+- [ ] On the uploaded project, Judge Start runs on the **free local simulator**: X on q1 gives syndrome 11 and "Recovered"; two errors give 01 and "Logical flip"
+- [ ] The same on an **IonQ simulator** (one job per Run: press Stop and Run between cases)
+- [ ] Project page covers what it does, the problem, how to run it, a link to this repo, and the attribution (the README is the page; check it renders)
+
+**Accessibility** (details in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md))
+- [x] axe-core: 0 WCAG A/AA violations on the Qollab player and `/`, `/learn`, `/learn/r3`, `/lab`, `/roadmaps`, `/explorer`, at 1440 and 390 px
+- [x] Keyboard-only run of Judge Start; circuit editor key map; dialogs trap focus and close on Escape
+- [ ] Screen-reader pass (VoiceOver or NVDA with Chrome)
+- [ ] Lighthouse accessibility scores for `/`, `/lab` and `/explorer` recorded
 
 **Demo video**
-- [ ] 2–3 minutes, recorded in Chrome, with voiceover
-- [ ] Public link checked in an incognito window
+- [ ] 2–3 minutes, recorded in Chrome, with voiceover. Suggested script: the three-minute path in the README (Judge Start → X on q1 → move the error → two errors → explainer), then 20 seconds each on the lessons, the Lab and the kids' Explorer
+- [ ] Public link checked in an incognito window, and added to the README and the Qollab page
 
 **Submission form (captain)**
 - [ ] Theme declared: Quantum Unlocked (proposed)
