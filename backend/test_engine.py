@@ -85,18 +85,6 @@ def main():
 
     engine.run(NoTarget(), {"qubits": 3, "ops": [g("initialize", [0], params=[1, 1]), g("x", [1]), g("ccx", [2], [0, 1])]})
 
-    # Mirror of curriculum.ts r3.compare: with one X error on any data qubit, the protected bit (q1) still reads 0.
-    compare = [g("cx", [2], [1]), g("cx", [3], [1]),
-               g("cx", [4], [1]), g("cx", [4], [2]), g("cx", [5], [2]), g("cx", [5], [3]),
-               g("ccx", [2], [4, 5]),
-               g("x", [5]), g("ccx", [1], [4, 5]), g("x", [5]),
-               g("x", [4]), g("ccx", [3], [4, 5]), g("x", [4]),
-               g("cx", [3], [1]), g("cx", [2], [1])]
-    for q in (None, 1, 2, 3):
-        ops = compare[:2] + ([g("x", [q])] if q else []) + compare[2:]
-        counts = engine.run(AerSimulator(), {"qubits": 6, "ops": ops, "shots": 200})["counts"]
-        assert all(k[-2] == "0" and k[-1] == "0" for k in counts), (q, counts)  # q1 and bare q0 read 0
-
     print("engine: all checks passed")
 
 

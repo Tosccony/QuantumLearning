@@ -1,4 +1,4 @@
-import { g, groverCircuit, type Circuit } from "./quantum";
+import { g, groverCircuit, type Circuit, type Op } from "./quantum";
 
 export type TrackId = "explorer" | "student" | "developer" | "researcher" | "concepts";
 
@@ -17,7 +17,7 @@ export const TRACKS: Track[] = [
   { id: "student", name: "Student", icon: "🎓", color: "#7bdff2", audience: "High school & first-year university", tagline: "States, gates, entanglement and your first algorithms, with just enough maths.", certificate: "Quantum Foundations" },
   { id: "developer", name: "Developer", icon: "💻", color: "#3ddc97", audience: "Programmers new to quantum", tagline: "Qiskit, transpilation, shots and noise, and building Grover, QFT and variational circuits.", certificate: "Quantum Software Developer" },
   { id: "researcher", name: "Researcher", icon: "🔬", color: "#b388ff", audience: "Graduate level", tagline: "Density matrices, noise and mitigation, error correction, phase estimation and advantage.", certificate: "Quantum Research Practitioner" },
-  { id: "concepts", name: "Concepts", icon: "🔓", color: "#ff9f1c", audience: "After the Student basics", tagline: "Hands-on deep dives: secret keys with BB84, the Bell test, and Shor's algorithm.", certificate: "Quantum Concepts" },
+  { id: "concepts", name: "Concepts", icon: "🔓", color: "#ff9e80", audience: "After the Student basics", tagline: "Hands-on deep dives: secret keys with BB84, the Bell test, and Shor's algorithm.", certificate: "Quantum Concepts" },
 ];
 
 export type Check = { q: string; options: string[]; answer: number; why: string };
@@ -42,11 +42,23 @@ export type Module = {
   tryIt: string[];
   check: Check;
   predict?: Predict;
-  compare?: Circuit;
   readout?: Readout;
+  /** An extra interactive section the lesson page renders after the circuit. */
+  extra?: "breakTheCode";
 };
 
 const PI = Math.PI;
+
+// r3's circuit in named parts, so Break the Code can swap the error without slicing by position.
+export const R3_ENCODE: Op[] = [g("ry", [0], [], [0.8]), g("cx", [1], [0]), g("cx", [2], [0])];
+export const R3_ERROR: Op[] = [g("x", [1])]; // the injected error
+export const R3_CORRECT: Op[] = [
+  g("cx", [3], [0]), g("cx", [3], [1]), g("cx", [4], [1]), g("cx", [4], [2]),
+  g("ccx", [1], [3, 4]),
+  g("x", [4]), g("ccx", [0], [3, 4]), g("x", [4]),
+  g("x", [3]), g("ccx", [2], [3, 4]), g("x", [3]),
+  g("cx", [2], [0]), g("cx", [1], [0]),
+];
 
 export const MODULES: Module[] = [
   // ------------------------------------------------------------------ Student
@@ -355,7 +367,7 @@ export const MODULES: Module[] = [
     check: { q: "Zero-noise extrapolation primarily trades…", options: ["More circuit executions for lower bias", "More qubits for lower noise", "Deeper circuits for fewer shots", "Nothing; it is free"], answer: 0, why: "ZNE runs extra noise-amplified circuits (and more shots) to reduce bias in the estimated expectation value." },
   },
   {
-    id: "r3", track: "researcher", title: "Error correction: the 3-qubit bit-flip code", minutes: 15, skill: "Error correction", requires: ["r2"],
+    id: "r3", extra: "breakTheCode", track: "researcher", title: "Error correction: the 3-qubit bit-flip code", minutes: 15, skill: "Error correction", requires: ["r2"],
     summary: "Encode one logical qubit in three, measure parities with ancillas without learning the data, and correct any single X error.",
     sections: [
       { heading: "Encoding and syndromes", body: "α|0⟩+β|1⟩ ↦ α|000⟩+β|111⟩. The stabilisers Z₀Z₁ and Z₁Z₂ are measured into two ancillas. The syndrome (s₀, s₁) identifies which qubit flipped, and it reveals nothing about α or β." },
@@ -364,15 +376,7 @@ export const MODULES: Module[] = [
     ],
     circuit: {
       qubits: 5,
-      ops: [
-        g("ry", [0], [], [0.8]), g("cx", [1], [0]), g("cx", [2], [0]),
-        g("x", [1]), // the error
-        g("cx", [3], [0]), g("cx", [3], [1]), g("cx", [4], [1]), g("cx", [4], [2]),
-        g("ccx", [1], [3, 4]),
-        g("x", [4]), g("ccx", [0], [3, 4]), g("x", [4]),
-        g("x", [3]), g("ccx", [2], [3, 4]), g("x", [3]),
-        g("cx", [2], [0]), g("cx", [1], [0]),
-      ],
+      ops: [...R3_ENCODE, ...R3_ERROR, ...R3_CORRECT],
     },
     observe: "q0's Bloch vector returns to ≈ (0.717, 0, 0.697) even though an X error hit the codeword. Ancillas q3, q4 always read 11, the syndrome for 'q1 flipped'.",
     tryIt: ["Move the injected X to q0 or q2. Which syndrome appears?", "Inject two X errors. Does the code still recover?"],
@@ -386,19 +390,6 @@ export const MODULES: Module[] = [
         "The ancillas detect the error by checking parities, and the controlled corrections act on that information. The data never needs to be measured directly.",
         "The syndrome checks only parities (Z₀Z₁ and Z₁Z₂), which are the same for |000⟩ and |111⟩. That reveals the error without disturbing the superposition.",
         "This code fully corrects a single X error. Damage starts only with two or more errors, or with errors it can't see, such as Z flips.",
-      ],
-    },
-    // q0: a bare qubit. q1–q3: the same bit protected by the 3-qubit code (ancillas q4, q5).
-    // One circuit, so it fits IonQ's one-job-per-Run rule. Bare error = P(q0 = 1), protected = P(q1 = 1).
-    compare: {
-      qubits: 6,
-      ops: [
-        g("cx", [2], [1]), g("cx", [3], [1]),
-        g("cx", [4], [1]), g("cx", [4], [2]), g("cx", [5], [2]), g("cx", [5], [3]),
-        g("ccx", [2], [4, 5]),
-        g("x", [5]), g("ccx", [1], [4, 5]), g("x", [5]),
-        g("x", [4]), g("ccx", [3], [4, 5]), g("x", [4]),
-        g("cx", [3], [1]), g("cx", [2], [1]),
       ],
     },
   },

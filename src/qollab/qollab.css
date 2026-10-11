@@ -1,8 +1,11 @@
 @import "../app/globals.css";
 
-/* Next's font loader defines these in the web app; on Qollab fall back to system fonts. */
+/* The bundle does not ship film-grain.png, and an absolute /path would point at qollab.xyz. */
+body { background-image: none; }
+
+/* Next's font loader defines these in the web app; on Qollab the faces come from the link in index.html, with system fallbacks. */
 :root {
-  --font-inter: system-ui, sans-serif;
-  --font-jetbrains: ui-monospace, monospace;
-  --font-fredoka: ui-rounded, system-ui, sans-serif;
+  --font-saira-cond: "Saira Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-saira-semi: "Saira Semi Condensed", system-ui, sans-serif;
+  --font-jetbrains: "JetBrains Mono", ui-monospace, monospace;
 }

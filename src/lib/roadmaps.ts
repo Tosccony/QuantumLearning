@@ -50,7 +50,7 @@ export function firstStartable(state: State, id: string, seen = new Set<string>(
 }
 
 export const ROADMAP_STORAGE_KEY = "quantum-quest-roadmaps-v1";
-export type Personal = Record<string, { bookmarked?: boolean; note?: string; started?: boolean; reviewed?: string[] }>;
+export type Personal = Record<string, { bookmarked?: boolean; note?: string; started?: boolean; skipped?: boolean; reviewed?: string[] }>;
 
 const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 
@@ -63,6 +63,7 @@ export function sanitizePersonal(raw: unknown): Personal {
     const e: Personal[string] = {};
     if (typeof v.bookmarked === "boolean") e.bookmarked = v.bookmarked;
     if (typeof v.started === "boolean") e.started = v.started;
+    if (typeof v.skipped === "boolean") e.skipped = v.skipped;
     if (typeof v.note === "string") e.note = v.note;
     if (Array.isArray(v.reviewed)) e.reviewed = v.reviewed.filter((x): x is string => typeof x === "string");
     out[id] = e;

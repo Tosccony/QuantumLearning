@@ -1,12 +1,13 @@
 // Runnable checks for the logic the Qollab player depends on. Run: npm run check:js
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { MODULES, moduleById, TRACKS } from "@/lib/curriculum";
+import { codeCircuit, DEFAULT_INJECTION, expected, explainProof, INJECTIONS, readProof, START } from "@/lib/breakTheCode";
+import { MODULES, moduleById, R3_CORRECT, R3_ENCODE, R3_ERROR, TRACKS } from "@/lib/curriculum";
 import { firstStartable, roadmapTopics, sanitizePersonal, topicStatus } from "@/lib/roadmaps";
 import type { State } from "@/lib/progress";
 import { planetStatus, trackProgress } from "@/lib/skills";
-import { bellScore, noiseVisible, onesRate, pairCorrelation, registerCounts, shorFactors, shotNoiseTvd, tvd } from "@/lib/explain";
-import { QuantumServiceError } from "@/lib/quantum";
+import { bellScore, bitOf, noiseVisible, onesRate, pairCorrelation, registerCounts, shorFactors, shotNoiseTvd, tvd } from "@/lib/explain";
+import { QuantumServiceError, type RunResult } from "@/lib/quantum";
 import { pythonErrorMessage, qollabTransport } from "@/qollab/bridge";
 
 assert.equal(
@@ -59,9 +60,41 @@ assert.equal(shorFactors(2, 4, 7, 15).factors, null);
 assert.match(shorFactors(2, 4, 7, 15).note, /multiple of the true period/);
 assert.match(shorFactors(8, 4, 14, 15).note, /≡ −1/); // a = 14 ≡ −1: r = 2 and 14¹ ≡ −1 mod 15
 
-// Every lesson circuit, for backend/check_lessons.py to run through the real engine.
+// Break the Code: the r3 circuit is its "X on q1" case, and the syndromes follow the lesson's table.
+assert.deepEqual(codeCircuit(INJECTIONS.find((i) => i.id === "q1")!), moduleById("r3")!.circuit);
+assert.deepEqual(INJECTIONS.map((i) => [expected(i).syndrome, expected(i).fixes, expected(i).recovered]), [
+  ["00", null, true], ["10", 0, true], ["11", 1, true], ["01", 2, true], ["01", 2, false], // two errors look like one on q2
+]);
+// Bitstrings are q4 q3 q2 q1 q0: the syndrome is (q3, q4), the majority reading wins under noise.
+const fake = { counts: { "11000": 90, "11001": 10, "01000": 4 }, probabilities: { "11000": 0.85, "11001": 0.15 }, shots: 104, bloch: [START], transpiled: { gate_counts: { cx: 22 } } } as unknown as RunResult;
+const proof = readProof(fake);
+assert.equal(proof.syndrome, "11");
+assert.equal(proof.fixes, 1);
+assert.equal(proof.recovered, true);
+assert.ok(Math.abs(proof.exactOne - 0.15) < 1e-12 && Math.abs(proof.measuredOne - 10 / 104) < 1e-12);
+// The syndrome share divides by the counts' own total, not by `shots`.
+assert.equal(readProof({ ...fake, shots: 1024 }).syndromeShare, 100 / 104);
+assert.deepEqual(moduleById("r3")!.circuit.ops, [...R3_ENCODE, ...R3_ERROR, ...R3_CORRECT]);
+assert.equal(moduleById("r3")!.extra, "breakTheCode");
+assert.equal(DEFAULT_INJECTION, INJECTIONS[2]);
+assert.equal(bitOf("10110", 0), "0"); // little-endian: q0 is the last character
+assert.equal(bitOf("10110", 4), "1");
+// Offline explainer: the expected chain, the noise caveat only when the measured syndrome differs, and level detail.
+const noisy = { ...fake, counts: { "01000": 60, "11000": 40 }, shots: 100 } as unknown as RunResult;
+assert.match(explainProof(DEFAULT_INJECTION, fake, "beginner"), /syndrome reads 11/);
+assert.doesNotMatch(explainProof(DEFAULT_INJECTION, fake, "beginner"), /noise/);
+assert.match(explainProof(DEFAULT_INJECTION, noisy, "beginner"), /most common measured syndrome was 10[\s\S]*noise[\s\S]*X on q0/);
+assert.match(explainProof(DEFAULT_INJECTION, fake, "intermediate"), /Bloch/);
+assert.match(explainProof(DEFAULT_INJECTION, fake, "advanced"), /Z₀Z₁[\s\S]*Z₁Z₂[\s\S]*distance-3[\s\S]*TVD/);
+assert.match(explainProof(INJECTIONS[4], fake, "beginner"), /syndrome reads 01/);
+assert.equal(readProof({ ...fake, bloch: [[START[0], 0, -START[2]]] } as RunResult).recovered, false);
+
+// Every lesson circuit and Break the Code case, for backend/check_lessons.py to run through the real engine.
 mkdirSync("dist", { recursive: true });
-writeFileSync("dist/lessons.json", JSON.stringify(Object.fromEntries(MODULES.map((m) => [m.id, m.circuit]))));
+writeFileSync("dist/lessons.json", JSON.stringify(Object.fromEntries([
+  ...MODULES.map((m) => [m.id, m.circuit]),
+  ...INJECTIONS.map((i) => [`btc-${i.id}`, codeCircuit(i)]),
+])));
 
 // Concepts IDs retain their original prefixes, and prerequisites cross tracks.
 // Neither must prevent the roadmap from rendering or unlocking correctly.

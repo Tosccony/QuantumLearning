@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { PLANET_ICON } from "@/components/KidsRail";
+import Icon from "@/components/ui/Icon";
+import { Flag, Mark, Perf, Window } from "@/components/ui/primitives";
 import { PLANETS } from "@/lib/levels";
 import { today, useProgress, type State } from "@/lib/progress";
 
@@ -15,10 +18,12 @@ const ACTIVITIES: Record<number, string> = {
   7: "Watch a short video of a real quantum computer ‘chandelier’ together and spot the cold plates.",
 };
 
-function mastery(s: State, id: number) {
+type Mastery = { label: "Not started" | "Mastered" | "Developing" };
+
+function mastery(s: State, id: number): Mastery {
   const l = s.levels[id];
-  if (!l?.completed) return { label: "Not started", tone: "text-muted" };
-  return l.quizCorrect / l.quizTotal >= 2 / 3 ? { label: "Mastered", tone: "text-good" } : { label: "Developing", tone: "text-on" };
+  if (!l?.completed) return { label: "Not started" };
+  return l.quizCorrect / l.quizTotal >= 2 / 3 ? { label: "Mastered" } : { label: "Developing" };
 }
 
 const fmtMin = (sec: number) => `${Math.max(1, Math.round(sec / 60))} min`;
@@ -34,38 +39,80 @@ export default function GrownUps() {
 
   if (!unlocked)
     return (
-      <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-5 p-6">
-        <h1 className="text-3xl font-bold">👪 Grown-ups only</h1>
-        <form className="card flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); if (+answer === gate.a * gate.b) setUnlocked(true); }}>
-          <label htmlFor="gate" className="text-lg">To continue, what is {gate.a} × {gate.b}?</label>
-          <input id="gate" inputMode="numeric" value={answer} onChange={(e) => setAnswer(e.target.value)} className="rounded-xl bg-white px-4 py-3 text-xl text-[#1b2160]" />
-          <button className="btn-primary">Enter</button>
-        </form>
-        <Link href="/explorer" className="text-center text-muted underline">← Back to the galaxy</Link>
+      <main className="mx-auto flex min-h-[calc(100dvh-5rem)] max-w-md flex-col justify-center gap-5 px-4 py-8">
+        <Window as="form" className="flex flex-col gap-4 p-5 sm:p-6" onSubmit={(e: React.FormEvent) => { e.preventDefault(); if (+answer === gate.a * gate.b) setUnlocked(true); }}>
+          <Perf className="-mx-5 -mt-5 sm:-mx-6 sm:-mt-6" />
+          <h1 className="display flex items-center gap-3 text-3xl">
+            <Icon name="grownups" size={28} />
+            Grown-ups only
+          </h1>
+          <label htmlFor="gate" className="text-lg">To continue, what is <span className="code">{gate.a} × {gate.b}</span>?</label>
+          <input id="gate" inputMode="numeric" value={answer} onChange={(e) => setAnswer(e.target.value)} className="field !min-h-12 code !text-xl" autoComplete="off" />
+          <button className="keycap-xl keycap-paper-primary">Enter</button>
+        </Window>
+        <Link href="/explorer" className="keycap self-center">
+          <Icon name="back" size={18} />
+          Back to the mission map
+        </Link>
       </main>
     );
 
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-5 px-4 py-6 sm:px-6 print:text-black">
+    <main className="mx-auto flex max-w-5xl flex-col gap-5 px-3 py-6 sm:px-6 print:text-black">
       <header className="flex flex-wrap items-center gap-3 print:hidden">
-        <Link href="/explorer" className="btn-ghost !min-h-12 !px-4 !py-2 !text-lg">← Galaxy</Link>
-        <h1 className="flex-1 text-3xl font-bold">Dashboard · {state.name || "Explorer"}</h1>
-        <div className="flex rounded-2xl bg-space-2 p-1" role="tablist">
+        <Link href="/explorer" className="keycap !px-3" aria-label="Back to the mission map">
+          <Icon name="back" size={20} />
+          <span className="hidden sm:inline">Map</span>
+        </Link>
+        <h1 className="display min-w-0 flex-1 text-3xl sm:text-4xl">Dashboard · {state.name || "Explorer"}</h1>
+        <div className="flex gap-1 pt-2" role="tablist" aria-label="Dashboard view">
           {(["parent", "teacher"] as const).map((t) => (
-            <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`rounded-xl px-5 py-2 text-lg capitalize ${tab === t ? "bg-accent" : ""}`}>
+            <button
+              key={t}
+              type="button"
+              role="tab"
+              id={`dashboard-${t}`}
+              aria-controls="dashboard-panel"
+              aria-selected={tab === t}
+              tabIndex={tab === t ? 0 : -1}
+              onKeyDown={(event) => {
+                if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+                event.preventDefault();
+                const next = event.key === "Home" ? "parent" : event.key === "End" ? "teacher" : tab === "parent" ? "teacher" : "parent";
+                setTab(next);
+                document.getElementById(`dashboard-${next}`)?.focus();
+              }}
+              onClick={() => setTab(t)}
+              className={`frame relative min-h-11 px-5 label ${tab === t ? "frame-active text-paper" : "text-fog hover:text-paper"}`}
+            >
+              {tab === t && <Flag className="absolute -top-[11px] left-2" width={16} />}
               {t}
             </button>
           ))}
         </div>
       </header>
-      {tab === "parent" ? <ParentView s={state} /> : <TeacherView s={state} />}
+      <h1 className="display hidden text-3xl print:block">Quantum Quest · {state.name || "Explorer"}</h1>
+      <div id="dashboard-panel" role="tabpanel" aria-labelledby={`dashboard-${tab}`}>
+        {tab === "parent" ? <ParentView s={state} /> : <TeacherView s={state} />}
+      </div>
       <button
-        className="self-start text-sm text-muted underline print:hidden"
+        type="button"
+        className="keycap self-start !border-bad !text-bad print:hidden"
         onClick={() => { if (confirm("Erase all progress on this device? This can't be undone.")) reset(); }}
       >
+        <Icon name="reset" size={18} />
         Reset all progress on this device
       </button>
     </main>
+  );
+}
+
+function Section({ title, children, className = "", id }: { title: string; children: React.ReactNode; className?: string; id: string }) {
+  return (
+    <Window as="section" className={`flex flex-col gap-3 p-5 sm:p-6 ${className}`} aria-labelledby={id}>
+      <h2 id={id} className="display text-2xl">{title}</h2>
+      {children}
+    </Window>
   );
 }
 
@@ -87,8 +134,8 @@ function ParentView({ s }: { s: State }) {
 
   const insights = [
     done.length === 0 ? "Your explorer hasn't finished a planet yet — the first one takes about 4 minutes." : `Finished ${done.length} of 7 planets.`,
-    s.streak > 1 ? `🔥 On a ${s.streak}-day streak — short daily sessions help ideas stick.` : "Try a 5-minute session each day to build a streak.",
-    developing.length ? `Worth revisiting together: ${developing.map((p) => p.concept).join(", ")} (quiz under 2/3).` : done.length ? "Every finished planet has a strong quiz score. 🌟" : "",
+    s.streak > 1 ? `On a ${s.streak}-day streak — short daily sessions help ideas stick.` : "Try a 5-minute session each day to build a streak.",
+    developing.length ? `Worth revisiting together: ${developing.map((p) => p.concept).join(", ")} (quiz under 2/3).` : done.length ? "Every finished planet has a strong quiz score." : "",
     done.some((p) => p.id === 4) ? "Ask: “Can you explain entanglement using two socks?” Explaining in their own words is the goal." : "",
   ].filter(Boolean);
 
@@ -97,50 +144,76 @@ function ParentView({ s }: { s: State }) {
 
   return (
     <div className="grid gap-5 md:grid-cols-2">
-      <section className="card md:col-span-2">
-        <h2 className="mb-1 text-2xl font-bold">This week</h2>
-        <p className="mb-4 text-muted">{weekMin} minutes played · {week.reduce((a, w) => a + w.xp, 0)} XP earned</p>
-        <div className="flex h-44 items-end gap-2 sm:gap-4" role="img" aria-label="XP earned each day this week">
+      <Section id="week-h" title="This week" className="md:col-span-2">
+        <p className="text-[#46587a]">
+          <span className="code text-navy-ink">{weekMin}</span> minutes played · <span className="code text-navy-ink">{week.reduce((a, w) => a + w.xp, 0)}</span> XP earned
+        </p>
+        <div className="graticule flex h-48 items-end gap-2 border border-paper-3 px-2 pt-6 sm:gap-4" role="img" aria-label="XP earned each day this week">
           {week.map((w) => (
-            <div key={w.key} className="flex flex-1 flex-col items-center gap-1">
-              <span className="text-sm tabular-nums text-muted">{w.xp || ""}</span>
-              <div className="w-full max-w-12 rounded-t-lg bg-accent" style={{ height: `${(w.xp / max) * 120}px`, minHeight: 4 }} />
-              <span className="text-sm">{w.day}</span>
+            <div key={w.key} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
+              <span className="code text-xs text-[#46587a]">{w.xp || ""}</span>
+              <div className="rise w-full max-w-12 bg-navy-ink" style={{ height: `${(w.xp / max) * 110}px`, minHeight: 3 }} />
+              <span className="code text-xs uppercase tracking-[0.1em] text-navy-ink">{w.day}</span>
             </div>
           ))}
         </div>
-      </section>
-      <section className="card">
-        <h2 className="mb-3 text-2xl font-bold">💡 Learning insights</h2>
-        <ul className="flex list-disc flex-col gap-2 pl-5 text-lg">{insights.map((i) => <li key={i}>{i}</li>)}</ul>
-      </section>
-      <section className="card">
-        <h2 className="mb-3 text-2xl font-bold">🏡 Try together offline</h2>
+      </Section>
+      <Section id="insights-h" title="Learning insights">
+        <ul className="flex list-[square] flex-col gap-2 pl-5 text-lg">{insights.map((i) => <li key={i}>{i}</li>)}</ul>
+      </Section>
+      <Section id="offline-h" title="Try together offline">
         <ul className="flex flex-col gap-3 text-lg">
           {suggestions.map((id) => (
-            <li key={id}><b>{PLANETS[id - 1].concept}:</b> {ACTIVITIES[id]}</li>
+            <li key={id} className="border-t border-paper-3 pt-3 first:border-t-0 first:pt-0">
+              <span className="label block text-[#46587a]">{PLANETS[id - 1].concept}</span>
+              {ACTIVITIES[id]}
+            </li>
           ))}
         </ul>
-      </section>
-      <section className="card md:col-span-2">
-        <h2 className="mb-3 text-2xl font-bold">🎉 Milestones</h2>
+      </Section>
+      <Section id="milestones-h" title="Milestones" className="md:col-span-2">
         {done.length === 0 ? (
-          <p className="text-muted">Milestones appear here as badges are earned.</p>
+          <p className="text-[#46587a]">Milestones appear here as badges are earned.</p>
         ) : (
           <ul className="grid gap-2 sm:grid-cols-2">
             {done.map((p) => (
-              <li key={p.id} className="flex items-center gap-3 rounded-2xl bg-space-2 p-3">
-                <span className="text-3xl" aria-hidden>{p.badgeIcon}</span>
+              <li key={p.id} className="frame flex min-h-14 items-center gap-3 px-3 py-2 text-paper print:border-black print:bg-white print:text-black">
+                <Icon name={PLANET_ICON[p.id]} size={24} className="shrink-0 text-ice print:text-black" />
                 <span className="flex-1">{p.badge} badge</span>
-                <span className="text-sm text-muted">{new Date(s.levels[p.id].completedAt!).toLocaleDateString()}</span>
+                <span className="code text-xs text-fog print:text-black">{new Date(s.levels[p.id].completedAt!).toLocaleDateString()}</span>
+                <Mark kind="done" size={16} />
               </li>
             ))}
-            {s.badges.length === 7 && <li className="rounded-2xl bg-on p-3 font-bold text-[#1b2160]">🎓 Completed the whole Quantum Galaxy!</li>}
+            {s.badges.length === 7 && (
+              <li className="frame frame-active relative flex min-h-14 items-center gap-3 px-3 py-2 text-paper print:border-black print:bg-white print:text-black">
+                <Flag className="absolute -top-[11px] left-2" width={16} />
+                <Icon name="rocket" size={24} className="shrink-0 text-ice print:text-black" />
+                <span className="display text-lg">Completed the whole Quantum Galaxy!</span>
+              </li>
+            )}
           </ul>
         )}
-      </section>
+      </Section>
     </div>
   );
+}
+
+function MasteryCell({ m }: { m: Mastery }) {
+  if (m.label === "Mastered")
+    return (
+      <span className="flex items-center gap-2 font-semibold">
+        <span className="grid h-6 w-6 place-items-center bg-navy-ink print:hidden"><Mark kind="done" size={12} /></span>
+        {m.label}
+      </span>
+    );
+  if (m.label === "Developing")
+    return (
+      <span className="flex items-center gap-2 font-semibold">
+        <Icon name="warn" size={18} className="print:hidden" />
+        {m.label}
+      </span>
+    );
+  return <span className="text-[#46587a]">{m.label}</span>;
 }
 
 function TeacherView({ s }: { s: State }) {
@@ -170,46 +243,54 @@ function TeacherView({ s }: { s: State }) {
   };
 
   return (
-    <section className="card flex flex-col gap-4">
+    <Window as="section" className="flex flex-col gap-4 p-5 sm:p-6" aria-labelledby="report-h">
       <div className="flex flex-wrap items-center gap-3">
-        <h2 className="flex-1 text-2xl font-bold">Progress report</h2>
-        <button className="btn-ghost !min-h-12 !py-2 !text-base print:hidden" onClick={download}>⬇️ Download CSV</button>
-        <button className="btn-ghost !min-h-12 !py-2 !text-base print:hidden" onClick={() => window.print()}>🖨️ Print / PDF</button>
+        <h2 id="report-h" className="display flex-1 text-2xl">Progress report</h2>
+        <button type="button" className="keycap-paper print:hidden" onClick={download}>
+          <Icon name="download" size={18} />
+          Download CSV
+        </button>
+        <button type="button" className="keycap-paper print:hidden" onClick={() => window.print()}>
+          <Icon name="print" size={18} />
+          Print / PDF
+        </button>
       </div>
-      <div className="grid grid-cols-3 gap-3 text-center">
+      <div className="grid grid-cols-3 gap-3">
         <Kpi label="Lessons completed" value={`${s.badges.length}/7`} />
         <Kpi label="Quiz accuracy" value={totalQs ? `${Math.round((totalQuiz / totalQs) * 100)}%` : "—"} />
         <Kpi label="Time in lessons" value={fmtMin(Object.values(s.levels).reduce((a, l) => a + l.timeSec, 0))} />
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[560px] text-left text-lg">
-          <thead className="text-muted">
-            <tr>{["Planet", "Status", "Quiz", "Time", "Attempts", "Mastery"].map((h) => <th key={h} className="p-2 font-semibold">{h}</th>)}</tr>
+        <table className="w-full min-w-[560px] border-collapse text-left text-lg">
+          <thead>
+            <tr className="border-b border-navy-ink">
+              {["Planet", "Status", "Quiz", "Time", "Attempts", "Mastery"].map((h) => <th key={h} scope="col" className="label p-2 text-[#46587a]">{h}</th>)}
+            </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.planet} className="border-t border-white/10">
+              <tr key={r.planet} className="border-t border-paper-3">
                 <td className="p-2">{r.planet}</td>
                 <td className="p-2">{r.status}</td>
-                <td className="p-2 tabular-nums">{r.quiz}</td>
-                <td className="p-2">{r.time}</td>
-                <td className="p-2 tabular-nums">{r.attempts}</td>
-                <td className={`p-2 font-semibold ${r.mastery.tone}`}>{r.mastery.label}</td>
+                <td className="code p-2">{r.quiz}</td>
+                <td className="code p-2">{r.time}</td>
+                <td className="code p-2">{r.attempts}</td>
+                <td className="p-2"><MasteryCell m={r.mastery} /></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-muted">Mastered = quiz score of 2/3 or better. Data is stored on this device only.</p>
-    </section>
+      <p className="text-sm text-[#46587a]">Mastered = quiz score of 2/3 or better. Data is stored on this device only.</p>
+    </Window>
   );
 }
 
 function Kpi({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-space-2 p-3">
-      <div className="text-2xl font-bold sm:text-3xl">{value}</div>
-      <div className="text-sm text-muted">{label}</div>
+    <div className="border border-paper-3 bg-paper-2 p-3">
+      <div className="code text-2xl font-bold sm:text-3xl">{value}</div>
+      <div className="label-sm text-[#46587a]">{label}</div>
     </div>
   );
 }

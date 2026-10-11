@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import LessonShell, { type StepApi } from "@/components/LessonShell";
+import Icon from "@/components/ui/Icon";
 import { runCircuit, type Op } from "@/lib/quantum";
 import { OFFLINE_MSG } from "@/lib/useShots";
 
@@ -24,31 +25,40 @@ async function simulate(start: Q, gates: Gate[]): Promise<Q[]> {
   return r.trace!.slice(prep.length).map((b) => fromBloch(b[0]));
 }
 
+/* Gate colours are game content: they match the coloured-square icons in the quiz. */
 const GATES: Record<Gate, { color: string; name: string; does: string }> = {
   X: { color: "#ff9f1c", name: "X Gate — the Flipper", does: "flips 0 ↔ 1" },
   H: { color: "#7b6cff", name: "H Gate — the Mixer", does: "makes a superposition (and back)" },
   Z: { color: "#2ec4ff", name: "Z Gate — the Twister", does: "twists 'both +' ↔ 'both −'" },
 };
 
+function GateTile({ g, className = "" }: { g: Gate; className?: string }) {
+  return (
+    <span className={`display flex items-center justify-center border-2 border-navy-ink text-navy-ink ${className}`} style={{ background: GATES[g].color }}>
+      {g}
+    </span>
+  );
+}
+
 function QubitDial({ q, size = 150 }: { q: Q; size?: number }) {
   const both = q === "+" || q === "-";
   return (
     <div className="flex flex-col items-center gap-2">
       <div
-        className="relative rounded-full border-4 border-white/30"
-        style={{ width: size, height: size, background: both ? "radial-gradient(circle, color-mix(in srgb, var(--accent) 50%, transparent), transparent 70%)" : "transparent" }}
+        className="relative border-2 border-navy-ink"
+        style={{ width: size, height: size, background: both ? "color-mix(in srgb, var(--accent) 35%, transparent)" : "var(--paper-2)" }}
         role="img"
         aria-label={`Qubit is ${LABEL[q]}`}
       >
-        <span className="absolute left-1/2 top-1 -translate-x-1/2 text-sm text-muted">0</span>
-        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-sm text-muted">1</span>
-        <motion.div className="absolute inset-0" animate={{ rotate: ANGLE[q] }} transition={{ type: "spring", stiffness: 90, damping: 12 }}>
-          <div className="absolute left-1/2 top-[12%] h-[38%] w-2 -translate-x-1/2 rounded-full bg-on" />
+        <span className="code absolute left-1/2 top-1 -translate-x-1/2 text-sm text-[#46587a]">0</span>
+        <span className="code absolute bottom-1 left-1/2 -translate-x-1/2 text-sm text-[#46587a]">1</span>
+        <motion.div className="absolute inset-0" animate={{ rotate: ANGLE[q] }} transition={{ type: "spring", stiffness: 90, damping: 14 }}>
+          <div className="absolute left-1/2 top-[12%] h-[38%] w-2 -translate-x-1/2 bg-on" />
           <div className="absolute left-1/2 top-[6%] -translate-x-1/2 border-x-[10px] border-b-[16px] border-x-transparent border-b-on" />
         </motion.div>
-        <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
+        <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 bg-navy-ink" />
       </div>
-      <span className="text-xl font-bold">{LABEL[q]}</span>
+      <span className="display text-xl">{LABEL[q]}</span>
     </div>
   );
 }
@@ -78,9 +88,19 @@ function GateTour({ done, say }: StepApi) {
       <QubitDial q={q} />
       <div className="flex flex-col gap-3">
         {(Object.keys(GATES) as Gate[]).map((g) => (
-          <button key={g} onClick={() => press(g)} className="btn justify-start text-left text-white" style={{ background: GATES[g].color }}>
-            <span className="text-3xl font-black">{g}</span>
-            <span className="text-base font-normal">{GATES[g].does} {tried.has(g) && "✓"}</span>
+          <button
+            key={g}
+            type="button"
+            onClick={() => press(g)}
+            className="flex min-h-16 items-center gap-4 border-2 border-navy-ink p-2 pr-4 text-left text-navy-ink hover:bg-paper-2"
+            aria-label={`${GATES[g].name}: ${GATES[g].does}${tried.has(g) ? " (tried)" : ""}`}
+          >
+            <GateTile g={g} className="h-12 w-12 text-3xl" />
+            <span className="flex-1">
+              <b className="display block text-lg">{GATES[g].name}</b>
+              <span className="text-base text-[#46587a]">{GATES[g].does}</span>
+            </span>
+            {tried.has(g) && <Icon name="check" size={20} className="shrink-0" />}
           </button>
         ))}
       </div>
@@ -145,26 +165,26 @@ function GateMachine({ done, say }: StepApi) {
 
   return (
     <div className="flex w-full flex-col items-center gap-5">
-      <p className="text-lg text-muted">
-        Challenge {c + 1} of {CHALLENGES.length}: turn <b className="text-ink">{LABEL[ch.start]}</b> into <b className="text-ink">{LABEL[ch.target]}</b>
+      <p className="text-lg text-[#46587a]">
+        Challenge <span className="code">{c + 1}</span> of {CHALLENGES.length}: turn <b className="text-navy-ink">{LABEL[ch.start]}</b> into <b className="text-navy-ink">{LABEL[ch.target]}</b>
       </p>
       <div className="flex flex-wrap items-center justify-center gap-4">
         <QubitDial q={q} size={120} />
         <div
-          className="flex min-h-24 min-w-64 items-center gap-2 rounded-3xl border-4 border-dashed border-white/30 bg-space-2 p-3"
+          className="flex min-h-24 min-w-64 items-center gap-2 border-2 border-dashed border-[#46587a] bg-paper-2 p-3"
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => add(e.dataTransfer.getData("gate") as Gate)}
           aria-label="Gate machine slots"
         >
-          {slots.length === 0 && <span className="px-2 text-muted">Drag or tap gates here</span>}
+          {slots.length === 0 && <span className="px-2 text-[#46587a]">Drag or tap gates here</span>}
           {slots.map((g, k) => (
-            <motion.span key={k} initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex h-16 w-16 items-center justify-center rounded-2xl text-3xl font-black text-white" style={{ background: GATES[g].color }}>
-              {g}
+            <motion.span key={k} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex">
+              <GateTile g={g} className="h-16 w-16 text-3xl" />
             </motion.span>
           ))}
         </div>
         <div className="flex flex-col items-center opacity-80" aria-label={`Target: ${LABEL[ch.target]}`}>
-          <span className="text-sm">🎯 Target</span>
+          <span className="label text-[#46587a]">Target</span>
           <QubitDial q={ch.target} size={80} />
         </div>
       </div>
@@ -172,11 +192,12 @@ function GateMachine({ done, say }: StepApi) {
         {(Object.keys(GATES) as Gate[]).map((g) => (
           <button
             key={g}
+            type="button"
             draggable={allowed.includes(g)}
             onDragStart={(e) => e.dataTransfer.setData("gate", g)}
             onClick={() => add(g)}
             disabled={!allowed.includes(g) || running}
-            className="flex h-20 w-20 cursor-grab items-center justify-center rounded-2xl text-4xl font-black text-white shadow-lg disabled:opacity-25"
+            className="display flex h-20 w-20 cursor-grab items-center justify-center border-2 border-navy-ink text-4xl text-navy-ink disabled:cursor-not-allowed disabled:opacity-25"
             style={{ background: GATES[g].color }}
             aria-label={`Add ${GATES[g].name}`}
           >
@@ -185,9 +206,20 @@ function GateMachine({ done, say }: StepApi) {
         ))}
       </div>
       <div className="flex flex-wrap justify-center gap-3">
-        <button className="btn-ghost" onClick={() => { setSlots([]); setQ(ch.start); }} disabled={running}>🧹 Clear</button>
-        <button className="btn-primary" onClick={run} disabled={running || slots.length === 0 || solved}>▶️ Run machine</button>
-        {solved && c < CHALLENGES.length - 1 && <button className="btn-primary" onClick={nextChallenge}>Next challenge ➜</button>}
+        <button type="button" className="keycap-xl keycap-paper" onClick={() => { setSlots([]); setQ(ch.start); }} disabled={running}>
+          <Icon name="reset" size={20} />
+          Clear
+        </button>
+        <button type="button" className="keycap-xl keycap-paper-primary" onClick={run} disabled={running || slots.length === 0 || solved}>
+          <Icon name="run" size={20} />
+          Run machine
+        </button>
+        {solved && c < CHALLENGES.length - 1 && (
+          <button type="button" className="keycap-xl keycap-paper-primary" onClick={nextChallenge}>
+            Next challenge
+            <Icon name="next" size={20} />
+          </button>
+        )}
       </div>
     </div>
   );

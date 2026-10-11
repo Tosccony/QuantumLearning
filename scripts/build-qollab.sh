@@ -19,6 +19,7 @@ npx esbuild src/qollab/main.tsx --bundle --format=esm --jsx=automatic --minify \
 npx tailwindcss -i src/qollab/qollab.css -o "$OUT/main.css" --minify
 cp src/qollab/index.html src/qollab/requirements.txt README.md LICENSE "$OUT/"
 cp backend/engine.py "$OUT/quantum/engine.py"
+mkdir -p "$OUT/docs/images" && cp docs/images/judge-start.png "$OUT/docs/images/"  # the README's screenshot
 : > "$OUT/quantum/__init__.py"
 
 COUNT=$(find "$OUT" -type f | wc -l | tr -d ' ')

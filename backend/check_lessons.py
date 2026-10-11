@@ -44,6 +44,13 @@ def main(path):
     assert set(reg) == {0, 4, 8, 12}, reg
     assert all(0.2 < v / 4000 < 0.3 for v in reg.values()), reg
 
+    # Break the Code (src/lib/breakTheCode.ts): ancillas q3, q4 read the syndrome on every shot. Single X errors are
+    # undone, so q0 reads 1 with P = sin²(0.4) ≈ 0.152; two errors pass for one on q2 and flip the logical qubit.
+    for key, syndrome, recovered in (("none", "00", True), ("q0", "10", True), ("q1", "11", True), ("q2", "01", True), ("two", "01", False)):
+        c = counts[f"btc-{key}"]
+        assert {k[-4] + k[-5] for k in c} == {syndrome}, (key, c)
+        assert abs(ones(c, 0) - (0.152 if recovered else 0.848)) < 0.03, (key, c)
+
     print(f"lessons: {len(counts)} circuits ran; physics checks passed")
 
 

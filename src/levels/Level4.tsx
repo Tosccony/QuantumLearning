@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import LessonShell, { type StepApi } from "@/components/LessonShell";
+import Icon from "@/components/ui/Icon";
 import { useProgress } from "@/lib/progress";
 import { EXPLORER_CIRCUITS } from "@/lib/curriculum";
 import { OFFLINE_MSG, useShots } from "@/lib/useShots";
@@ -20,28 +21,28 @@ function Twin({ color, label, shimmer }: { color: Color; label: string; shimmer:
   return (
     <div className="flex flex-col items-center gap-2">
       <motion.div
-        animate={shimmer ? { background: ["var(--a)", "var(--b)", "var(--a)"], scale: [1, 1.06, 1] } : { background: color ? `var(--${color})` : "var(--off)", scale: 1 }}
-        transition={shimmer ? { duration: 1.6, repeat: Infinity } : { type: "spring" }}
-        className="flex h-24 w-24 items-center justify-center rounded-full text-5xl shadow-[0_0_30px_#fff4] sm:h-28 sm:w-28"
+        animate={shimmer ? { background: ["var(--a)", "var(--b)", "var(--a)"], scale: [1, 1.04, 1] } : { background: color ? `var(--${color})` : "var(--off)", scale: 1 }}
+        transition={shimmer ? { duration: 1.6, repeat: Infinity } : { type: "spring", stiffness: 160, damping: 18 }}
+        className="flex h-24 w-24 items-center justify-center border-[3px] border-navy-ink text-5xl leading-none sm:h-28 sm:w-28"
+        role="img"
         aria-label={`${label}: ${shimmer ? "mixed, not decided yet" : color ? NAME[color] : "unknown"}`}
       >
         {shimmer ? "😊" : color ? "😄" : "😶"}
       </motion.div>
-      <span className="text-lg font-semibold">{label}</span>
+      <span className="label text-navy-ink">{label}</span>
     </div>
   );
 }
 
+/** The quantum bond: a two-tone bar in the twins' colours that pulses while linked. */
 function Beam({ on, gap }: { on: boolean; gap: number }) {
   return (
     <div className="relative h-4 flex-1" style={{ minWidth: 40 + gap * 30 }}>
       {on && (
-        <motion.div
-          className="absolute inset-y-1 left-0 right-0 rounded-full"
-          style={{ background: "linear-gradient(90deg, var(--a), #fff, var(--b))" }}
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.2, repeat: Infinity }}
-        />
+        <motion.div className="absolute inset-y-1 left-0 right-0 flex" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.2, repeat: Infinity }} aria-hidden>
+          <span className="h-full w-1/2" style={{ background: "var(--a)" }} />
+          <span className="h-full w-1/2" style={{ background: "var(--b)" }} />
+        </motion.div>
       )}
     </div>
   );
@@ -58,12 +59,13 @@ function MeetTwins({ done, say }: StepApi) {
         <Twin color={null} label="Twin B" shimmer={linked} />
       </div>
       {!linked ? (
-        <button className="btn-primary" onClick={() => { setLinked(true); say("Zap! ⚡ They're ENTANGLED now — linked by a magic quantum bond. Slide them far apart!"); }}>
-          ⚡ Entangle the twins
+        <button type="button" className="keycap-xl keycap-paper-primary" onClick={() => { setLinked(true); say("Zap! ⚡ They're ENTANGLED now — linked by a magic quantum bond. Slide them far apart!"); }}>
+          <Icon name="twins" size={22} />
+          Entangle the twins
         </button>
       ) : (
         <label className="flex w-full max-w-md flex-col gap-2 text-lg">
-          Move Twin B to: <b>{PLACES[dist]}</b>
+          <span>Move Twin B to: <b>{PLACES[dist]}</b></span>
           <input
             type="range"
             min={0}
@@ -77,7 +79,7 @@ function MeetTwins({ done, say }: StepApi) {
                 done();
               }
             }}
-            className="h-10 w-full accent-[var(--accent)]"
+            className="scrub w-full"
           />
         </label>
       )}
@@ -122,18 +124,34 @@ function PeekGame({ done, say }: StepApi) {
         <Beam on gap={3} />
         <Twin color={b} label="Twin B 🌌" shimmer={!b && !a} />
       </div>
-      {!a && <button className="btn-primary" onClick={peek}>👀 Peek at Twin A</button>}
+      {!a && (
+        <button type="button" className="keycap-xl keycap-paper-primary" onClick={peek}>
+          <Icon name="eye" size={22} />
+          Peek at Twin A
+        </button>
+      )}
       {a && !guess && (
-        <div className="flex gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           {(["a", "b"] as const).map((c) => (
-            <button key={c} className="btn" style={{ background: `var(--${c})`, color: "#1b2160" }} onClick={() => predict(c)}>
+            <button
+              key={c}
+              type="button"
+              className="keycap keycap-xl"
+              style={{ background: `var(--${c})`, borderColor: "var(--navy-ink)", color: "var(--navy-ink)" }}
+              onClick={() => predict(c)}
+            >
               Twin B is {NAME[c]}
             </button>
           ))}
         </div>
       )}
-      {guess && <button className="btn-ghost" onClick={reset}>🔄 Entangle again</button>}
-      <p className="text-lg text-muted">Matches checked: {rounds} / 3</p>
+      {guess && (
+        <button type="button" className="keycap-xl keycap-paper" onClick={reset}>
+          <Icon name="reset" size={20} />
+          Entangle again
+        </button>
+      )}
+      <p className="text-lg text-[#46587a]">Matches checked: <span className="code text-navy-ink">{rounds} / 3</span></p>
     </div>
   );
 }
