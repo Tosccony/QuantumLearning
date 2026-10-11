@@ -13,8 +13,8 @@ type Props = {
   isIonQ?: boolean;
   /** Offered as "Open in Lab" when given (Qollab's Lab, or the web Lab). */
   onOpenLab?: (c: Circuit) => void;
-  /** Called after each successful run (the web lesson page counts it toward progress). */
-  onRun?: () => void;
+  /** Called after each successful run with the circuit that ran and its result. */
+  onRun?: (circuit: Circuit, result: RunResult) => void;
 };
 
 /** The three interactive demos of the quantum money lesson: a rotation angle, a one-bit lock, and a banknote. */
@@ -28,7 +28,7 @@ const SHOTS = 1000;
 const pick = "border-ice bg-ice text-navy-ink";
 
 /** Run state for one demo. Changing an input clears the result, and a run that finishes after that is dropped. */
-function useRun(circuit: Circuit, onRun?: () => void) {
+function useRun(circuit: Circuit, onRun?: Props["onRun"]) {
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +46,7 @@ function useRun(circuit: Circuit, onRun?: () => void) {
       const r = await runCircuit(circuit, { shots: SHOTS });
       if (mine === gen.current) {
         setResult(r);
-        onRun?.();
+        onRun?.(circuit, r);
       }
     } catch (e) {
       if (mine === gen.current) {

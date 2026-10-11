@@ -32,6 +32,8 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
   const [error, setError] = useState<string | null>(null);
   const [picked, setPicked] = useState<number | null>(null);
   const [guess, setGuess] = useState<number | null>(null);
+  const [lockRan, setLockRan] = useState(false); // the demo in the predictHere section has run
+  const [demoRun, setDemoRun] = useState<{ circuit: Circuit; result: RunResult } | null>(null); // latest demo run, for the tutor
   const track = TRACKS.find((t) => t.id === m.track)!;
   const correct = picked === m.check.answer;
   // In memory only: the Qollab player must not touch browser storage.
@@ -92,7 +94,7 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
   const circuitPanel = m.circuitPanel !== false;
   const predictInline = m.sections.some((s) => s.predictHere);
   const checkInline = m.sections.some((s) => s.checkHere);
-  const predictBlock = m.predict && <Predict p={m.predict} picked={guess} onPick={setGuess} revealed={circuitPanel ? !!result : guess !== null} />;
+  const predictBlock = m.predict && <Predict p={m.predict} picked={guess} onPick={setGuess} revealed={circuitPanel ? !!result : lockRan} />;
 
   // The lesson copy sits in one punched window. A section with a demo, an inline prediction or an inline check ends the
   // window; those blocks follow (prediction, then demo, then check), and the copy resumes in a new window.
@@ -124,7 +126,7 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
     if (!s.demo && !s.predictHere && !s.checkHere) continue;
     flush();
     if (s.predictHere) copy.push(<Fragment key={`predict-${s.heading}`}>{predictBlock}</Fragment>);
-    if (s.demo) copy.push(<QuantumMoneyDemo key={`demo-${s.heading}`} kind={s.demo} isIonQ={isIonQ} onOpenLab={onOpenLab} />);
+    if (s.demo) copy.push(<QuantumMoneyDemo key={`demo-${s.heading}`} kind={s.demo} isIonQ={isIonQ} onOpenLab={onOpenLab} onRun={(c, r) => { setDemoRun({ circuit: c, result: r }); if (s.predictHere) setLockRan(true); }} />);
     if (s.checkHere) copy.push(<Fragment key={`check-${s.heading}`}>{checkBlock}</Fragment>);
   }
   flush();
@@ -195,7 +197,7 @@ export default function Lesson({ m, isIonQ, onOpenLab, breadcrumb, next }: { m: 
         )}
       </div>
       <aside className="lg:sticky lg:top-20 lg:self-start">
-        <Tutor compact offline shortcut={keys} circuit={circuit} result={result} extra={`Lesson: ${m.title}. What to look for: ${m.observe}`} />
+        <Tutor compact offline shortcut={keys} circuit={demoRun?.circuit ?? circuit} result={demoRun?.result ?? result} extra={`Lesson: ${m.title}. What to look for: ${m.observe}`} />
         {m.sidebarNote && <SidebarNote note={m.sidebarNote} />}
       </aside>
     </article>

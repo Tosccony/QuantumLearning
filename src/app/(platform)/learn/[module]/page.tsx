@@ -20,7 +20,7 @@ import { EdgeCode, Heading, Notice, Perf, Stripe, Window } from "@/components/ui
 import { DEMO_NOISE } from "@/lib/breakTheCode";
 import { moduleById, modulesOf, TRACKS } from "@/lib/curriculum";
 import { useProgress } from "@/lib/progress";
-import { labLink, runCircuit, type RunResult } from "@/lib/quantum";
+import { labLink, runCircuit, type Circuit, type RunResult } from "@/lib/quantum";
 import { moduleStatus } from "@/lib/skills";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
@@ -38,6 +38,8 @@ export default function LessonPage() {
   const [guess, setGuess] = useState<number | null>(null);
   const [asked, setAsked] = useState(false);
   const [codeRan, setCodeRan] = useState(false); // Break the Code was run on this page
+  const [lockRan, setLockRan] = useState(false); // the demo in the predictHere section has run
+  const [demoRun, setDemoRun] = useState<{ circuit: Circuit; result: RunResult } | null>(null); // latest demo run, for the tutor
   const [earned, setEarned] = useState(0);
   const ops = useMemo(() => (m ? layout(m.circuit) : []), [m]);
   const [keys, setKeys] = useState(true);
@@ -165,9 +167,9 @@ export default function LessonPage() {
   const circuitPanel = m.circuitPanel !== false;
   const predictInline = m.sections.some((s) => s.predictHere);
   const checkInline = m.sections.some((s) => s.checkHere);
-  const predictBlock = m.predict && <Predict p={m.predict} picked={guess} onPick={setGuess} revealed={circuitPanel ? !!result : guess !== null} />;
-  const demo = (kind: NonNullable<typeof m.sections[number]["demo"]>) => (
-    <QuantumMoneyDemo kind={kind} onOpenLab={(c) => router.push(labLink(c))} onRun={() => { recordRun(); setCodeRan(true); }} />
+  const predictBlock = m.predict && <Predict p={m.predict} picked={guess} onPick={setGuess} revealed={circuitPanel ? !!result : lockRan} />;
+  const demo = (kind: NonNullable<typeof m.sections[number]["demo"]>, reveals: boolean) => (
+    <QuantumMoneyDemo kind={kind} onOpenLab={(c) => router.push(labLink(c))} onRun={(circuit, result) => { recordRun(); setCodeRan(true); setDemoRun({ circuit, result }); if (reveals) setLockRan(true); }} />
   );
 
   // The lesson copy sits in one punched window. A section with a demo, an inline prediction or an inline check ends the
@@ -203,7 +205,7 @@ export default function LessonPage() {
     if (!s.demo && !s.predictHere && !s.checkHere) continue;
     flush();
     if (s.predictHere) copy.push(<Fragment key={`predict-${s.heading}`}>{predictBlock}</Fragment>);
-    if (s.demo) copy.push(<Fragment key={`demo-${s.heading}`}>{demo(s.demo)}</Fragment>);
+    if (s.demo) copy.push(<Fragment key={`demo-${s.heading}`}>{demo(s.demo, !!s.predictHere)}</Fragment>);
     if (s.checkHere) copy.push(<Fragment key={`check-${s.heading}`}>{checkBlock}</Fragment>);
   }
   flush();
@@ -303,7 +305,7 @@ export default function LessonPage() {
       </div>
 
       <div className="lg:sticky lg:top-24 lg:self-start" onClickCapture={() => setAsked(true)}>
-        <Tutor compact shortcut={keys} circuit={m.circuit} result={result} extra={`Lesson: ${m.title} (${track.name} track). Summary: ${m.summary}. What the learner should observe: ${m.observe}`} />
+        <Tutor compact shortcut={keys} circuit={demoRun?.circuit ?? m.circuit} result={demoRun?.result ?? result} extra={`Lesson: ${m.title} (${track.name} track). Summary: ${m.summary}. What the learner should observe: ${m.observe}`} />
         {m.sidebarNote && <SidebarNote note={m.sidebarNote} />}
       </div>
     </article>
