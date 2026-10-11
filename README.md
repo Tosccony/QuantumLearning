@@ -50,7 +50,7 @@ Quantum computing is usually taught in one of two ways: linear algebra on a whit
 - **Every number is real.** Every circuit runs on Qiskit: Aer in the web app, and on Qollab the built-in simulator, IBM device noise models, or IonQ's Aria and Forte simulators.
 - **Ideal vs this machine.** Each result is compared with the exact ideal answer, so noise becomes something you can see and measure, not a footnote.
 - **One path for everyone.** Four tracks teach the same honest physics at different depths, from no maths at all to density matrices.
-- **Hard topics, hands on.** Error correction (Break the Code: inject one or two errors and watch the syndrome catch them, or get fooled), BB84 quantum key distribution, the Bell test, teleportation, Grover's search and Shor's algorithm all run as circuits you can edit, with panels that do the arithmetic: the Bell score, and the factors Shor's algorithm finds.
+- **Hard topics, hands on.** Error correction (Break the Code: inject one or two errors and watch the syndrome catch them, or get fooled), Wiesner's uncopiable quantum money, the Bell test, teleportation, Grover's search and Shor's algorithm all run as circuits you can edit, with panels that do the arithmetic: the Bell score, and the factors Shor's algorithm finds.
 - **A free-build Lab.** Build any circuit up to 8 qubits, or start from any lesson's circuit, and run the same circuit on an ideal simulator and on IBM and IonQ machine models to see what noise does. The results include the circuit as Qiskit code to copy.
 
 | Track | For | Lessons |
@@ -59,7 +59,7 @@ Quantum computing is usually taught in one of two ways: linear algebra on a whit
 | 🎓 Student | High school and first-year university | Qubits and measurement, superposition and interference, phase, Bell states, teleportation, Deutsch–Jozsa |
 | 💻 Developer | Programmers new to quantum | Qiskit and bit ordering, transpilation, shots and noise, Grover's search, the QFT, variational circuits |
 | 🔬 Researcher | Graduate level | Density matrices, noise and mitigation, the bit-flip code, phase estimation, VQE and QAOA, benchmarking |
-| 🔓 Concepts | After the Student basics | BB84 quantum key distribution, the Bell test (is entanglement real?), Shor's algorithm factoring 15 |
+| 🔓 Concepts | After the Student basics | Wiesner's quantum money, the Bell test (is entanglement real?), Shor's algorithm factoring 15 |
 
 All 21 lessons (Student, Developer, Researcher and Concepts) and the Lab run on Qollab. The Explorer games, community sharing and the Claude tutor need the full web app.
 
@@ -142,7 +142,7 @@ Nothing. All code and content were written during the build window. Nothing was 
 
 **Roadmap inspiration and resources.** Inspired by [roadmap.sh](https://roadmap.sh/), using our own curriculum and implementation. External videos and reading are credited to their providers and remain under their original terms.
 
-**Circuits.** The example circuits are standard, published constructions, not original algorithms: Bell and GHZ states, Grover search, Deutsch–Jozsa, teleportation, the QFT, phase estimation, the 3-qubit bit-flip code, BB84 (Bennett and Brassard, 1984), the CHSH Bell test (Clauser, Horne, Shimony and Holt, 1969) and Shor's algorithm (Shor, 1994). They follow the standard textbook treatments in Nielsen and Chuang's *Quantum Computation and Quantum Information*. The compiled ×7 and ×4 mod 15 circuits in the Shor lesson follow the construction in the Qiskit textbook. The lesson text, predictions and explanations are our own. Our contribution is the learning platform built around these circuits.
+**Circuits.** The example circuits are standard, published constructions, not original algorithms: Bell and GHZ states, Grover search, Deutsch–Jozsa, teleportation, the QFT, phase estimation, the 3-qubit bit-flip code, Wiesner's quantum money (Wiesner, "Conjugate Coding", 1983), the CHSH Bell test (Clauser, Horne, Shimony and Holt, 1969) and Shor's algorithm (Shor, 1994). They follow the standard textbook treatments in Nielsen and Chuang's *Quantum Computation and Quantum Information*. The compiled ×7 and ×4 mod 15 circuits in the Shor lesson follow the construction in the Qiskit textbook. The lesson text, predictions and explanations are our own. Our contribution is the learning platform built around these circuits.
 
 **Third-party libraries.** All of these are used as unmodified dependencies.
 
