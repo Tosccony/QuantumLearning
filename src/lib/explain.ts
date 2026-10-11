@@ -147,7 +147,7 @@ export function offlineExplain(c: Circuit, r: RunResult | null, level: Level): s
     else if (idealCertain) out.push(`A perfect machine would give **${probs[0][0]}** on every shot${hasH ? ", because interference cancels every other answer" : ""}. This run gave it on ${pctAuto((r.counts[probs[0][0]] ?? 0) / shots)} of shots, and the rest comes from noise in the machine.`);
     else out.push(`Results are spread over ${probs.length} answers. The most likely is **${probs[0][0]}** (${pctAuto(probs[0][1])}). Each run is like a fresh coin toss with these odds.${noisy ? " Some of the spread comes from noise in the machine, not just quantum randomness." : ""}`);
     if (r.entangled) out.push("The qubits are **entangled**: their answers are linked, so looking at one tells you about the other. That's why the Bloch arrows shrank toward the centre.");
-    out.push(idealCertain ? "**Try:** remove one gate and predict what changes before you run it." : "**Try:** run it again. The counts wobble but stay close to the yellow lines, which are the exact odds.");
+    out.push(idealCertain ? "**Try:** remove one gate and predict what changes before you run it." : "**Try:** run it again. The counts wobble but stay close to the tick marks, which show the exact odds.");
   } else if (level === "intermediate") {
     out.push(`Statevector support: ${probs.slice(0, 6).map(([k, p]) => `|${k}⟩ (${p.toFixed(3)})`).join(", ")}${probs.length > 6 ? ", …" : ""}.`);
     if (hasH && idealCertain) out.push("You created superposition and then ended in a basis state. That is **interference**: amplitudes into the other outcomes cancelled.");
